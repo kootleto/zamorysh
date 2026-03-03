@@ -1,6 +1,9 @@
+# WORK IN PROGRESS
+
 import gs_api
 
-def make_task(task_type="default", required=100):
+
+def base_task(task_type="default", required=100):
     return {
         "progress": 0,
         "required": required,
@@ -8,22 +11,41 @@ def make_task(task_type="default", required=100):
         "is_completed": False,
     }
 
+
 def add_task(gs, task):
     task = gs_api.with_id(gs, task)
     gs["tasks"].append(task)
+    return task["id"]
 
-def get_task_progress(gs, task_id):
-    return get_task_by_id(gs, task_id)["progress"]
 
-def get_task_type(gs, task_id):
-    return get_task_by_id(gs, task_id)["type"]
+def get_progress(task):
+    return task["progress"]
 
-def is_task_completed(gs, task_id):
-    return get_task_by_id(gs, task_id)["is_completed"]
+
+def set_progress(task, value):
+    task["progress"] = value
+    if task["progress"] == task["required"]:
+        task["is_completed"] = True
+
+
+def get_required(task):
+    return task["required"]
+
+
+def get_type(task):
+    return task["type"]
+
+
+def is_completed(task):
+    return task["is_completed"]
+
 
 def increment_task_progress(gs, task_id, delta):
     if delta < 0:
         raise ValueError(f"Progress increment must be non-negative (task_id={task_id})")
+    gs["intents"].append(
+        {"type": "task", "target": task_id, "op": "mod", "value": delta}
+    )
     task = get_task_by_id(gs, task_id)
     task["progress"] = min(task["required"], task["progress"] + delta)
     if task["progress"] == task["required"]:

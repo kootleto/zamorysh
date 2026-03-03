@@ -1,7 +1,7 @@
 import importlib
 import pkgutil
 
-import ui_api
+import log_api
 
 
 def load_definitions(package_name):
@@ -30,11 +30,11 @@ def load_definitions(package_name):
 
     walk_modules(package)
 
-    ui_api.log(
+    log_api.log(
         f"Loaded activities: {", ".join(activity_definitions.keys())}",
         log_type="loader",
     )
-    ui_api.log(
+    log_api.log(
         f"Loaded scenarios: {", ".join(scenario_definitions.keys())}",
         log_type="loader",
     )

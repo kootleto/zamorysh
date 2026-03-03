@@ -1,6 +1,6 @@
 import inspect
 import gs_api
-import ui_api
+import log_api
 
 
 def base_activity(
@@ -161,7 +161,7 @@ def create_activity_entry(definition, param=None):
 
 
 def configure_activity(definitions, entry):
-    ui_api.log(f"Activity Entry: {entry}", log_type="config")
+    log_api.log(f"Activity entry: {entry}", log_type="config")
 
     # На основе данных и определения получаем логику для активности,
     # чье имя указано в этих данных

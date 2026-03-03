@@ -1,6 +1,6 @@
 import inspect
 import gs_api
-import ui_api
+import log_api
 
 
 def base_scenario(transitions=None, start_node=0):
@@ -74,7 +74,7 @@ def create_scenario_entry(definition):
 
 
 def configure_scenario(definitions, entry):
-    ui_api.log(f"Scenario Entry: {entry}", log_type="config")
+    log_api.log(f"Scenario entry: {entry}", log_type="config")
 
     definition = definitions[entry["scenario_name"]]
     state = entry["state"]
@@ -92,3 +92,13 @@ def start_all_scenarios(gs, definitions):
     for definition in definitions.values():
         entry = create_scenario_entry(definition)
         start_scenario(gs, definitions, entry)
+
+
+def init_fn(state, fn):
+    # Этот метод инициализации подходит, если изначальный state вычисляется на основе параметра
+    # Он позволяет вызывать логику инициализации только в том случае, если state еще не инициализирован
+    if state is None:
+        return fn()
+    elif state == {}:
+        state.update(fn())
+    return state

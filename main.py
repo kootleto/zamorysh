@@ -4,6 +4,7 @@ import resolver_api
 import activities_api
 import scenarios_api
 import ui_api
+import log_api
 import definitions_loader
 
 game_state = gs_api.get_initial_gs()
@@ -15,6 +16,9 @@ definitions = definitions_loader.load_definitions("content")
 def update(gs, activity_definitions, scenario_definitions):
     # Применяем tick_effect всех текущих активностей
     for entry in gs_api.get_activity_entries(gs):
+        log_api.log(
+            f"Applying effect for {entry["activity_name"]}", log_type="activity"
+        )
         activity = activities_api.configure_activity(activity_definitions, entry)
         activities_api.apply_tick_effect(gs, activity)
     resolver_api.resolve_intents(gs)
@@ -27,8 +31,8 @@ def update(gs, activity_definitions, scenario_definitions):
             node_matches = scenarios_api.get_node_from(transition) == node
             trigger_ok = scenarios_api.check_trigger(gs, transition)
             if node_matches and trigger_ok:
-                ui_api.log(
-                    f"Condition Met for {entry["scenario_name"]}. Moving Node {scenarios_api.get_node_from(transition)} -> {scenarios_api.get_node_to(transition)}",
+                log_api.log(
+                    f"Condition met for {entry["scenario_name"]}. Moving node {scenarios_api.get_node_from(transition)} -> {scenarios_api.get_node_to(transition)}",
                     log_type="scenario",
                 )
                 scenarios_api.apply_effect(gs, transition)
@@ -49,11 +53,16 @@ def update(gs, activity_definitions, scenario_definitions):
 
         if hold_ok and can_continue:
             new_entries.append(entry)
+        else:
+            log_api.log(
+                f"Stopped {entry["activity_name"]} (can_continue: {can_continue}, hold_ok: {hold_ok})",
+                log_type="activity",
+            )
 
     gs_api.set_activity_entries(gs, new_entries)
 
-    ui_api.log(
-        f"Activity Entries: {gs_api.get_activity_entries(gs)}", log_type="status"
+    log_api.log(
+        f"Activity entries: {gs_api.get_activity_entries(gs)}", log_type="status"
     )
 
 
@@ -78,6 +87,6 @@ while not gs_api.get_flag(game_state, "is_end"):
     ui_api.show_stats(game_state)
     if len(gs_api.get_activity_entries(game_state)) == 0:
         pick_activity(game_state, definitions["activities"])
-    ui_api.log(f"------ TICK {gs_api.get_time(game_state)} ------", log_type="tick")
+    log_api.log(f"------ TICK {gs_api.get_time(game_state)} ------", log_type="tick")
     sleep(0.15)
     update(game_state, definitions["activities"], definitions["scenarios"])
