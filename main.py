@@ -8,7 +8,6 @@ import log_api
 import definitions_loader
 
 game_state = gs_api.get_initial_gs()
-key_pressed = False
 
 definitions = definitions_loader.load_definitions("content")
 
@@ -90,3 +89,5 @@ while not gs_api.get_flag(game_state, "is_end"):
     log_api.log(f"------ TICK {gs_api.get_time(game_state)} ------", log_type="tick")
     sleep(0.15)
     update(game_state, definitions["activities"], definitions["scenarios"])
+print("--- GAME FINISHED ---")
+input("Press Enter to exit")

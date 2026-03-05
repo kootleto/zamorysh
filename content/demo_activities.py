@@ -24,6 +24,10 @@ def rest(hold_required=True):
     )
 
 
+def rest_hard():
+    return rest(False)
+
+
 def work_and_rest(definitions=None, state=None, hold_required=True):
     return activities_api.override_activity(
         activities_api.composite_activity(
@@ -39,4 +43,19 @@ def work_and_rest(definitions=None, state=None, hold_required=True):
     )
 
 
-activities = [work, rest, work_and_rest]
+def cry(state=None, hold_required=True):
+    state = activities_api.init_defaults(state, counter=102)
+
+    def tick_effect(gs):
+        gs_api.mod_vital(gs, "fatigue", +1)
+        state["counter"] -= 1
+
+    def can_continue(gs):
+        return state["counter"] > 0
+
+    return activities_api.base_activity(
+        tick_effect, can_continue, hold_required, name="cry"
+    )
+
+
+activities = [work, rest, rest_hard, work_and_rest, cry]
