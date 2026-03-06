@@ -1,22 +1,22 @@
 import keyboard
 import sys
 from time import sleep
-import gs_api
-import log_api
+from engine import gs_api
+from tools import logger
 
 
 def display(*message, sep=" "):
     message = sep.join(map(str, message))
-    if log_api.LOG_ENABLED:
-        log_api.log(message, log_type="ui")
+    if logger.LOG_ENABLED:
+        logger.log(message, log_type="ui")
     else:
         print(message)
 
 
 def prompt(*message, sep=" "):
     message = sep.join(map(str, message))
-    if log_api.LOG_ENABLED:
-        log_api.log(message, log_type="ui")
+    if logger.LOG_ENABLED:
+        logger.log(message, log_type="ui")
         response = input()
     else:
         response = input(message)

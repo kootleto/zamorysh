@@ -1,6 +1,6 @@
 import inspect
-import gs_api
-import log_api
+from . import gs_api
+from tools import logger
 
 
 def base_scenario(transitions=None, start_node=0):
@@ -74,7 +74,7 @@ def create_scenario_entry(definition):
 
 
 def configure_scenario(definitions, entry):
-    log_api.log(f"Scenario entry: {entry}", log_type="config")
+    logger.log(f"Scenario entry: {entry}", log_type="config")
 
     definition = definitions[entry["scenario_name"]]
     state = entry["state"]

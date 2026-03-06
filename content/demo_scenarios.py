@@ -1,6 +1,5 @@
-import gs_api
-import scenarios_api
-import ui_api
+from engine import scenarios_api, gs_api
+from interface import ui
 
 
 def rich_scenario():
@@ -8,13 +7,13 @@ def rich_scenario():
         return gs_api.get_stat(gs, "money") >= 20
 
     def congratulations(gs):
-        ui_api.display("--- HI THERE! YOU ARE RICH! ---")
+        ui.display("--- HI THERE! YOU ARE RICH! ---")
 
     def check_ultra_rich(gs):
         return gs_api.get_stat(gs, "money") >= 50
 
     def game_over(gs):
-        ui_api.display("--- GAME OVER: YOU ARE TOO RICH FOR THIS WORLD ---")
+        ui.display("--- GAME OVER: YOU ARE TOO RICH FOR THIS WORLD ---")
         gs_api.set_flag(gs, "is_end", True)
 
     return scenarios_api.base_scenario(

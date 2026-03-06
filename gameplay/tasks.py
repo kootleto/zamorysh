@@ -1,6 +1,6 @@
 # WORK IN PROGRESS
 
-import gs_api
+from engine import gs_api
 
 
 def base_task(task_type="default", required=100):
