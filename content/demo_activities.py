@@ -1,5 +1,4 @@
-import gs_api
-import activities_api
+from engine import activities_api, gs_api
 
 
 def work(hold_required=False, fatigue_cost=1, earn_money=1):
@@ -44,7 +43,7 @@ def work_and_rest(definitions=None, state=None, hold_required=True):
 
 
 def cry(state=None, hold_required=True):
-    state = activities_api.init_defaults(state, counter=102)
+    state = activities_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
         gs_api.mod_vital(gs, "fatigue", +1)
