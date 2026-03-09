@@ -1,4 +1,9 @@
-LOG_ENABLED = True
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+LOG_ENABLED = os.getenv("LOG_ENABLED", "False").lower() == "true"
 
 COLORS = {
     "black": "\033[30m",

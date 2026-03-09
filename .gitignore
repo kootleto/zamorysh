@@ -8,3 +8,5 @@ archive/
 # Cache
 __pycache__/
 .idea/
+# Environment variables
+.env
