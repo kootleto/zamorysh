@@ -7,6 +7,9 @@
 archive/
 # Cache
 __pycache__/
+# PyCharm settings
 .idea/
+# Python virtual environment
+.venv/
 # Environment variables
 .env
