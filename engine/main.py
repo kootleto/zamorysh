@@ -6,10 +6,6 @@ from . import scenarios_api
 from interface import ui
 from tools import logger, definitions_loader
 
-game_state = gs_api.get_initial_gs()
-
-definitions = definitions_loader.load_definitions("content")
-
 
 def update(gs, activity_definitions, scenario_definitions):
     # Применяем tick_effect всех текущих активностей
@@ -77,13 +73,21 @@ def pick_activity(gs, definitions):
     activities_api.add_activity_entry(gs, definitions, entry_to_start)
 
 
-scenarios_api.start_all_scenarios(game_state, definitions["scenarios"])
-while not gs_api.get_flag(game_state, "is_end"):
-    ui.show_stats(game_state)
-    if len(gs_api.get_activity_entries(game_state)) == 0:
-        pick_activity(game_state, definitions["activities"])
-    logger.log(f"------ TICK {gs_api.get_time(game_state)} ------", log_type="tick")
-    sleep(0.15)
-    update(game_state, definitions["activities"], definitions["scenarios"])
-print("--- GAME FINISHED ---")
-input("Press Enter to exit")
+def main():
+    game_state = gs_api.get_initial_gs()
+    definitions = definitions_loader.load_definitions("content")
+
+    scenarios_api.start_all_scenarios(game_state, definitions["scenarios"])
+    while not gs_api.get_flag(game_state, "is_end"):
+        ui.show_stats(game_state)
+        if len(gs_api.get_activity_entries(game_state)) == 0:
+            pick_activity(game_state, definitions["activities"])
+        logger.log(f"------ TICK {gs_api.get_time(game_state)} ------", log_type="tick")
+        sleep(0.15)
+        update(game_state, definitions["activities"], definitions["scenarios"])
+    print("--- GAME FINISHED ---")
+    input("Press Enter to exit")
+
+
+if __name__ == "__main__":
+    main()
