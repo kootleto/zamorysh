@@ -56,6 +56,7 @@ def handle_input(activities_ui_info):
 
 
 def show_stats(gs):
+    # TODO: добавить новые показатели
     display(
         f"Time: {gs_api.get_time(gs)}, Fatigue: {gs_api.get_vital(gs, "fatigue")}, Money: {gs_api.get_stat(gs, "money")}"
     )

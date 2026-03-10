@@ -5,9 +5,13 @@ from tools import logger
 initial_gs = {
     "vitals": {
         "fatigue": 0,
+        "sleepiness": 0,
+        "mental": 100,
     },
     "stats": {
         "money": 0,
+        "social": 0,
+        "knowledge": 0,
     },
     "flags": {
         "is_end": False,
@@ -27,6 +31,13 @@ def get_initial_gs():
 
 def get_vital(gs, vital):
     return gs["vitals"][vital]
+
+
+def set_vital(gs, vital, value):
+    gs["intents"].append(
+        {"type": "vital", "target": vital, "op": "set", "value": value}
+    )
+    logger.log("SET VITAL", vital, value, log_type="intent")
 
 
 def mod_vital(gs, vital, delta):
