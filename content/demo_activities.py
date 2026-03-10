@@ -24,7 +24,7 @@ def rest(hold_required=True):
 
 
 def rest_hard():
-    return rest(False)
+    return activities_api.override_activity(rest(False), name="rest in peace")
 
 
 def work_and_rest(definitions=None, state=None, hold_required=True):
@@ -57,4 +57,5 @@ def cry(state=None, hold_required=True):
     )
 
 
-activities = [work, rest, rest_hard, work_and_rest, cry]
+# activities = [work, rest, rest_hard, work_and_rest, cry]
+# Раскомментируйте эту строчку, чтобы добавить в игру демо-активности

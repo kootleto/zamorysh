@@ -85,8 +85,8 @@ def main():
         logger.log(f"------ TICK {gs_api.get_time(game_state)} ------", log_type="tick")
         sleep(0.15)
         update(game_state, definitions["activities"], definitions["scenarios"])
-    print("--- GAME FINISHED ---")
-    input("Press Enter to exit")
+    ui.display("--- GAME FINISHED ---")
+    ui.prompt("Press Enter to exit")
 
 
 if __name__ == "__main__":
