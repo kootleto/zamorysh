@@ -13,6 +13,8 @@ def base_activity(
 ):
     # Храним все параметры активности как callable, потому что в композитных активностях
     # флаги могут меняться при смене подактивности
+    if not callable(can_continue):
+        can_continue = lambda v=can_continue: v
     if not callable(hold_required):
         hold_required = lambda v=hold_required: v
     if not callable(is_stackable):
@@ -122,9 +124,9 @@ def composite_activity(state, definitions, init_queue, name="default"):
     )
 
 
-def override_activity(definition, **overrides):
+def override_activity(activity, **overrides):
     # Так можно изменить любое поле определения
-    new_data = {**definition, **overrides}
+    new_data = {**activity, **overrides}
     return base_activity(**new_data)
 
 

@@ -17,7 +17,7 @@ def work(hold_required=False, fatigue_cost=1, earn_money=1):
 def rest(hold_required=True):
     return activities_api.base_activity(
         lambda gs: gs_api.mod_vital(gs, "fatigue", -1),
-        lambda gs: True,
+        True,
         hold_required,
         name="rest",
     )
@@ -57,5 +57,5 @@ def cry(state=None, hold_required=True):
     )
 
 
-# activities = [work, rest, rest_hard, work_and_rest, cry]
+activities = [work, rest, rest_hard, work_and_rest, cry]
 # Раскомментируйте эту строчку, чтобы добавить в игру демо-активности
