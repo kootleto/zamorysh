@@ -7,6 +7,22 @@ from interface import ui
 from tools import logger, definitions_loader
 
 
+def pick_activity(gs, definitions):
+    allowed_entries = activities_api.get_allowed_activity_entries(gs, definitions)
+    activities_ui_info = []
+    for entry in allowed_entries:
+        activity = activities_api.configure_activity(definitions, entry)
+        activities_ui_info.append(
+            (
+                activities_api.get_activity_name(activity),
+                activities_api.check_hold_required(activity),
+            )
+        )
+    selected_index = ui.handle_input(activities_ui_info)
+    entry_to_start = allowed_entries[selected_index]
+    activities_api.add_activity_entry(gs, definitions, entry_to_start)
+
+
 def update(gs, activity_definitions, scenario_definitions):
     # Применяем tick_effect всех текущих активностей
     for entry in gs_api.get_activity_entries(gs):
@@ -52,26 +68,6 @@ def update(gs, activity_definitions, scenario_definitions):
 
     gs_api.set_activity_entries(gs, new_entries)
 
-    logger.log(
-        f"Activity entries: {gs_api.get_activity_entries(gs)}", log_type="status"
-    )
-
-
-def pick_activity(gs, definitions):
-    allowed_entries = activities_api.get_allowed_activity_entries(gs, definitions)
-    activities_ui_info = []
-    for entry in allowed_entries:
-        activity = activities_api.configure_activity(definitions, entry)
-        activities_ui_info.append(
-            (
-                activities_api.get_activity_name(activity),
-                activities_api.check_hold_required(activity),
-            )
-        )
-    selected_index = ui.handle_input(activities_ui_info)
-    entry_to_start = allowed_entries[selected_index]
-    activities_api.add_activity_entry(gs, definitions, entry_to_start)
-
 
 def main():
     game_state = gs_api.get_initial_gs()
@@ -79,6 +75,11 @@ def main():
 
     scenarios_api.start_all_scenarios(game_state, definitions["scenarios"])
     while not gs_api.get_flag(game_state, "is_end"):
+        logger.log(
+            f"time: {gs_api.get_time(game_state)}, vitals: {game_state["vitals"]}, stats: {game_state["stats"]},"
+            f" flags: {game_state["flags"]}, activity entries: {gs_api.get_activity_entries(game_state)}",
+            log_type="status",
+        )
         ui.show_stats(game_state)
         if len(gs_api.get_activity_entries(game_state)) == 0:
             pick_activity(game_state, definitions["activities"])
