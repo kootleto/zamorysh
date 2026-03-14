@@ -16,6 +16,9 @@ initial_gs = {
     "flags": {
         "is_end": False,
     },
+    "timers": {
+        "alarm": 0,
+    },
     "time": 0,
     "activity_entries": [],
     "scenario_entries": [],
@@ -68,6 +71,17 @@ def get_flag(gs, flag):
 def set_flag(gs, flag, value):
     gs["intents"].append({"type": "flag", "target": flag, "op": "set", "value": value})
     logger.log("SET FLAG", flag, value, log_type="intent")
+
+
+def get_timer(gs, timer):
+    return gs["timers"][timer]
+
+
+def set_timer(gs, timer, value):
+    gs["intents"].append(
+        {"type": "timer", "target": timer, "op": "set", "value": value}
+    )
+    logger.log("SET TIMER", timer, value, log_type="intent")
 
 
 def tick(gs):
