@@ -6,7 +6,7 @@ initial_gs = {
     "vitals": {
         "fatigue": 0,
         "sleepiness": 0,
-        "mental": 0,
+        "mental": 100,
     },
     "stats": {
         "money": 0,

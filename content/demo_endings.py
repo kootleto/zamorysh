@@ -1,5 +1,3 @@
-from typing import Any, Callable
-
 from engine import scenarios_api, gs_api
 from interface import ui
 
@@ -28,13 +26,13 @@ def rich_scenario():
 
 def breakdown_scenario():
     def check_kukukha(gs):
-        return gs_api.get_vital(gs, "mental") >= 80
+        return gs_api.get_vital(gs, "mental") <= 20
 
     def mental_warning(gs):
         ui.display("--- ...ARE YOU OKAY, BUDDY? YOU'RE ACTING WEIRD. ---")
 
     def check_bad_kukukha(gs):
-        return gs_api.get_vital(gs, "mental") >= 100
+        return gs_api.get_vital(gs, "mental") <= 0
 
     def mental_game_over(gs):
         ui.display(
@@ -114,11 +112,10 @@ def win_scenario():
     )
 
 
-# scenarios = [
+scenarios = [
     rich_scenario,
     breakdown_scenario,
     eternalsleep_scenario,
     verytired_scenario,
     win_scenario,
 ]
-# Раскомментируйте эту строчку, чтобы добавить в игру демо-сценарий
