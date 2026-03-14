@@ -67,6 +67,16 @@ def resolve_flags(gs, intents):
     )
 
 
+def resolve_timers(gs, intents):
+    resolve_generic(
+        gs,
+        intents,
+        "timers",
+        set_fn=min,
+        clamp_fn=lambda v: max(0, v),
+    )
+
+
 # WORK IN PROGRESS
 def resolve_tasks(gs, intents):
     grouped_intents = defaultdict(lambda: {"mod": [], "set": []})
