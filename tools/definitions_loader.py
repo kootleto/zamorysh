@@ -1,19 +1,30 @@
 import importlib
 import pkgutil
 
-from tools import logger
+from tools.logger import log
 
 
-def load_definitions(package_name):
+def load_definitions(package_name: str) -> dict[str, dict]:
+    """
+    Args:
+        package_name: Имя пакета, из которого требуется загрузить определения.
+
+    Returns:
+        Словарь с ключами `activities` и `scenarios`, по которым лежат словари с парами `"модуль.функция"` — `функция`.
+    """
     activity_definitions = {}
     scenario_definitions = {}
 
     package = importlib.import_module(package_name)
 
     def walk_modules(pkg):
+        # Проходим по всем модулям в пакете
         for _, module_name, is_pkg in pkgutil.iter_modules(pkg.__path__):
             full_module_name = f"{pkg.__name__}.{module_name}"
             module = importlib.import_module(full_module_name)
+
+            # Если в модуле есть списки activities или scenarios — кладем их содержимое
+            # в соответствующие словари
 
             if hasattr(module, "activities"):
                 for func in module.activities:
@@ -25,16 +36,17 @@ def load_definitions(package_name):
                     key = f"{full_module_name}.{func.__name__}"
                     scenario_definitions[key] = func
 
+            # Если модуль сам — пакет (то есть папка с __init__.py), проходим по нему рекурсивно
             if is_pkg:
                 walk_modules(module)
 
     walk_modules(package)
 
-    logger.log(
+    log(
         f"Loaded activities: {", ".join(activity_definitions.keys())}",
         log_type="loader",
     )
-    logger.log(
+    log(
         f"Loaded scenarios: {", ".join(scenario_definitions.keys())}",
         log_type="loader",
     )
