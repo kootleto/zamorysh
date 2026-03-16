@@ -1,20 +1,45 @@
-import inspect
+from inspect import signature
+from typing import Callable, Iterable
+
+from tools.logger import log
+from tools.utils import call_with_gs
 from . import gs_api
-from tools import logger
+from . import state_api
 
 
 def base_activity(
-    tick_effect=lambda gs: None,
-    can_continue=lambda gs: True,
-    hold_required=False,
-    is_stackable=False,
-    param_space=lambda gs: None,
-    name="default",
-):
-    # Храним все параметры активности как callable, потому что в композитных активностях
-    # флаги могут меняться при смене подактивности
+    tick_effect: Callable[[dict], None] | Callable[[], None] = lambda gs: None,
+    can_continue: bool | Callable[[dict], bool] | Callable[[], bool] = lambda gs: True,
+    hold_required: bool | Callable[[], bool] = False,
+    is_stackable: bool | Callable[[], bool] = False,
+    param_space: Iterable = None,
+    name: str = "default",
+) -> dict:
+    """
+    Создать активность с указанными свойствами и методами.
+
+    Базовое определение (definition) активности.
+
+    Args:
+        tick_effect: Функция, которая выполняется каждый тик, пока активность запущена. Принимает `gs`.
+        can_continue: Условие, при котором активность может выполняться в следующем тике. Принимает `gs`.
+        hold_required: Нужно ли игроку удерживать клавишу для продолжения активности.
+        is_stackable: При добавлении не-stackable в список текущих активностей
+            из него удаляются все остальные не-stackable.
+        param_space: Область параметров для генерации допустимых вариантов в `get_allowed_activity_entries`.
+        name: Название активности для отображения в UI.
+
+    Returns:
+        Активность, то есть словарь, который следует передавать в функции API,
+        чтобы вызвать методы активности или узнать ее свойства.
+
+    """
+    # Все параметры активности, кроме имени и param_space,
+    # хранятся как callable, чтобы их можно было изменять динамически
+    # Например, в композитных активностях hold_required и is_stackable совпадают с соответствующими свойствами
+    # текущей подактивности
     if not callable(can_continue):
-        can_continue = lambda v=can_continue: v
+        can_continue = lambda gs, v=can_continue: v
     if not callable(hold_required):
         hold_required = lambda v=hold_required: v
     if not callable(is_stackable):
@@ -31,11 +56,11 @@ def base_activity(
 
 
 def apply_tick_effect(gs, activity):
-    activity["tick_effect"](gs)
+    call_with_gs(gs, activity["tick_effect"])
 
 
 def check_can_continue(gs, activity):
-    return activity["can_continue"](gs)
+    return call_with_gs(gs, activity["can_continue"])
 
 
 def check_hold_required(activity):
@@ -46,28 +71,190 @@ def check_is_stackable(activity):
     return activity["is_stackable"]()
 
 
-def get_param_space(gs, activity):
-    return activity["param_space"](gs)
+def get_param_space(activity):
+    return activity["param_space"]
 
 
 def get_activity_name(activity):
     return activity["name"]
 
 
-def composite_activity(state, definitions, init_queue, name="default"):
-    # Если state еще не инициализирован, проводим инициализацию
-    # Мы можем создать активность на этапе перебора возможных активностей
-    # В таком случае активность не прожила еще ни одного тика,
-    # и она не может перейти к следующей подактивности,
-    # потому что еще не выполнила предыдущую
-    # Поэтому next_index инициализируется как None и превращается в 0 при успешной проверке can_continue
+def override_activity(activity: dict, **overrides) -> dict:
+    """
+    Заменить любые элементы словаря активности: `tick_effect`, `can_continue`, `hold_required`,
+    `is_stackable`, `param_space`, `name`.
+
+    Это позволяет заменять отдельные элементы определений, создавая на их основе новое определение,
+    и не хранить все свойства и методы активности в аргументах.
+    Например, по умолчанию параметр `hold_required` композитной активности равен `hold_required` текущей подактивности.
+    Сделав override с `hold_required = False`, мы сможем изменить ее поведение.
+    """
+    new_data = {**activity, **overrides}
+    return base_activity(**new_data)
+
+
+def create_activity_entry(definition, param=None) -> dict:
+    """
+    Создать запись активности (entry).
+
+    Это словарь, в котором хранятся определение (definition) активности, параметр (если есть) и
+    локальное состояние активности (если есть).
+    """
+
+    # Получаем имя функции-определения в формате модуль.имя (по этому ключу в definitions хранится сама функция)
+    # noinspection PyTypeChecker
+    activity_name = f"{definition.__module__}.{definition.__name__}"
+
+    # Если активности нужен state, создаем пустой словарь. При первом создании активности
+    # пройдет инициализация, и в этом словаре окажутся значения по умолчанию.
+    # Иначе явно показываем, что state активности не нужен.
+    # Чтобы понять, нужен ли активности state, смотрим, есть ли среди аргументов функции аргумент с именем `state`
+    sig = signature(definition)
+    state = None
+    if "state" in sig.parameters:
+        state = {}
+
+    return {
+        "activity_name": activity_name,
+        "param": param,
+        "state": state,
+    }
+
+
+def configure_activity(definitions: dict, entry: dict) -> dict:
+    """
+    Создать активность на основе definitions (списка определений) и entry.
+
+    Definition — логика активности, entry — данные о ней. Совместив их, мы получаем активность, то есть
+    объект в виде словаря, у которого есть методы и свойства. Их можно вызывать или читать через API.
+
+    Если `param` в entry равен `None`, то в definition ничего не передается, и будет использован параметр,
+    указанный в definition по умолчанию. Поэтому не используйте `None` в качестве значения параметра!
+    """
+    log(f"Activity entry: {entry}", log_type="config")
+
+    # Собираем данные из entry
+    definition = definitions[entry["activity_name"]]
+    param = entry["param"]
+    state = entry["state"]
+
+    # Даем определению аргументы только в том случае, если они ему нужны.
+    # Чтобы понять, нужны ли аргументы, смотрим сигнатуру функции
+    sig = signature(definition)
+    kwargs = {}
+
+    # Если в качестве параметра при создании entry передано None,
+    # мы считаем это отсутствием параметра и, следовательно,
+    # definition будет использовать параметр по умолчанию
+    if "param" in sig.parameters and param is not None:
+        kwargs["param"] = param
+    # Передаем state из entry, если он нужен definition
+    if "state" in sig.parameters:
+        kwargs["state"] = state
+    # Definition могут быть нужны определения, если оно внутри себя вызывает другие активности.
+    # Например, это нужно композитным активностям
+    if "definitions" in sig.parameters:
+        kwargs["definitions"] = definitions
+
+    return definition(**kwargs)
+
+
+# Используется движком в pick_activity, чтобы предложить игроку все доступные активности
+# со всеми доступными параметрами на выбор
+def get_allowed_activity_entries(gs, definitions):
+    allowed_entries = []
+    # Проходим по всем определениям
+    for definition in definitions.values():
+        # Если активности нужны definitions (например, если это композитная активность), передадим их
+        sig = signature(definition)
+        kwargs = {}
+        if "definitions" in sig.parameters:
+            kwargs["definitions"] = definitions
+
+        # Создаем активность, чтобы узнать, какая у нее область параметров
+        activity = definition(**kwargs)
+        param_space = get_param_space(activity)
+
+        # Если параметра вообще нет, просто проверяем, можем ли мы выполнить активность в следующем тике
+        # Если параметр есть, создаем по варианту активности на каждый параметр и проверяем каждый из вариантов
+        if param_space is None:
+            if check_can_continue(gs, activity):
+                entry = create_activity_entry(definition)
+                allowed_entries.append(entry)
+        else:
+            for param in param_space:
+                activity = definition(**kwargs, param=param)
+                if check_can_continue(gs, activity):
+                    entry = create_activity_entry(definition, param)
+                    allowed_entries.append(entry)
+
+    # Возвращаем все доступные варианты в виде списка entries.
+    # State там сейчас не инициализирован, то есть это None или {},
+    # потому что мы создаем entry уже после создания активности,
+    # и, следовательно, не передаем активности ссылку на state.
+    # Но это не так уж и важно. State будет инициализирован при первом создании активности
+    return allowed_entries
+
+
+def start_activity(gs: dict, definitions: dict, entry: dict):
+    """
+    Добавить entry в список текущих активностей.
+    Если активность не-stackable, остановить другие не-stackable активности.
+    """
+    # Создаем активность, чтобы понять, стакается ли она
+    activity = configure_activity(definitions, entry)
+    if not check_is_stackable(activity):
+        gs["activity_entries"] = [
+            entry
+            for entry in gs["activity_entries"]
+            if check_is_stackable(configure_activity(definitions, entry))
+        ]
+    # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему.
+    # До добавления в gs такой необходимости нет
+    entry_with_id = gs_api.with_id(gs, entry)
+    gs["activity_entries"].append(entry_with_id)
+
+
+def composite_activity(
+    definitions: dict,
+    init_queue: Callable[[], list],
+    state: dict = None,
+    name="default",
+):
+    """
+    Создать композитную активность, состояющую из нескольких подактивностей, выполняющихся последовательно.
+    Следующая подактивность начинает выполняться, как только `can_continue` предыдущей подактивности становится `False`.
+
+
+    Каждая поадктивность должна выполняться хотя бы тик, иначе композитная активность завершается досрочно.
+
+    Args:
+        definitions: Определения активностей. Нужны, чтобы создать активности из entries в очереди.
+        init_queue: Функция, которая вычисляет очередь — список entries.
+        state: Локальное состояние активности.
+        name: Название активности для отображения в UI.
+
+    Returns:
+        dict: Композитная активность. `hold_required` и `is_stackable` равны соответствующим свойствам
+            текущей подактивности.
+
+    """
+
+    # Если state еще не инициализирован, проводим инициализацию.
+    # Мы можем создать активность на этапе перебора возможных активностей.
+    # В таком случае нам нужно обозначить, что первая подактивность еще не прожила ни одного тика,
+    # чтобы при проверке мы не могли решить, что пора переходить к следующей подактивности.
+    # Поэтому next_index инициализируется как None и превращается в 0 только при успешной проверке can_continue
+
     def init():
         return {"queue": init_queue(), "current_index": 0, "next_index": None}
 
-    state = init_fn(state, init)
+    state = state_api.init_fn(state, init)
 
     # В очереди хранятся не activities (это логика),
-    # а entries, поэтому в качестве аргумента нам нужны definitions
+    # а entries, поэтому в качестве аргумента нам нужны definitions.
+    # Чтобы узнать текущую или следующую подактивность, мы проводим конфигурацию
+
     def get_current():
         return configure_activity(definitions, state["queue"][state["current_index"]])
 
@@ -75,41 +262,46 @@ def composite_activity(state, definitions, init_queue, name="default"):
         return configure_activity(definitions, state["queue"][state["next_index"]])
 
     def tick_effect(gs):
-        # На всякий случай повторная проверка: мы могли запустить активность,
-        # и не выполняя can_continue
+        # 0. На всякий случай повторная проверка: мы могли запустить активность, не выполняя can_continue
         if state["next_index"] is None:
             state["next_index"] = 0
 
-        # Если надо перейти к следующей активности, переходим
+        # 1. Если надо перейти к следующей подактивности, переходим
         state["current_index"] = state["next_index"]
+
+        # 2. Выполняем эффект текущей подактивности
         current = get_current()
-        # Выполняем эффект текущей подактивности
         apply_tick_effect(gs, current)
 
     def can_continue(gs):
+        # 0. Защита от пустой очереди
+        if len(state["queue"]) == 0:
+            return False
+
+        # 1. Если мы больше не можем выполнять текущую подактивность, в следующем тике надо перейти к следующей.
+        # Если индекс следующей None, то есть мы еще не выполнили ни одного тика, вся активность не может начаться
         current = get_current()
-        # Если мы больше не можем выполнять текущую подактивность, укажем, что в следующем тике
-        # надо перейти к следующей
         if not check_can_continue(gs, current):
             if state["next_index"] is None:
                 return False
             else:
-                state["next_index"] += 1
-        # Если мы можем продолжать текущую активность, установим индекс следующей в 0
+                state["next_index"] = state["current_index"] + 1
+
+        # 2. Если мы можем начать первую подактивность, в следующем тике будем выполнять ее.
         # Можно воспринимать это так: если мы можем прожить один тик в настоящем, мы имеем право смотреть в будущее
         if state["next_index"] is None:
             state["next_index"] = 0
 
-        # Если очередь закончилась, композитная активность завершается
+        # 3. Если очередь закончилась, композитная активность завершается
         if state["next_index"] >= len(state["queue"]):
             return False
 
-        # Если подактивность, которая должна выполниться в следующем тике
-        # (это может быть как текущая подактивность, так и следующая в очереди), не может выполняться в следующем тике,
-        # композитная активность тоже завершается, потому что под композитной активностью мы понимаем,
-        # что каждую подактивность мы должны выполнять хотя бы тик
+        # 4. То, может ли выполняться вся композитная активность, зависит от того, может ли выполняться подактивность,
+        # которая должна выполняться в следующем тике
         next_activity = get_next()
         return check_can_continue(gs, next_activity)
+
+    # Свойства hold_required и is_stackable равны свойствам текущей подактивности
 
     def hold_required():
         current = get_current()
@@ -122,116 +314,3 @@ def composite_activity(state, definitions, init_queue, name="default"):
     return base_activity(
         tick_effect, can_continue, hold_required, is_stackable, name=name
     )
-
-
-def override_activity(activity, **overrides):
-    # Так можно изменить любое поле определения
-    new_data = {**activity, **overrides}
-    return base_activity(**new_data)
-
-
-def add_activity_entry(gs, definitions, entry):
-    # Конфигурируем логику, чтобы понять, стакается ли эта активность
-    # Здесь же происходит инициализация state
-    activity = configure_activity(definitions, entry)
-    # Если не стакается, удаляем остальные не стакающиеся
-    if not check_is_stackable(activity):
-        gs["activity_entries"] = [
-            entry
-            for entry in gs["activity_entries"]
-            if check_is_stackable(configure_activity(definitions, entry))
-        ]
-    entry_with_id = gs_api.with_id(gs, entry)
-    gs["activity_entries"].append(entry_with_id)
-
-
-def create_activity_entry(definition, param=None):
-    activity_name = f"{definition.__module__}.{definition.__name__}"
-
-    sig = inspect.signature(definition)
-    state = None
-    if "state" in sig.parameters:
-        state = {}
-
-    # Возвращаем entry. Для инициализации state потребуется создать саму activity,
-    # поэтому это будет происходить не здесь, а при добавлении в gs
-    return {
-        "activity_name": activity_name,
-        "param": param,
-        "state": state,
-    }
-
-
-def configure_activity(definitions, entry):
-    logger.log(f"Activity entry: {entry}", log_type="config")
-
-    # На основе данных и определения получаем логику для активности,
-    # чье имя указано в этих данных
-
-    definition = definitions[entry["activity_name"]]
-    param = entry["param"]
-    state = entry["state"]
-
-    # Мы даем определению аргументы только в том случае, если они ему нужны
-    # Чтобы понять, нужны ли аргументы, смотрим сигнатуру
-    sig = inspect.signature(definition)
-
-    kwargs = {}
-    # Если в качестве параметра при создании записи передано None,
-    # мы считаем это отсутствием параметра и, следовательно,
-    # логика будет использовать не None, а параметр по умолчанию
-    if "param" in sig.parameters and param is not None:
-        kwargs["param"] = param
-    # Передаем state из данных, если он нужен логике
-    if "state" in sig.parameters:
-        kwargs["state"] = state
-    # Логике могут быть нужны определения, если она внутри себя вызывает другие активности
-    # Например, это нужно любым композитным активностям
-    if "definitions" in sig.parameters:
-        kwargs["definitions"] = definitions
-
-    return definition(**kwargs)
-
-
-def init_defaults(state, **defaults):
-    # Этот метод инициализации подходит, если изначальный state всегда одинаковый
-    # Он принимает уже готовый словарь, а не логику инициализации
-    if state is None:
-        return defaults
-    for key, val in defaults.items():
-        state.setdefault(key, val)
-    return state
-
-
-def init_fn(state, fn):
-    # Этот метод инициализации подходит, если изначальный state вычисляется на основе параметра
-    # Он позволяет вызывать логику инициализации только в том случае, если state еще не инициализирован
-    if state is None:
-        return fn()
-    elif state == {}:
-        state.update(fn())
-    return state
-
-
-def get_allowed_activity_entries(gs, definitions):
-    allowed_entries = []
-    for definition in definitions.values():
-        sig = inspect.signature(definition)
-        kwargs = {}
-        if "definitions" in sig.parameters:
-            kwargs["definitions"] = definitions
-
-        activity = definition(**kwargs)
-        param_space = get_param_space(gs, activity)
-        if param_space is None:
-            if check_can_continue(gs, activity):
-                entry = create_activity_entry(definition)
-                allowed_entries.append(entry)
-        else:
-            for param in param_space:
-                activity = definition(**kwargs, param=param)
-                if check_can_continue(gs, activity):
-                    entry = create_activity_entry(definition, param)
-                    allowed_entries.append(entry)
-
-    return allowed_entries
