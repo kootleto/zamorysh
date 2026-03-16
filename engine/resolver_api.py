@@ -1,14 +1,19 @@
 from collections import defaultdict
+from typing import Callable, Iterable
 
 from gameplay import tasks
-from tools import logger
+from tools.logger import log
 
 
 def resolve_intents(gs):
+
+    # Группируем интенты по категории в gs, к которой относится цель
     grouped_intents = defaultdict(list)
     for intent in gs["intents"]:
         grouped_intents[intent["type"]].append(intent)
-    # logger.log("Raw Intents: ", dict(grouped_intents), log_type="resolver")
+
+    # Для каждого типа пытаемся применить резолвер с соответствующим именем.
+    # Если такого нет, вызываем ошибку
     for intent_type, intents in grouped_intents.items():
         resolver_name = f"resolve_{intent_type}s"
         if resolver_name in globals():
@@ -17,13 +22,34 @@ def resolve_intents(gs):
             raise NotImplementedError(
                 f"No resolver implemented for intent type '{intent_type}'"
             )
+
+    # После обработки интентов очищаем массив в gs
     gs["intents"].clear()
 
 
-def resolve_generic(gs, intents, gs_key, set_fn=max, mod_fn=sum, clamp_fn=lambda x: x):
+def resolve_generic(
+    gs,
+    intents: Iterable[dict],
+    gs_key: str,
+    set_fn: Callable = max,
+    mod_fn: Callable = sum,
+    clamp_fn: Callable = lambda x: x,
+):
+    """
+    Универсальный резолвер для категории gs_key.
+
+    Работает по следующему алгоритму:
+    1. Применяет изменения типа set при помощи set_fn.
+    2. К результату применяет изменения типа mod при помощи mod_fn.
+    3. Если результат выходит за границы допустимых значений, возвращает его в эти границы
+    при помощи clamp_fn.
+    """
+    # Группируем интенты по цели и виду операции (mod или set)
     grouped_intents = defaultdict(lambda: {"mod": [], "set": []})
     for intent in intents:
         grouped_intents[intent["target"]][intent["op"]].append(intent)
+
+    # Применяем изменения для каждой цели
     for target, grouped in grouped_intents.items():
         if grouped["set"]:
             value = set_fn([i["value"] for i in grouped["set"]])
@@ -31,7 +57,7 @@ def resolve_generic(gs, intents, gs_key, set_fn=max, mod_fn=sum, clamp_fn=lambda
             value = gs[gs_key][target]
         value += mod_fn([i["value"] for i in grouped["mod"]])
         value = clamp_fn(value)
-        logger.log(f"{target} {gs[gs_key][target]} -> {value}", log_type="resolver")
+        log(f"{target} {gs[gs_key][target]} -> {value}", log_type="resolver")
         gs[gs_key][target] = value
 
 
@@ -40,9 +66,11 @@ def resolve_vitals(gs, intents):
         gs,
         intents,
         "vitals",
-        set_fn=max,
+        set_fn=max,  # Обычно для игрока чем выше, тем хуже
         mod_fn=sum,
-        clamp_fn=lambda v: max(0, min(100, v)),
+        clamp_fn=lambda v: max(
+            0, min(100, v)
+        ),  # vitals ограничены значениями от 0 до 100
     )
 
 
@@ -51,7 +79,7 @@ def resolve_stats(gs, intents):
         gs,
         intents,
         "stats",
-        set_fn=min,
+        set_fn=min,  # Обычно для игрока чем ниже, тем хуже
         mod_fn=sum,
         clamp_fn=lambda v: max(0, v),
     )
@@ -62,7 +90,7 @@ def resolve_flags(gs, intents):
         gs,
         intents,
         "flags",
-        set_fn=any,
+        set_fn=any,  # Логическое ИЛИ
         clamp_fn=lambda v: v,
     )
 
@@ -72,7 +100,7 @@ def resolve_timers(gs, intents):
         gs,
         intents,
         "timers",
-        set_fn=min,
+        set_fn=min,  # Лучше раньше, чем позже
         clamp_fn=lambda v: max(0, v),
     )
 
@@ -88,7 +116,7 @@ def resolve_tasks(gs, intents):
         value += sum([i["value"] for i in grouped["mod"]])
         value = min(value, tasks.get_required(task))
 
-        logger.log(
+        log(
             f"Task {target} progress {tasks.get_progress(task)} -> {value} / {tasks.get_required(task)}",
             log_type="resolver",
         )
