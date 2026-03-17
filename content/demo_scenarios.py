@@ -24,5 +24,5 @@ def rich_scenario():
     )
 
 
-# scenarios = [rich_scenario]
+scenarios = [rich_scenario]
 # Раскомментируйте эту строчку, чтобы добавить в игру демо-сценарий
