@@ -7,3 +7,5 @@
 [Как запустить игру](docs/guides/RUN.md)
 
 [Доска в Trello](https://trello.com/b/dVBBwC4t/%D0%B7%D0%B0%D0%BC%D0%BE%D1%80%D1%8B%D1%88)
+
+[Доска в Pinterest с идеями для графики](https://pin.it/cYbcKFSim)
