@@ -33,4 +33,4 @@ def get_weekday(gs):
 
 
 def datetime_to_tick(dt):
-    return (dt - START_DATETIME).total_seconds() / 60
+    return int((dt - START_DATETIME).total_seconds() / 60)
