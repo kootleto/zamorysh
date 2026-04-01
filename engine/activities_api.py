@@ -1,5 +1,5 @@
 from inspect import signature
-from typing import Callable, Iterable
+from typing import Callable
 
 from tools.logger import log
 from tools.utils import call_with_gs
@@ -12,7 +12,6 @@ def base_activity(
     can_continue: bool | Callable[[dict], bool] | Callable[[], bool] = lambda gs: True,
     hold_required: bool | Callable[[], bool] = False,
     is_stackable: bool | Callable[[], bool] = False,
-    param_space: Iterable = None,
     name: str = "default",
 ) -> dict:
     """
@@ -26,7 +25,6 @@ def base_activity(
         hold_required: Нужно ли игроку удерживать клавишу для продолжения активности.
         is_stackable: При добавлении не-stackable в список текущих активностей
             из него удаляются все остальные не-stackable.
-        param_space: Область параметров для генерации допустимых вариантов в `get_allowed_activity_entries`.
         name: Название активности для отображения в UI.
 
     Returns:
@@ -39,7 +37,7 @@ def base_activity(
     # Например, в композитных активностях hold_required и is_stackable совпадают с соответствующими свойствами
     # текущей подактивности
     if not callable(can_continue):
-        can_continue = lambda gs, v=can_continue: v
+        can_continue = lambda v=can_continue: v
     if not callable(hold_required):
         hold_required = lambda v=hold_required: v
     if not callable(is_stackable):
@@ -50,7 +48,6 @@ def base_activity(
         "can_continue": can_continue,
         "hold_required": hold_required,
         "is_stackable": is_stackable,
-        "param_space": param_space,
         "name": name,
     }
 
