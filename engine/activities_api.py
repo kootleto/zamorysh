@@ -68,12 +68,36 @@ def check_is_stackable(activity):
     return activity["is_stackable"]()
 
 
-def get_param_space(activity):
-    return activity["param_space"]
-
-
 def get_activity_name(activity):
     return activity["name"]
+
+
+# Это обертка над декоратором: у нее есть параметр param_space, и его может использовать сам декоратор.
+# Она возвращает декоратор
+def with_param_space(param_space: Iterable | Callable[[dict], Iterable]):
+    # Это декоратор, то есть обертка над definition. Он принимает definition,
+    # присваивает ему указанную область параметра в качестве атрибута
+    # и возвращает definition
+    def wrapper(definition):
+        # Функции в Python - это объекты, и им можно присваивать атрибуты. Мы используем это,
+        # чтобы узнать область параметра можно было из определения активности, не создавая саму активность
+        # (ведь для создания активности уже нужно будет указать параметр)
+        definition.param_space = param_space
+        return definition
+
+    return wrapper
+
+
+def get_param_space(gs, definition):
+    # Атрибут функции можно узнать, не вызывая ее, чем мы и пользуемся
+    param_space = getattr(definition, "param_space", None)
+
+    # param_space может быть как функцией, которая принимает gs и возвращает Iterable, так и просто Iterable
+    # (то есть чем-то, по чему можно пройтись в цикле for)
+    if callable(param_space):
+        return call_with_gs(gs, param_space)
+    else:
+        return param_space
 
 
 def override_activity(activity: dict, **overrides) -> dict:
@@ -99,7 +123,6 @@ def create_activity_entry(definition, param=None) -> dict:
     """
 
     # Получаем имя функции-определения в формате модуль.имя (по этому ключу в definitions хранится сама функция)
-    # noinspection PyTypeChecker
     activity_name = f"{definition.__module__}.{definition.__name__}"
 
     # Если активности нужен state, создаем пустой словарь. При первом создании активности
@@ -168,13 +191,12 @@ def get_allowed_activity_entries(gs, definitions):
         if "definitions" in sig.parameters:
             kwargs["definitions"] = definitions
 
-        # Создаем активность, чтобы узнать, какая у нее область параметров
-        activity = definition(**kwargs)
-        param_space = get_param_space(activity)
-
-        # Если параметра вообще нет, просто проверяем, можем ли мы выполнить активность в следующем тике
+        # Смотрим, есть ли у активности параметр
+        # Если параметра нет, просто проверяем, можем ли мы выполнить активность в следующем тике
         # Если параметр есть, создаем по варианту активности на каждый параметр и проверяем каждый из вариантов
+        param_space = get_param_space(gs, definition)
         if param_space is None:
+            activity = definition(**kwargs)
             if check_can_continue(gs, activity):
                 entry = create_activity_entry(definition)
                 allowed_entries.append(entry)
