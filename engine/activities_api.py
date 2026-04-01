@@ -1,5 +1,5 @@
 from inspect import signature
-from typing import Callable
+from typing import Callable, Iterable
 
 from tools.logger import log
 from tools.utils import call_with_gs
