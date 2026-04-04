@@ -1,6 +1,8 @@
 from engine import activities_api, gs_api, state_api
 
+from interface import ui
 import random
+
 
 # Параметрами активности может быть что угодно.
 # Вынос конкретных значений в параметры позволит легко менять их
@@ -169,22 +171,34 @@ def random_event(
     earn_money=1,
     fatigue_cost=1,
 ):
+    state = state_api.init_defaults(state, counter=1)
+
     def tick_effect(gs):
-        if random.randint(1, 3) % 3 == 0:
-            print("Вы нашли на дороге 5 рублей! Поздравляем!")
-            gs_api.mod_vital(gs, "money", +earn_money)
-        if random.randint(1, 3) % 3 == 1:
-            print(
+        state["counter"] -= 1
+        ran = random.randint(1, 3) % 3
+        if ran == 0:
+            ui.display("Вы нашли на дороге 5 рублей! Поздравляем!")
+            gs_api.mod_stat(gs, "money", +earn_money)
+        if ran == 1:
+            ui.display(
                 "Онет! Вы врезались в Ландера, пока опаздывали на дискру. Он расстроен."
             )
-            gs_api.mod_vital(gs, "money", -fatigue_cost)
+            gs_api.mod_vital(gs, "fatigue", -fatigue_cost)
         else:
-            print("Вы проспорили деньги на свой накоп по дискре (он меньше 3)")
-            gs_api.mod_vital(gs, "money", +earn_money)
+            ui.display("Вы проспорили деньги на свой накоп по дискре (он меньше 3)")
+            gs_api.mod_stat(gs, "money", -earn_money)
 
-    return activities_api.base_activity(hold_required, tick_effect, name="random_event")
+    def can_continue():
+        return state["counter"] > 0
+
+    return activities_api.base_activity(
+        hold_required=False,
+        tick_effect=tick_effect,
+        can_continue=can_continue,
+        name="random_event",
+    )
 
 
-activities = [work, rest, rest_hard, work_and_rest, cry, random_event]
-activities = [work, rest, rest_hard, work_and_rest, cry, waste_money]
+activities = [work, rest, rest_hard, work_and_rest, cry, waste_money, random_event]
+# activities = [work, rest, rest_hard, work_and_rest, cry, waste_money]
 # Раскомментируйте эту строчку, чтобы добавить в игру демо-активности
