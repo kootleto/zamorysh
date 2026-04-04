@@ -84,7 +84,7 @@ def main():
         if len(gs_api.get_activity_entries(game_state)) == 0:
             pick_activity(game_state, definitions["activities"])
         logger.log(f"------ TICK {gs_api.get_time(game_state)} ------", log_type="tick")
-        sleep(0.15)
+        sleep(1)
         update(game_state, definitions["activities"], definitions["scenarios"])
     ui.display("--- GAME FINISHED ---")
     ui.prompt("Press Enter to exit")
