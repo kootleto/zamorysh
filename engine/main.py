@@ -57,7 +57,9 @@ def update(gs, activity_definitions, scenario_definitions, is_initial=False):
     # Каждый сценарий за тик может совершить только один переход. Порядок проверки зависит от того,
     # в каком порядке указаны переходы в definition сценария
     for entry in gs_api.get_scenario_entries(gs):
-        scenario = scenarios_api.configure_scenario(scenario_definitions, entry)
+        scenario = scenarios_api.configure_scenario(
+            activity_definitions, scenario_definitions, entry
+        )
         node = scenarios_api.get_node(entry)
         for transition in scenarios_api.get_transitions(scenario):
             node_matches = scenarios_api.get_node_from(transition) == node
@@ -96,11 +98,22 @@ def update(gs, activity_definitions, scenario_definitions, is_initial=False):
     gs_api.set_activity_entries(gs, new_entries)
 
 
+def check_foreground_activities_running(gs, definitions):
+    entries = gs_api.get_activity_entries(gs)
+    for entry in entries:
+        activity = activities_api.configure_activity(definitions, entry)
+        if not activities_api.check_is_background(activity):
+            return True
+    return False
+
+
 def main():
     # Инициализация
     game_state = gs_api.get_initial_gs()
     definitions = load_definitions("content")
-    scenarios_api.start_all_scenarios(game_state, definitions["scenarios"])
+    scenarios_api.start_all_scenarios(
+        game_state, definitions["activities"], definitions["scenarios"]
+    )
     # Обновление, чтобы проверить триггеры сценариев (какие-то триггеры могут сработать уже при initial_gs)
     update(
         game_state, definitions["activities"], definitions["scenarios"], is_initial=True
@@ -113,8 +126,10 @@ def main():
             log_type="status",
         )
         ui.show_stats(game_state)
-        # Если не запущена ни одна активность, игрок должен выбрать активность
-        if len(gs_api.get_activity_entries(game_state)) == 0:
+        # Если не запущена ни одна не фоновая, игрок должен выбрать активность
+        if not check_foreground_activities_running(
+            game_state, definitions["activities"]
+        ):
             pick_activity(game_state, definitions["activities"])
         log(f"------ TICK {gs_api.get_time(game_state)} ------", log_type="tick")
         sleep(0.15)

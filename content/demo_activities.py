@@ -1,4 +1,5 @@
 from engine import activities_api, gs_api, state_api
+from tools import logger
 
 
 # Параметрами активности может быть что угодно.
@@ -107,5 +108,18 @@ def waste_money(param, state=None):
     )
 
 
-activities = [work, rest, rest_hard, work_and_rest, cry, waste_money]
+@activities_api.with_auto_start
+def get_tired():
+    def tick_effect(gs):
+        gs_api.mod_vital(gs, "sleepiness", 1)
+
+    return activities_api.base_activity(
+        tick_effect, True, is_stackable=True, is_background=True
+    )
+
+
+logger.log(hasattr(get_tired, "auto_start"))
+
+
+activities = [work, rest, rest_hard, work_and_rest, cry, waste_money, get_tired]
 # Раскомментируйте эту строчку, чтобы добавить в игру демо-активности

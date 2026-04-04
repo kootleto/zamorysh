@@ -12,6 +12,7 @@ def base_activity(
     can_continue: bool | Callable[[dict], bool] | Callable[[], bool] = lambda gs: True,
     hold_required: bool | Callable[[], bool] = False,
     is_stackable: bool | Callable[[], bool] = False,
+    is_background: bool | Callable[[], bool] = False,
     name: str = "default",
 ) -> dict:
     """
@@ -25,6 +26,8 @@ def base_activity(
         hold_required: Нужно ли игроку удерживать клавишу для продолжения активности.
         is_stackable: При добавлении не-stackable в список текущих активностей
             из него удаляются все остальные не-stackable.
+        is_background: Фоновая активность не предлагается игроку при выборе, и, если запущены только фоновые активности,
+            игрок должен выбрать любую не фоновую (из возможных), чтобы игра продолжилась.
         name: Название активности для отображения в UI.
 
     Returns:
@@ -42,12 +45,15 @@ def base_activity(
         hold_required = lambda v=hold_required: v
     if not callable(is_stackable):
         is_stackable = lambda v=is_stackable: v
+    if not callable(is_background):
+        is_background = lambda v=is_background: v
 
     return {
         "tick_effect": tick_effect,
         "can_continue": can_continue,
         "hold_required": hold_required,
         "is_stackable": is_stackable,
+        "is_background": is_background,
         "name": name,
     }
 
@@ -66,6 +72,10 @@ def check_hold_required(activity):
 
 def check_is_stackable(activity):
     return activity["is_stackable"]()
+
+
+def check_is_background(activity):
+    return activity["is_background"]()
 
 
 def get_activity_name(activity):
@@ -92,12 +102,27 @@ def get_param_space(gs, definition):
     # Атрибут функции можно узнать, не вызывая ее, чем мы и пользуемся
     param_space = getattr(definition, "param_space", None)
 
+    if param_space is not None:
+        log(definition, param_space)
+
     # param_space может быть как функцией, которая принимает gs и возвращает Iterable, так и просто Iterable
     # (то есть чем-то, по чему можно пройтись в цикле for)
     if callable(param_space):
         return call_with_gs(gs, param_space)
     else:
         return param_space
+
+
+# Это декоратор. Он делает то же, что и with_param_space: присваивает объекту атрибут
+def with_auto_start(definition):
+    """Запустить активность в начале игры."""
+    definition.auto_start = True
+    return definition
+
+
+def check_auto_start(definition):
+    # Если такого атрибута присвоено не было, то автозапуск нам не нужен
+    return getattr(definition, "auto_start", False)
 
 
 def override_activity(activity: dict, **overrides) -> dict:
@@ -197,13 +222,15 @@ def get_allowed_activity_entries(gs, definitions):
         param_space = get_param_space(gs, definition)
         if param_space is None:
             activity = definition(**kwargs)
-            if check_can_continue(gs, activity):
+            if not check_is_background(activity) and check_can_continue(gs, activity):
                 entry = create_activity_entry(definition)
                 allowed_entries.append(entry)
         else:
             for param in param_space:
                 activity = definition(**kwargs, param=param)
-                if check_can_continue(gs, activity):
+                if not check_is_background(activity) and check_can_continue(
+                    gs, activity
+                ):
                     entry = create_activity_entry(definition, param)
                     allowed_entries.append(entry)
 
@@ -330,6 +357,10 @@ def composite_activity(
         current = get_current()
         return check_is_stackable(current)
 
+    def is_background():
+        current = get_current()
+        return check_is_background(current)
+
     return base_activity(
-        tick_effect, can_continue, hold_required, is_stackable, name=name
+        tick_effect, can_continue, hold_required, is_stackable, is_background, name=name
     )

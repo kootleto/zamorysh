@@ -9,7 +9,7 @@ from . import gs_api
 def base_transition(
     node_from: Any,
     node_to: Any,
-    trigger: Callable[[dict], bool] | Callable[[], bool],
+    trigger: Callable[[dict], bool] | Callable[[], bool] | bool,
     effect: Callable[[dict], None] | Callable[[], None],
 ) -> dict:
     """
@@ -23,6 +23,10 @@ def base_transition(
         trigger: Условие перехода.
         effect: Функция, которая выполняется при переходе. Принимает `gs`.
     """
+
+    if not callable(trigger):
+        trigger = lambda v=trigger: v
+
     return {
         "from": node_from,
         "to": node_to,
@@ -111,7 +115,9 @@ def set_node(entry, node):
     entry["node"] = node
 
 
-def configure_scenario(definitions, entry):
+def configure_scenario(
+    activity_definitions: dict, scenario_definitions: dict, entry: dict
+) -> dict:
     """
     Создать сценарий на основе definitions (списка определений) и entry.
 
@@ -121,7 +127,7 @@ def configure_scenario(definitions, entry):
     log(f"Scenario entry: {entry}", log_type="config")
 
     # Собираем данные из entry
-    definition = definitions[entry["scenario_name"]]
+    definition = scenario_definitions[entry["scenario_name"]]
     state = entry["state"]
 
     # Даем определению state только в том случае, если он ему нужен.
@@ -130,13 +136,17 @@ def configure_scenario(definitions, entry):
     kwargs = {}
     if "state" in sig.parameters:
         kwargs["state"] = state
+    if "activity_definitions" in sig.parameters:
+        kwargs["activity_definitions"] = activity_definitions
 
     return definition(**kwargs)
 
 
-def start_scenario(gs, definitions, scenario_entry):
+def start_scenario(gs, activity_definitions, scenario_definitions, scenario_entry):
     """Добавить entry в список текущих сценариев."""
-    scenario = configure_scenario(definitions, scenario_entry)
+    scenario = configure_scenario(
+        activity_definitions, scenario_definitions, scenario_entry
+    )
     set_node(scenario_entry, get_start_node(scenario))
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему
     entry_with_id = gs_api.with_id(gs, scenario_entry)
@@ -144,7 +154,7 @@ def start_scenario(gs, definitions, scenario_entry):
 
 
 # В начале игры движок запускает все сценарии
-def start_all_scenarios(gs, definitions):
-    for definition in definitions.values():
+def start_all_scenarios(gs, activity_definitions, scenario_definitions):
+    for definition in scenario_definitions.values():
         entry = create_scenario_entry(definition)
-        start_scenario(gs, definitions, entry)
+        start_scenario(gs, activity_definitions, scenario_definitions, entry)
