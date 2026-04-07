@@ -135,16 +135,6 @@ def listen_to_music(hold_required=False, earn_mental=-5, earn_sleepiness=1, stat
     )
 
 
-activities = [
-    work,
-    rest,
-    rest_hard,
-    work_and_rest,
-    cry,
-    socialize,
-    drink_coffee,
-    listen_to_music,
-]
 # Пример активности с параметром
 # Сначала мы указываем область параметра - по этой области будет проходить
 # get_allowed_activity_entries и проверять для каждого параметра из этой области, можно ли начать такую активность.
@@ -174,5 +164,16 @@ def waste_money(param, state=None):
     )
 
 
-activities = [work, rest, rest_hard, work_and_rest, cry, waste_money]
+activities = [
+    work,
+    rest,
+    rest_hard,
+    work_and_rest,
+    cry,
+    socialize,
+    drink_coffee,
+    listen_to_music,
+    waste_money,
+]
+
 # Раскомментируйте эту строчку, чтобы добавить в игру демо-активности
