@@ -102,9 +102,6 @@ def get_param_space(gs, definition):
     # Атрибут функции можно узнать, не вызывая ее, чем мы и пользуемся
     param_space = getattr(definition, "param_space", None)
 
-    if param_space is not None:
-        log(definition, param_space)
-
     # param_space может быть как функцией, которая принимает gs и возвращает Iterable, так и просто Iterable
     # (то есть чем-то, по чему можно пройтись в цикле for)
     if callable(param_space):
@@ -219,20 +216,22 @@ def get_allowed_activity_entries(gs, definitions):
         # Смотрим, есть ли у активности параметр
         # Если параметра нет, просто проверяем, можем ли мы выполнить активность в следующем тике
         # Если параметр есть, создаем по варианту активности на каждый параметр и проверяем каждый из вариантов
+        # Чтобы не дублировать логику, представляем отсутствие параметра как параметр с одним вариантом None
         param_space = get_param_space(gs, definition)
-        if param_space is None:
-            activity = definition(**kwargs)
+        params_to_check = [None] if param_space is None else param_space
+        # None не может быть значением параметра, поэтому мы можем использовать это как флаг
+        # и передавать параметр только если он не None
+        for param in params_to_check:
+            activity = (
+                definition(**kwargs)
+                if param is None
+                else definition(**kwargs, param=param)
+            )
             if not check_is_background(activity) and check_can_continue(gs, activity):
-                entry = create_activity_entry(definition)
+                # В create_activity_entry param=None по умолчанию, так что мы спокойно можем
+                # передать туда None без риска получить исключение
+                entry = create_activity_entry(definition, param)
                 allowed_entries.append(entry)
-        else:
-            for param in param_space:
-                activity = definition(**kwargs, param=param)
-                if not check_is_background(activity) and check_can_continue(
-                    gs, activity
-                ):
-                    entry = create_activity_entry(definition, param)
-                    allowed_entries.append(entry)
 
     # Возвращаем все доступные варианты в виде списка entries.
     # State там сейчас не инициализирован, то есть это None или {},
