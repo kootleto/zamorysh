@@ -87,7 +87,7 @@ def drink_coffee(state=None, hold_required=True):
         state["counter"] -= 1
 
     def can_continue(gs):
-        return gs_api.get_vital(gs, "fatigue") > 0
+        return gs_api.get_vital(gs, "sleepiness") > 0
 
     return activities_api.base_activity(
         tick_effect,
@@ -120,8 +120,8 @@ def listen_to_music(hold_required=False, earn_mental=-5, earn_sleepiness=1, stat
     state = activities_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
-        gs_api.mod_stat(gs, "mental", +earn_mental)
-        gs_api.mod_stat(gs, "sleepiness", +earn_sleepiness)
+        gs_api.mod_vital(gs, "mental", +earn_mental)
+        gs_api.mod_vital(gs, "sleepiness", +earn_sleepiness)
         state["counter"] -= 1
 
     def can_continue(gs):
