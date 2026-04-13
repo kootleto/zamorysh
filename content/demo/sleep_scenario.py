@@ -14,3 +14,4 @@ def sleepiness_scenario():
 
 
 # scenarios = [sleepiness_scenario]
+# Строчка закомментирована, потому что у нас теперь есть фоновая активность get_tired

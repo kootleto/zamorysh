@@ -2,7 +2,7 @@ from inspect import signature
 from typing import Any, Callable
 
 from tools.logger import log
-from tools.utils import call_with_gs
+from tools.utils import call_with_gs, ensure_callable
 from . import gs_api
 
 
@@ -24,13 +24,10 @@ def base_transition(
         effect: Функция, которая выполняется при переходе. Принимает `gs`.
     """
 
-    if not callable(trigger):
-        trigger = lambda v=trigger: v
-
     return {
         "from": node_from,
         "to": node_to,
-        "trigger": trigger,
+        "trigger": ensure_callable(trigger),
         "effect": effect,
     }
 

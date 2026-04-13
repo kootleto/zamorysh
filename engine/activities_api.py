@@ -2,11 +2,15 @@ from inspect import signature
 from typing import Callable, Iterable
 
 from tools.logger import log
-from tools.utils import call_with_gs
+from tools.utils import call_with_gs, ensure_callable
 from . import gs_api
 from . import state_api
 
 
+# Все параметры активности, кроме имени и param_space,
+# хранятся как callable, чтобы их можно было изменять динамически
+# Например, в композитных активностях hold_required и is_stackable совпадают с соответствующими свойствами
+# текущей подактивности
 def base_activity(
     tick_effect: Callable[[dict], None] | Callable[[], None] = lambda gs: None,
     can_continue: bool | Callable[[dict], bool] | Callable[[], bool] = lambda gs: True,
@@ -35,25 +39,13 @@ def base_activity(
         чтобы вызвать методы активности или узнать ее свойства.
 
     """
-    # Все параметры активности, кроме имени и param_space,
-    # хранятся как callable, чтобы их можно было изменять динамически
-    # Например, в композитных активностях hold_required и is_stackable совпадают с соответствующими свойствами
-    # текущей подактивности
-    if not callable(can_continue):
-        can_continue = lambda v=can_continue: v
-    if not callable(hold_required):
-        hold_required = lambda v=hold_required: v
-    if not callable(is_stackable):
-        is_stackable = lambda v=is_stackable: v
-    if not callable(is_background):
-        is_background = lambda v=is_background: v
 
     return {
         "tick_effect": tick_effect,
-        "can_continue": can_continue,
-        "hold_required": hold_required,
-        "is_stackable": is_stackable,
-        "is_background": is_background,
+        "can_continue": ensure_callable(can_continue),
+        "hold_required": ensure_callable(hold_required),
+        "is_stackable": ensure_callable(is_stackable),
+        "is_background": ensure_callable(is_background),
         "name": name,
     }
 
