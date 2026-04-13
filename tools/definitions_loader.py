@@ -1,7 +1,13 @@
 import importlib
+import os
 import pkgutil
 
+from dotenv import load_dotenv
+
 from tools.logger import log
+
+load_dotenv()
+INCLUDE_DEMO = os.getenv("INCLUDE_DEMO", "False").lower() == "true"
 
 
 def load_definitions(package_name: str) -> dict[str, dict]:
@@ -22,6 +28,9 @@ def load_definitions(package_name: str) -> dict[str, dict]:
         for _, module_name, is_pkg in pkgutil.iter_modules(pkg.__path__):
             full_module_name = f"{pkg.__name__}.{module_name}"
             module = importlib.import_module(full_module_name)
+
+            if "demo" in module_name and not INCLUDE_DEMO:
+                continue
 
             # Если в модуле есть списки activities или scenarios — кладем их содержимое
             # в соответствующие словари

@@ -12,3 +12,8 @@ def call_with_gs(gs: dict, func: Callable):
     if "gs" in sig.parameters:
         return func(gs)
     return func()
+
+
+def ensure_callable(val) -> Callable:
+    """Если значение еще не функция, превратить его в функцию, которая может принимать любые аргументы."""
+    return val if callable(val) else (lambda *args, **kwargs: val)
