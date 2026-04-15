@@ -1,6 +1,8 @@
 # WORK IN PROGRESS
+from collections import defaultdict
 
 from engine import gs_api
+from tools.logger import log
 
 
 def base_task(task_type="default", required=100):
@@ -57,3 +59,21 @@ def get_task_by_id(gs, task_id):
         if task["id"] == task_id:
             return task
     raise ValueError(f"Task with id {task_id} not found")
+
+
+def resolve_tasks(gs, intents):
+    grouped_intents = defaultdict(lambda: {"mod": [], "set": []})
+    for intent in intents:
+        grouped_intents[intent["target"]][intent["op"]].append(intent)
+    for target, grouped in grouped_intents.items():
+        task = get_task_by_id(gs, target)
+        value = get_progress(task)
+        value += sum([i["value"] for i in grouped["mod"]])
+        value = min(value, get_required(task))
+
+        log(
+            f"Task {target} progress {get_progress(task)} -> {value} / {tasks.get_required(task)}",
+            log_type="resolver",
+        )
+
+        set_progress(task, value)
