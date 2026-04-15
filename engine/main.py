@@ -120,7 +120,7 @@ def main():
         game_state, definitions["activities"], definitions["scenarios"], is_initial=True
     )
 
-    while not gs_api.is_running(game_state):
+    while gs_api.is_running(game_state):
         log(
             f"time: {gs_api.get_time(game_state)}, vitals: {game_state["gameplay"]["vitals"]},",
             f"stats: {game_state["gameplay"]["stats"]},",

@@ -52,7 +52,7 @@ def stop(gs):
 
 
 def is_running(gs):
-    return gs["system"]["is_end"]
+    return not gs["system"]["is_end"]
 
 
 def get_time(gs):
