@@ -7,7 +7,7 @@ def rich_scenario():
     def check_rich(gs):
         return stats.get(gs, "money") >= 50
 
-    def congratulations(gs):
+    def congratulations():
         ui.display("--- HI THERE! YOU ARE RICH! ---")
 
     def check_ultra_rich(gs):
@@ -29,7 +29,7 @@ def breakdown_scenario():
     def check_kukukha(gs):
         return vitals.get(gs, "mental") <= 20
 
-    def mental_warning(gs):
+    def mental_warning():
         ui.display("--- ...ARE YOU OKAY, BUDDY? YOU'RE ACTING WEIRD. ---")
 
     def check_bad_kukukha(gs):
@@ -53,7 +53,7 @@ def eternalsleep_scenario():
     def check_sleep(gs):
         return vitals.get(gs, "sleepiness") >= 80
 
-    def sleepwarning(gs):
+    def sleepwarning():
         ui.display("--- YOU COULD REALLY USE SOME SLEEP NOW. ---")
 
     def check_bad_sleep(gs):
@@ -77,7 +77,7 @@ def verytired_scenario():
     def check_tired(gs):
         return vitals.get(gs, "fatigue") >= 80
 
-    def tiredwarning(gs):
+    def tiredwarning():
         ui.display("--- YOU FEEL VERY TIRED. ---")
 
     def check_very_tired(gs):

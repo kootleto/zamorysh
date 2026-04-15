@@ -4,6 +4,11 @@
 
 from time import sleep
 
+from engine.schema import (
+    GameState,
+    ActivityDefinitions,
+    ScenarioDefinitions,
+)
 from gameplay.api import initial_state, resolvers
 from interface import ui
 from tools.loader import load_definitions
@@ -14,7 +19,7 @@ from . import resolver_api
 from . import scenarios_api
 
 
-def pick_activity(gs, definitions):
+def pick_activity(gs: GameState, definitions: ActivityDefinitions):
     # Получаем все активности со всеми вариантами параметров (то есть все entries),
     # которые сейчас можно начать
     allowed_entries = activities_api.get_allowed_activity_entries(gs, definitions)
@@ -38,7 +43,12 @@ def pick_activity(gs, definitions):
     activities_api.start_activity(gs, definitions, entry_to_start)
 
 
-def update(gs, activity_definitions, scenario_definitions, is_initial=False):
+def update(
+    gs: GameState,
+    activity_definitions: ActivityDefinitions,
+    scenario_definitions: ScenarioDefinitions,
+    is_initial=False,
+):
     # 1. Применяем tick_effect всех текущих активностей
     for entry in gs_api.get_activity_entries(gs):
         log(f"Applying effect for {entry["activity_name"]}", log_type="activity")
@@ -99,7 +109,9 @@ def update(gs, activity_definitions, scenario_definitions, is_initial=False):
     gs_api.set_activity_entries(gs, new_entries)
 
 
-def check_foreground_activities_running(gs, definitions):
+def check_foreground_activities_running(
+    gs: GameState, definitions: ActivityDefinitions
+) -> bool:
     entries = gs_api.get_activity_entries(gs)
     for entry in entries:
         activity = activities_api.configure_activity(definitions, entry)

@@ -1,8 +1,10 @@
 from inspect import signature
 from typing import Callable
 
+from engine.schema import GameState
 
-def call_with_gs(gs: dict, func: Callable):
+
+def call_with_gs(gs: GameState, func: Callable):
     """
     Передать `gs`, если функция ожидает этот аргумент, иначе вызвать функцию без аргументов.
 

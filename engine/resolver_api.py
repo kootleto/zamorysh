@@ -1,10 +1,11 @@
 from collections import defaultdict
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Any
 
+from engine.schema import GameState, Intent, Resolver
 from tools.logger import log
 
 
-def resolve_intents(gs, resolvers):
+def resolve_intents(gs: GameState, resolvers: dict[str, Resolver]):
     # Добавляем обработку окончания игры
     resolvers["system"] = resolve_system
 
@@ -29,11 +30,11 @@ def resolve_intents(gs, resolvers):
 
 
 def resolve_generic(
-    gs,
-    intents: Iterable[dict],
+    gs: GameState,
+    intents: Iterable[Intent],
     domain: str,
-    set_fn: Callable = max,
-    mod_fn: Callable = sum,
+    set_fn: Callable[[Iterable[Any]], Any] = max,
+    mod_fn: Callable[[Iterable[Any]], Any] = sum,
     clamp_fn: Callable = lambda x: x,
 ):
     """
@@ -65,6 +66,6 @@ def resolve_generic(
 
 
 # Обработка остановки игры
-def resolve_system(gs, intents):
+def resolve_system(gs: GameState, intents: list[Intent]):
     if any(intent["target"] == "is_end" and intent["value"] for intent in intents):
         gs["system"]["is_end"] = True
