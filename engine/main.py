@@ -4,8 +4,9 @@
 
 from time import sleep
 
+from gameplay.api import initial_state, resolvers
 from interface import ui
-from tools.definitions_loader import load_definitions
+from tools.loader import load_definitions
 from tools.logger import log
 from . import activities_api
 from . import gs_api
@@ -46,7 +47,7 @@ def update(gs, activity_definitions, scenario_definitions, is_initial=False):
 
     # 2. Применяем изменения и разрешаем конфликты до проверки сценариев,
     # чтобы сценарии могли отреагировать на изменения в этом же тике
-    resolver_api.resolve_intents(gs)
+    resolver_api.resolve_intents(gs, resolvers)
 
     # 3. Увеличиваем игровое время на 1, если это не часть инициализации
     if not is_initial:
@@ -75,7 +76,7 @@ def update(gs, activity_definitions, scenario_definitions, is_initial=False):
 
     # 5. Применяем изменения и разрешаем конфликты до остановки лишних активностей,
     # чтобы условия были такими же, как в начале следующего тика
-    resolver_api.resolve_intents(gs)
+    resolver_api.resolve_intents(gs, resolvers)
 
     # 6. Останавливаем активности, которые больше не могут продолжаться
     # (игрок отпустил кнопку или не выполняется can_continue)
@@ -109,7 +110,7 @@ def check_foreground_activities_running(gs, definitions):
 
 def main():
     # Инициализация
-    game_state = gs_api.get_initial_gs()
+    game_state = gs_api.get_initial_gs(initial_state)
     definitions = load_definitions("content")
     scenarios_api.start_all_scenarios(
         game_state, definitions["activities"], definitions["scenarios"]
@@ -119,10 +120,11 @@ def main():
         game_state, definitions["activities"], definitions["scenarios"], is_initial=True
     )
 
-    while not gs_api.get_flag(game_state, "is_end"):
+    while not gs_api.is_running(game_state):
         log(
-            f"time: {gs_api.get_time(game_state)}, vitals: {game_state["vitals"]}, stats: {game_state["stats"]},"
-            f" flags: {game_state["flags"]}, activity entries: {gs_api.get_activity_entries(game_state)}",
+            f"time: {gs_api.get_time(game_state)}, vitals: {game_state["gameplay"]["vitals"]},",
+            f"stats: {game_state["gameplay"]["stats"]},",
+            f"activity entries: {gs_api.get_activity_entries(game_state)}",
             log_type="status",
         )
         ui.show_stats(game_state)

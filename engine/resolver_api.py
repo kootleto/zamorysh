@@ -1,42 +1,43 @@
 from collections import defaultdict
 from typing import Callable, Iterable
 
-from gameplay import tasks
 from tools.logger import log
 
 
-def resolve_intents(gs):
+def resolve_intents(gs, resolvers):
+    # Добавляем обработку окончания игры
+    resolvers["system"] = resolve_system
 
     # Группируем интенты по категории в gs, к которой относится цель
     grouped_intents = defaultdict(list)
-    for intent in gs["intents"]:
-        grouped_intents[intent["type"]].append(intent)
+    for intent in gs["system"]["intents"]:
+        grouped_intents[intent["domain"]].append(intent)
 
     # Для каждого типа пытаемся применить резолвер с соответствующим именем.
     # Если такого нет, вызываем ошибку
-    for intent_type, intents in grouped_intents.items():
-        resolver_name = f"resolve_{intent_type}s"
-        if resolver_name in globals():
-            globals()[resolver_name](gs, intents)
-        else:
+    for intent_domain, intents in grouped_intents.items():
+        try:
+            resolver = resolvers[intent_domain]
+            resolver(gs, intents)
+        except KeyError:
             raise NotImplementedError(
-                f"No resolver implemented for intent type '{intent_type}'"
+                f"No resolver implemented for intent domain '{intent_domain}'"
             )
 
     # После обработки интентов очищаем массив в gs
-    gs["intents"].clear()
+    gs["system"]["intents"].clear()
 
 
 def resolve_generic(
     gs,
     intents: Iterable[dict],
-    gs_key: str,
+    domain: str,
     set_fn: Callable = max,
     mod_fn: Callable = sum,
     clamp_fn: Callable = lambda x: x,
 ):
     """
-    Универсальный резолвер для категории gs_key.
+    Универсальный резолвер для категории domain.
 
     Работает по следующему алгоритму:
     1. Применяет изменения типа set при помощи set_fn.
@@ -54,71 +55,16 @@ def resolve_generic(
         if grouped["set"]:
             value = set_fn([i["value"] for i in grouped["set"]])
         else:
-            value = gs[gs_key][target]
+            value = gs["gameplay"][domain][target]
         value += mod_fn([i["value"] for i in grouped["mod"]])
         value = clamp_fn(value)
-        log(f"{target} {gs[gs_key][target]} -> {value}", log_type="resolver")
-        gs[gs_key][target] = value
-
-
-def resolve_vitals(gs, intents):
-    resolve_generic(
-        gs,
-        intents,
-        "vitals",
-        set_fn=max,  # Обычно для игрока чем выше, тем хуже
-        mod_fn=sum,
-        clamp_fn=lambda v: max(
-            0, min(100, v)
-        ),  # vitals ограничены значениями от 0 до 100
-    )
-
-
-def resolve_stats(gs, intents):
-    resolve_generic(
-        gs,
-        intents,
-        "stats",
-        set_fn=min,  # Обычно для игрока чем ниже, тем хуже
-        mod_fn=sum,
-        clamp_fn=lambda v: max(0, v),
-    )
-
-
-def resolve_flags(gs, intents):
-    resolve_generic(
-        gs,
-        intents,
-        "flags",
-        set_fn=any,  # Логическое ИЛИ
-        clamp_fn=lambda v: v,
-    )
-
-
-def resolve_timers(gs, intents):
-    resolve_generic(
-        gs,
-        intents,
-        "timers",
-        set_fn=min,  # Лучше раньше, чем позже
-        clamp_fn=lambda v: max(0, v),
-    )
-
-
-# WORK IN PROGRESS
-def resolve_tasks(gs, intents):
-    grouped_intents = defaultdict(lambda: {"mod": [], "set": []})
-    for intent in intents:
-        grouped_intents[intent["target"]][intent["op"]].append(intent)
-    for target, grouped in grouped_intents.items():
-        task = tasks.get_task_by_id(gs, target)
-        value = tasks.get_progress(task)
-        value += sum([i["value"] for i in grouped["mod"]])
-        value = min(value, tasks.get_required(task))
-
         log(
-            f"Task {target} progress {tasks.get_progress(task)} -> {value} / {tasks.get_required(task)}",
-            log_type="resolver",
+            f"{target} {gs["gameplay"][domain][target]} -> {value}", log_type="resolver"
         )
+        gs["gameplay"][domain][target] = value
 
-        tasks.set_progress(task, value)
+
+# Обработка остановки игры
+def resolve_system(gs, intents):
+    if any(intent["target"] == "is_end" and intent["value"] for intent in intents):
+        gs["system"]["is_end"] = True

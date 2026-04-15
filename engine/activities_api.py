@@ -241,15 +241,15 @@ def start_activity(gs: dict, definitions: dict, entry: dict):
     # Создаем активность, чтобы понять, стакается ли она
     activity = configure_activity(definitions, entry)
     if not check_is_stackable(activity):
-        gs["activity_entries"] = [
+        gs["system"]["activity_entries"] = [
             entry
-            for entry in gs["activity_entries"]
+            for entry in gs["system"]["activity_entries"]
             if check_is_stackable(configure_activity(definitions, entry))
         ]
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему.
     # До добавления в gs такой необходимости нет
     entry_with_id = gs_api.with_id(gs, entry)
-    gs["activity_entries"].append(entry_with_id)
+    gs["system"]["activity_entries"].append(entry_with_id)
 
 
 def composite_activity(

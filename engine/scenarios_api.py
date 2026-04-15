@@ -147,7 +147,7 @@ def start_scenario(gs, activity_definitions, scenario_definitions, scenario_entr
     set_node(scenario_entry, get_start_node(scenario))
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему
     entry_with_id = gs_api.with_id(gs, scenario_entry)
-    gs["scenario_entries"].append(entry_with_id)
+    gs["system"]["scenario_entries"].append(entry_with_id)
 
 
 # В начале игры движок запускает все сценарии

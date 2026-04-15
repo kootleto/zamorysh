@@ -1,16 +1,17 @@
-from engine import activities_api, gs_api, state_api
+from engine import activities_api, state_api
+from gameplay.api import vitals
 
 
 def drink_coffee(state=None, hold_required=True):
     state = state_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
-        gs_api.mod_vital(gs, "sleepiness", -1)
-        gs_api.mod_vital(gs, "mental", -1)
+        vitals.mod(gs, "sleepiness", -1)
+        vitals.mod(gs, "mental", -1)
         state["counter"] -= 1
 
     def can_continue(gs):
-        return gs_api.get_vital(gs, "sleepiness") > 0
+        return vitals.get(gs, "sleepiness") > 0
 
     return activities_api.base_activity(
         tick_effect,
@@ -24,8 +25,8 @@ def socialize(hold_required=False, earn_fatigue=1, earn_mental=1, state=None):
     state = state_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
-        gs_api.mod_vital(gs, "fatigue", +earn_fatigue)
-        gs_api.mod_vital(gs, "mental", +earn_mental)
+        vitals.mod(gs, "fatigue", +earn_fatigue)
+        vitals.mod(gs, "mental", +earn_mental)
         state["counter"] -= 1
 
     def can_continue():
@@ -43,8 +44,8 @@ def listen_to_music(hold_required=False, earn_mental=-5, earn_sleepiness=1, stat
     state = state_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
-        gs_api.mod_vital(gs, "mental", +earn_mental)
-        gs_api.mod_vital(gs, "sleepiness", +earn_sleepiness)
+        vitals.mod(gs, "mental", +earn_mental)
+        vitals.mod(gs, "sleepiness", +earn_sleepiness)
         state["counter"] -= 1
 
     def can_continue():
