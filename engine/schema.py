@@ -12,8 +12,11 @@ class SystemState(TypedDict):
     is_end: bool
 
 
+GameplayState = dict[str, dict[str, Any]]
+
+
 class GameState(TypedDict):
-    gameplay: Any
+    gameplay: GameplayState
     system: SystemState
 
 
@@ -21,11 +24,11 @@ class GameState(TypedDict):
 
 
 class Activity(TypedDict):
-    tick_effect: Callable
-    can_continue: Callable
-    hold_required: Callable
-    is_stackable: Callable
-    is_background: Callable
+    tick_effect: Callable[[dict], None] | Callable[[], None]
+    can_continue: Callable[[dict], bool] | Callable[[], bool]
+    hold_required: Callable[[], bool]
+    is_stackable: Callable[[], bool]
+    is_background: Callable[[], bool]
     name: str
 
 
@@ -52,7 +55,7 @@ Transition = TypedDict(
     {
         "from": Any,
         "to": Any,
-        "trigger": Callable[[GameState], bool] | Callable[[], bool] | bool,
+        "trigger": Callable[[GameState], bool] | Callable[[], bool],
         "effect": Callable[[GameState], None] | Callable[[], None],
     },
 )
@@ -72,8 +75,7 @@ class ScenarioEntry(TypedDict):
 class ScenarioDefinition(Protocol):
     __name__: str
     __module__: str
-
-    def __call__(self, *args: Any, **kwargs: Any) -> Scenario: ...
+    __call__: Callable[..., Scenario]
 
 
 ScenarioDefinitions = dict[str, ScenarioDefinition]

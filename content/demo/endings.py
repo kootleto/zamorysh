@@ -5,13 +5,13 @@ from interface import ui
 
 def rich_scenario():
     def check_rich(gs):
-        return stats.get(gs, "money") >= 50
+        return stats.get(gs, stats.money) >= 50
 
     def congratulations():
         ui.display("--- HI THERE! YOU ARE RICH! ---")
 
     def check_ultra_rich(gs):
-        return stats.get(gs, "money") >= 100
+        return stats.get(gs, stats.money) >= 100
 
     def game_over(gs):
         ui.display("GAME OVER: YOU ARE TOO RICH FOR A UNIVERSITY STUDENT")
@@ -27,13 +27,13 @@ def rich_scenario():
 
 def breakdown_scenario():
     def check_kukukha(gs):
-        return vitals.get(gs, "mental") <= 20
+        return vitals.get(gs, vitals.mental) <= 20
 
     def mental_warning():
         ui.display("--- ...ARE YOU OKAY, BUDDY? YOU'RE ACTING WEIRD. ---")
 
     def check_bad_kukukha(gs):
-        return vitals.get(gs, "mental") <= 0
+        return vitals.get(gs, vitals.mental) <= 0
 
     def mental_game_over(gs):
         ui.display(
@@ -51,13 +51,13 @@ def breakdown_scenario():
 
 def eternalsleep_scenario():
     def check_sleep(gs):
-        return vitals.get(gs, "sleepiness") >= 80
+        return vitals.get(gs, vitals.sleepiness) >= 80
 
     def sleepwarning():
         ui.display("--- YOU COULD REALLY USE SOME SLEEP NOW. ---")
 
     def check_bad_sleep(gs):
-        return vitals.get(gs, "sleepiness") >= 100
+        return vitals.get(gs, vitals.sleepiness) >= 100
 
     def sleep_game_over(gs):
         ui.display(
@@ -75,13 +75,13 @@ def eternalsleep_scenario():
 
 def verytired_scenario():
     def check_tired(gs):
-        return vitals.get(gs, "fatigue") >= 80
+        return vitals.get(gs, vitals.fatigue) >= 80
 
     def tiredwarning():
         ui.display("--- YOU FEEL VERY TIRED. ---")
 
     def check_very_tired(gs):
-        return vitals.get(gs, "fatigue") >= 100
+        return vitals.get(gs, vitals.fatigue) >= 100
 
     def fatigue_game_over(gs):
         ui.display(
