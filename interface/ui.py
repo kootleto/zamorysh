@@ -3,9 +3,10 @@ from time import sleep
 
 import keyboard
 
+from config import settings
 from engine import gs_api
 from gameplay.api import vitals, stats
-from tools.logger import log, LOG_ENABLED
+from tools.logger import log
 
 
 def display(*message, sep: str = " "):
@@ -15,7 +16,7 @@ def display(*message, sep: str = " "):
     Аналог стандартной функции `print`.
     """
     message = sep.join(map(str, message))
-    if LOG_ENABLED:
+    if settings.log_enabled:
         log(message, log_type="ui")
     else:
         print(message)
@@ -30,7 +31,7 @@ def prompt(*message, sep: str = " ") -> str:
     """
 
     message = sep.join(map(str, message))
-    if LOG_ENABLED:
+    if settings.log_enabled:
         log(message, log_type="ui")
         response = input()
     else:

@@ -1,12 +1,4 @@
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Если переменная в .env не задана, по умолчанию считаем, что это False
-# Приводим все к нижнему регистру, чтобы распознавать любое написание
-LOG_ENABLED = os.getenv("LOG_ENABLED", "False").lower() == "true"
+from config import settings
 
 # Доступные через escape-коды цвета.
 # Escape-коды — последовательности символов, которые терминал распознает как команды, а не как текст
@@ -48,7 +40,7 @@ def log(*message, log_type="log", color: str = None, sep=" "):
     """
     message = sep.join(map(str, message))
     log_type = log_type.lower()
-    if not LOG_ENABLED:
+    if not settings.log_enabled:
         return
     chosen_color = color or LOG_TYPE_COLORS.get(log_type, "blue")
     color_code = COLORS.get(chosen_color, COLORS["blue"])
