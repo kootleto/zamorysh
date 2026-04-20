@@ -1,41 +1,17 @@
-from engine import gs_api
 from collections import defaultdict
-from typing import Callable, Iterable, Any
-from engine.schema import GameState, Intent, Resolver
-from tools.logger import log
+
+from engine import gs_api, resolver_api
 
 domain = "location"
 
 x = "xcoordinate"
 y = "ycoordinate"
-# coordinates = (xcoordinate, ycoordinate)
-place = ""
 
 
 initial = {
     x: 0,
     y: 0,
 }
-
-
-def resolve_intents(
-    gs: GameState,
-    intents: Iterable[Intent],
-    domain: str,
-    set_fn: Callable[[Iterable[Any]], Any] = max,
-    mod_fn: Callable[[Iterable[Any]], Any] = sum,
-    clamp_fn: Callable = lambda x: x,
-):
-    grouped_intents = defaultdict(lambda: {"set": [], "mod": []})
-    for intent in intents:
-        grouped_intents[intent["target"]][intent["op"]].append(intent)
-    for target, grouped in grouped_intents.items():
-        if grouped["set"]:
-            value = set_fn([i["value"] for i in grouped["set"]])
-        else:
-            value = gs["gameplay"][domain][target]
-        value += mod_fn([i["value"] for i in grouped["mod"]])
-        if
 
 
 def get(gs, coordinate):
@@ -63,21 +39,54 @@ def get_directions(gs):
     return directions
 
 
+def check_home(gs):
+    return get(gs, x) == 0 and get(gs, y) == 0
+
+
+def check_metro(gs):
+    return 10 < get(gs, y) < 40
+
+
+def check_park(gs):
+    return get(gs, x) == 5 and get(gs, y) == 0
+
+
+def check_coffee(gs):
+    return get(gs, x) == 5 and (get(gs, y) == 10 or get(gs, y) == 60)
+
+
+def check_club(gs):
+    return get(gs, x) == 5 and get(gs, y) == 40
+
+
+def check_university(gs):
+    return get(gs, x) == 0 and get(gs, y) == 60
+
+
+places = {
+    "home": check_home,
+    "metro": check_metro,
+    "park": check_park,
+    "coffee_house": check_coffee,
+    "club": check_club,
+    "university": check_university,
+}
+
+
 def get_place(gs):
-    if get(gs, x) == 0 and get(gs, y) == 0:
-        mod(gs, place, "home")
-    elif 0 <= get(gs, x) < 11 and get(gs, y) == 5:
-        mod(gs, place, "park")
-    elif 10 < get(gs, x) < 40:
-        mod(gs, place, "metro")
-    elif get(gs, x) == 60 and get(gs, y) == 0:
-        mod(gs, place, "university")
-    elif (get(gs, x) == 10 or get(gs, x) == 60) and get(
-        gs, y
-    ) == 5:
-        mod(gs, place, "coffee house")
-    elif get(gs, x) == 40 and get(gs, y) == 5:
-        mod(gs, place, "club")
-    else:
-        mod(gs, place, "outside")
-    return place
+    for place, check_coordinate in places.items():
+        if check_coordinate(gs):
+            return place
+    return "outside"
+
+
+def resolve(gs, intents):
+    grouped_intents = defaultdict(list)
+    for intent in intents:
+        grouped_intents[intent["target"]].append(intent)
+    resolver_api.resolve_generic(
+        gs, grouped_intents[x], domain, clamp_fn=lambda v: max(0, min(5, v))
+    )
+    resolver_api.resolve_generic(
+        gs, grouped_intents[y], domain, clamp_fn=lambda v: max(0, min(60, v))
+    )
