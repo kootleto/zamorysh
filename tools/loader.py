@@ -1,13 +1,8 @@
 import importlib
-import os
 import pkgutil
 
-from dotenv import load_dotenv
-
+from config import settings
 from tools.logger import log
-
-load_dotenv()
-INCLUDE_DEMO = os.getenv("INCLUDE_DEMO", "False").lower() == "true"
 
 
 def load_from_package(package_name: str, attr_name: str, skip=None) -> dict:
@@ -46,7 +41,7 @@ def load_definitions(package_name: str) -> dict[str, dict]:
         Словарь с ключами `activities` и `scenarios`, по которым лежат словари с парами `"модуль.функция"` — `функция`.
     """
 
-    skip = lambda name: "demo" in name and not INCLUDE_DEMO
+    skip = lambda name: "demo" in name and not settings.include_demo
     activities = load_from_package(package_name, "activities", skip)
     scenarios = load_from_package(package_name, "scenarios", skip)
 

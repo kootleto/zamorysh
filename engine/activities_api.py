@@ -21,8 +21,10 @@ from .schema import (
 
 
 def base_activity(
-    tick_effect: Callable[[dict], None] | Callable[[], None] = lambda gs: None,
-    can_continue: bool | Callable[[dict], bool] | Callable[[], bool] = lambda gs: True,
+    tick_effect: Callable[[GameState], None] | Callable[[], None] = lambda gs: None,
+    can_continue: (
+        bool | Callable[[GameState], bool] | Callable[[], bool]
+    ) = lambda gs: True,
     hold_required: bool | Callable[[], bool] = False,
     is_stackable: bool | Callable[[], bool] = False,
     is_background: bool | Callable[[], bool] = False,

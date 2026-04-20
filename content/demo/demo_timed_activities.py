@@ -1,5 +1,6 @@
 from engine import state_api, activities_api
 from gameplay.activity_wrappers import timed_activity, single_tick_activity
+from gameplay.api import stats
 from interface import ui
 
 
@@ -8,19 +9,15 @@ from interface import ui
 def display_numbers_for_10_ticks(state=None):
     state = state_api.init_defaults(state, number=2)
 
-    def tick_effect():
+    def tick_effect(gs):
         ui.display(state["number"])
         state["number"] *= 2
-
-    def can_continue():
-        return True
+        stats.mod(gs, stats.knowledge, 1)
 
     # Обратите внимание: мы передаем в обертку уже готовую активность,
     # а не ее кусочки вроде tick_effect или can_continue
     return timed_activity(
-        activities_api.base_activity(
-            tick_effect, can_continue, name="отображать рандомные числа"
-        ),
+        activities_api.base_activity(tick_effect, name="отображать рандомные числа"),
         state,
         duration=5,
     )
