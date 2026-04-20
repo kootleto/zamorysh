@@ -7,6 +7,10 @@ domain = "location"
 x = "xcoordinate"
 y = "ycoordinate"
 
+NORTH_BORDER = 5
+SOUTH_BORDER = 0
+EAST_BORDER = 60
+WEST_BORDER = 0
 
 initial = {
     x: 0,
@@ -28,13 +32,13 @@ def mod(gs, coordinate, delta):
 
 def get_directions(gs):
     directions = []
-    if get(gs, x) < 60:
+    if get(gs, x) < EAST_BORDER:
         directions.append("east")
-    if get(gs, x) > 0:
+    if get(gs, x) > WEST_BORDER:
         directions.append("west")
-    if get(gs, y) < 5:
+    if get(gs, y) < NORTH_BORDER:
         directions.append("north")
-    if get(gs, y) > 0:
+    if get(gs, y) > SOUTH_BORDER:
         directions.append("south")
     return directions
 
@@ -85,8 +89,14 @@ def resolve(gs, intents):
     for intent in intents:
         grouped_intents[intent["target"]].append(intent)
     resolver_api.resolve_generic(
-        gs, grouped_intents[x], domain, clamp_fn=lambda v: max(0, min(5, v))
+        gs,
+        grouped_intents[x],
+        domain,
+        clamp_fn=lambda v: max(WEST_BORDER, min(EAST_BORDER, v)),
     )
     resolver_api.resolve_generic(
-        gs, grouped_intents[y], domain, clamp_fn=lambda v: max(0, min(60, v))
+        gs,
+        grouped_intents[y],
+        domain,
+        clamp_fn=lambda v: max(SOUTH_BORDER, min(NORTH_BORDER, v)),
     )

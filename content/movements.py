@@ -1,7 +1,8 @@
 from engine import activities_api
 from gameplay.api import location
+from tools.logger import log
 
-DIRECTIONS = {"north": (1, 0), "south": (-1, 0), "east": (0, 1), "west": (0, -1)}
+DIRECTIONS = {"north": (0, 1), "south": (0, -1), "east": (1, 0), "west": (-1, 0)}
 
 
 @activities_api.with_param_space(location.get_directions)
@@ -12,13 +13,18 @@ def move(param=None):
         location.mod(gs, location.y, DIRECTIONS[param][1])
 
     def can_continue(gs):
+        log(param)
         return (
-            0 <= location.get(gs, location.x) + DIRECTIONS[param][0] <= 5
-            and 0 <= location.get(gs, location.y) + DIRECTIONS[param][1] <= 60
+            location.WEST_BORDER
+            <= location.get(gs, location.x) + DIRECTIONS[param][0]
+            <= location.EAST_BORDER
+            and location.SOUTH_BORDER
+            <= location.get(gs, location.y) + DIRECTIONS[param][1]
+            <= location.NORTH_BORDER
         )
 
     return activities_api.base_activity(
-        tick_effect, can_continue, name=f"move to {param}"
+        tick_effect, can_continue, True, name=f"move to {param}"
     )
 
 
