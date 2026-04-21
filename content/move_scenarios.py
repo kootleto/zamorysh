@@ -53,5 +53,5 @@ scenarios = [
     coffee_scenario,
     club_scenario,
     park_scenario,
-    university_scenario
+    university_scenario,
 ]
