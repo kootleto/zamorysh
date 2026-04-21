@@ -71,7 +71,7 @@ places = {
     "home": check_home,
     "metro": check_metro,
     "park": check_park,
-    "coffee_house": check_coffee,
+    "coffee house": check_coffee,
     "club": check_club,
     "university": check_university,
 }

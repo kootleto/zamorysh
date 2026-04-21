@@ -3,28 +3,55 @@ from gameplay.api import location
 from interface import ui
 
 
-def home_scenario():
-    def check_home(gs):
-        return location.get_place(gs) == "home"
+def move_scenario(place):
+    def check(gs):
+        return location.get_place(gs) == place
 
     def enter():
-        ui.display("You are entering home!")
+        ui.display(f"You are entering {place}!")
 
     def exit():
-        ui.display("You are exiting home!")
+        ui.display(f"You are exiting {place}!")
 
     return scenarios_api.base_scenario(
         [
-            scenarios_api.base_transition(0, "in", check_home, lambda: None),
-            scenarios_api.base_transition(
-                0, "out", lambda gs: not check_home, lambda: None
-            ),
-            scenarios_api.base_transition("out", "in", check_home, enter),
-            scenarios_api.base_transition(
-                "in", "out", lambda gs: not check_home(gs), exit
-            ),
+            scenarios_api.base_transition(0, "in", check, lambda: None),
+            scenarios_api.base_transition(0, "out", lambda gs: not check, lambda: None),
+            scenarios_api.base_transition("out", "in", check, enter),
+            scenarios_api.base_transition("in", "out", lambda gs: not check(gs), exit),
         ]
     )
 
 
-scenarios = [home_scenario]
+def home_scenario():
+    move_scenario("home")
+
+
+def metro_scenario():
+    move_scenario("metro")
+
+
+def coffee_scenario():
+    move_scenario("coffee house")
+
+
+def club_scenario():
+    move_scenario("club")
+
+
+def park_scenario():
+    move_scenario("park")
+
+
+def university_scenario():
+    move_scenario("university")
+
+
+scenarios = [
+    home_scenario,
+    metro_scenario,
+    coffee_scenario,
+    club_scenario,
+    park_scenario,
+    university_scenario
+]
