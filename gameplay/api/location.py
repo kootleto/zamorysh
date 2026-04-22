@@ -43,37 +43,13 @@ def get_directions(gs):
     return directions
 
 
-def check_home(gs):
-    return get(gs, y) == 0 and get(gs, x) == 0
-
-
-def check_metro(gs):
-    return 10 < get(gs, x) < 40
-
-
-def check_park(gs):
-    return get(gs, y) == 5 and get(gs, x) == 0
-
-
-def check_coffee(gs):
-    return get(gs, y) == 5 and (get(gs, x) == 10 or get(gs, x) == 60)
-
-
-def check_club(gs):
-    return get(gs, y) == 5 and get(gs, x) == 40
-
-
-def check_university(gs):
-    return get(gs, y) == 0 and get(gs, x) == 60
-
-
 places = {
-    "home": check_home,
-    "metro": check_metro,
-    "park": check_park,
-    "coffee house": check_coffee,
-    "club": check_club,
-    "university": check_university,
+    "home": lambda gs: get(gs, y) == 0 and get(gs, x) == 0,
+    "metro": lambda gs: 10 < get(gs, x) < 40,
+    "park": lambda gs: get(gs, y) == 5 and get(gs, x) == 0,
+    "coffee house": lambda gs: get(gs, y) == 5 and (get(gs, x) == 10 or get(gs, x) == 60),
+    "club": lambda gs: get(gs, y) == 5 and get(gs, x) == 40,
+    "university": lambda gs: get(gs, y) == 0 and get(gs, x) == 60,
 }
 
 
