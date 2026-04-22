@@ -14,7 +14,7 @@ def drink_coffee(
         state["counter"] -= 1
 
     def can_continue(gs):
-        return gs_api.get_stat(gs, "money") > 9
+        return gs_api.get_stat(gs, "money") > 9 and state["counter"] > 0
 
     return activities_api.base_activity(
         tick_effect,
