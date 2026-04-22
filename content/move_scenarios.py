@@ -16,7 +16,9 @@ def move_scenario(place):
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, "in", check, lambda: None),
-            scenarios_api.base_transition(0, "out", lambda gs: not check, lambda: None),
+            scenarios_api.base_transition(
+                0, "out", lambda gs: not check(gs), lambda: None
+            ),
             scenarios_api.base_transition("out", "in", check, enter),
             scenarios_api.base_transition("in", "out", lambda gs: not check(gs), exit),
         ]
@@ -24,27 +26,27 @@ def move_scenario(place):
 
 
 def home_scenario():
-    move_scenario("home")
+    return move_scenario("home")
 
 
 def metro_scenario():
-    move_scenario("metro")
+    return move_scenario("metro")
 
 
 def coffee_scenario():
-    move_scenario("coffee house")
+    return move_scenario("coffee house")
 
 
 def club_scenario():
-    move_scenario("club")
+    return move_scenario("club")
 
 
 def park_scenario():
-    move_scenario("park")
+    return move_scenario("park")
 
 
 def university_scenario():
-    move_scenario("university")
+    return move_scenario("university")
 
 
 scenarios = [

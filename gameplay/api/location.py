@@ -44,27 +44,27 @@ def get_directions(gs):
 
 
 def check_home(gs):
-    return get(gs, x) == 0 and get(gs, y) == 0
+    return get(gs, y) == 0 and get(gs, x) == 0
 
 
 def check_metro(gs):
-    return 10 < get(gs, y) < 40
+    return 10 < get(gs, x) < 40
 
 
 def check_park(gs):
-    return get(gs, x) == 5 and get(gs, y) == 0
+    return get(gs, y) == 5 and get(gs, x) == 0
 
 
 def check_coffee(gs):
-    return get(gs, x) == 5 and (get(gs, y) == 10 or get(gs, y) == 60)
+    return get(gs, y) == 5 and (get(gs, x) == 10 or get(gs, x) == 60)
 
 
 def check_club(gs):
-    return get(gs, x) == 5 and get(gs, y) == 40
+    return get(gs, y) == 5 and get(gs, x) == 40
 
 
 def check_university(gs):
-    return get(gs, x) == 0 and get(gs, y) == 60
+    return get(gs, y) == 0 and get(gs, x) == 60
 
 
 places = {
