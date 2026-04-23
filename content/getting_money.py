@@ -1,6 +1,7 @@
 from engine import scenarios_api
 from gameplay.api import time, stats
 
+
 def money_getting():
     def weekday_check(gs):
         weekday = time.get_weekday(gs)
