@@ -1,7 +1,21 @@
-from inspect import signature
+from functools import lru_cache
+from inspect import signature, isawaitable
 from typing import Callable
 
 from engine.schema import GameState
+
+
+@lru_cache(maxsize=1024)
+def accepts(param: str, func: Callable) -> bool:
+    """Проверить, принимает ли функция этот параметр. Результат кэшируется для повышения производительности."""
+    sig = signature(func)
+    return param in sig.parameters
+
+
+def _get_result(gs: GameState, func: Callable):
+    if accepts("gs", func):
+        return func(gs)
+    return func()
 
 
 def call_with_gs(gs: GameState, func: Callable):
@@ -10,10 +24,12 @@ def call_with_gs(gs: GameState, func: Callable):
 
     Позволяет не прописывать этот параметр в функциях, которым он не нужен.
     """
-    sig = signature(func)
-    if "gs" in sig.parameters:
-        return func(gs)
-    return func()
+    return _get_result(gs, func)
+
+
+async def call_with_gs_async(gs: GameState, func: Callable):
+    result = _get_result(gs, func)
+    return await result if isawaitable(result) else result
 
 
 def ensure_callable(val) -> Callable:

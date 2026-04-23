@@ -31,6 +31,7 @@ def _parse_args():
     _add_bool_setting(
         parser, "LOG_ENABLED", "log", "l", "log_enabled", "enable logging in terminal"
     )
+    _add_bool_setting(parser, "GUI_MODE", "gui", "g", "gui", "run Kivy")
     return parser.parse_args()
 
 

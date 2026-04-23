@@ -1,101 +1,66 @@
-import sys
-from time import sleep
-
-import keyboard
+import functools
+import time
 
 from config import settings
-from engine import gs_api
-from gameplay.api import vitals, stats
-from tools.logger import log
+from engine.schema import GameState, ActivityOptions
+
+_ui_wait_time = 0.0
+
+if settings.gui:
+    from .gui import gui
+    interface = gui
+else:
+    from .cli import cli
+    interface = cli
+
+
+def record_wait_time(func):
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        global _ui_wait_time
+
+        start = time.perf_counter()
+        result = await func(*args, **kwargs)
+        end = time.perf_counter()
+
+        _ui_wait_time += end - start
+
+        return result
+
+    return wrapper
+
+
+def pop_wait_time():
+    global _ui_wait_time
+
+    total = _ui_wait_time
+    _ui_wait_time = 0.0
+    return total
 
 
 def display(*message, sep: str = " "):
-    """
-    Вывести в консоль сообщение с разделителем sep. Если логирование включено, вывести как лог типа UI.
-
-    Аналог стандартной функции `print`.
-    """
-    message = sep.join(map(str, message))
-    if settings.log_enabled:
-        log(message, log_type="ui")
-    else:
-        print(message)
+    interface.display(*message, sep=sep)
 
 
-def prompt(*message, sep: str = " ") -> str:
-    """
-    Вывести в консоль сообщение с разделителем sep и вернуть ответ игрока.
-    Если логирование включено, вывести как лог типа UI.
-
-    Аналог стандартной функции `input`.
-    """
-
-    message = sep.join(map(str, message))
-    if settings.log_enabled:
-        log(message, log_type="ui")
-        response = input()
-    else:
-        response = input(message)
+@record_wait_time
+async def prompt(*message, sep: str = " ") -> str:
+    response = await interface.prompt(*message, sep=sep)
     return response
 
 
-def clear_input_buffer():
-    """
-    Очистить набранный пользователем текст.
-    """
-    # Windows
-    if sys.platform.startswith("win"):
-        import msvcrt
-
-        while msvcrt.kbhit():
-            msvcrt.getch()
-    # Unix / macOS
-    else:
-        import termios
-
-        termios.tcflush(sys.stdin, termios.TCIFLUSH)
+@record_wait_time
+async def prompt_activity(options: ActivityOptions) -> int:
+    index = await interface.prompt_activity(options)
+    return index
 
 
-def check_key_pressed():
-    """Проверить, нажата ли клавиша Space."""
-    return keyboard.is_pressed("space")
+def refresh_stats(gs: GameState):
+    interface.refresh_stats(gs)
 
 
-def handle_input(activities_ui_info: list[tuple]) -> int:
-    """
-    Запросить у игрока выбор активности. Если он выберет активность, для которой требуется зажать клавишу,
-    дождаться нажатия клавиши.
-
-    Args:
-        activities_ui_info: Информация об активностях в формате `(name, hold_required)`.
-
-    Returns:
-        Индекс выбранной активности.
-    """
-
-    display("Выберите активность")
-    for i in range(len(activities_ui_info)):
-        display(i, activities_ui_info[i][0])
-
-    # Если пользователю ранее надо было зажимать кнопку,
-    # без очистки буфера терминал интерпретирует это как набор текста
-    clear_input_buffer()
-    selected_index = int(prompt("Введите номер активности: "))
-
-    # Дождаться нажатия, если необходимо
-    if activities_ui_info[selected_index][1]:
-        display("Зажмите пробел, чтобы начать")
-        while not check_key_pressed():
-            sleep(0.01)
-
-    return selected_index
+def check_button_pressed():
+    return interface.check_button_pressed()
 
 
-def show_stats(gs):
-    display(
-        f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.fatigue)}, Money: {stats.get(gs, stats.money)}"
-    )
-    display(
-        f"Social: {stats.get(gs, stats.social)}, Mental: {vitals.get(gs, vitals.mental)}"
-    )
-    display(f"Knowledge: {stats.get(gs, stats.knowledge)}")
+async def on_finish():
+    await interface.on_finish()

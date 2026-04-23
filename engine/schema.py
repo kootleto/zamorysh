@@ -31,7 +31,8 @@ class SystemState(TypedDict):
     scenario_entries: list[ScenarioEntry]
     intents: list[Intent]
     next_id: int
-    is_end: bool
+    is_running: bool
+    tick_interval: float
 
 
 GameplayState = dict[str, dict[str, Any]]
@@ -87,5 +88,19 @@ class ActivityDefinition(Protocol):
 ActivityDefinitions = dict[str, ActivityDefinition]
 
 
+class Definitions(TypedDict):
+    activities: ActivityDefinitions
+    scenarios: ScenarioDefinitions
+
+
 # Резолвер
 Resolver = Callable[[GameState, list[Intent]], None]
+
+
+# Описание активностей для UI
+class ActivityOption(TypedDict):
+    label: str
+    hold_required: bool
+
+
+ActivityOptions = list[ActivityOption]

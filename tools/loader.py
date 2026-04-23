@@ -2,6 +2,7 @@ import importlib
 import pkgutil
 
 from config import settings
+from engine.schema import Definitions
 from tools.logger import log
 
 
@@ -32,7 +33,7 @@ def load_from_package(package_name: str, attr_name: str, skip=None) -> dict:
     return result
 
 
-def load_definitions(package_name: str) -> dict[str, dict]:
+def load_definitions(package_name: str) -> Definitions:
     """
     Args:
         package_name: Имя пакета, из которого требуется загрузить определения.

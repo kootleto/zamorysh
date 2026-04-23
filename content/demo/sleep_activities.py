@@ -5,8 +5,8 @@ from interface import ui
 
 def set_alarm():  # игрок должен ввести время будильника
 
-    def tick_effect(gs):
-        time = int(ui.prompt("Установите время: "))
+    async def tick_effect(gs):
+        time = int(await ui.prompt("Установите время: "))
         timers.set(gs, "alarm", time)
 
     return activities_api.base_activity(
