@@ -4,8 +4,14 @@
 
 from time import sleep
 
+from engine.schema import (
+    GameState,
+    ActivityDefinitions,
+    ScenarioDefinitions,
+)
+from gameplay.api import initial_state, resolvers
 from interface import ui
-from tools.definitions_loader import load_definitions
+from tools.loader import load_definitions
 from tools.logger import log
 from . import activities_api
 from . import gs_api
@@ -13,7 +19,7 @@ from . import resolver_api
 from . import scenarios_api
 
 
-def pick_activity(gs, definitions):
+def pick_activity(gs: GameState, definitions: ActivityDefinitions):
     # Получаем все активности со всеми вариантами параметров (то есть все entries),
     # которые сейчас можно начать
     allowed_entries = activities_api.get_allowed_activity_entries(gs, definitions)
@@ -37,7 +43,12 @@ def pick_activity(gs, definitions):
     activities_api.start_activity(gs, definitions, entry_to_start)
 
 
-def update(gs, activity_definitions, scenario_definitions, is_initial=False):
+def update(
+    gs: GameState,
+    activity_definitions: ActivityDefinitions,
+    scenario_definitions: ScenarioDefinitions,
+    is_initial=False,
+):
     # 1. Применяем tick_effect всех текущих активностей
     for entry in gs_api.get_activity_entries(gs):
         log(f"Applying effect for {entry["activity_name"]}", log_type="activity")
@@ -46,7 +57,7 @@ def update(gs, activity_definitions, scenario_definitions, is_initial=False):
 
     # 2. Применяем изменения и разрешаем конфликты до проверки сценариев,
     # чтобы сценарии могли отреагировать на изменения в этом же тике
-    resolver_api.resolve_intents(gs)
+    resolver_api.resolve_intents(gs, resolvers)
 
     # 3. Увеличиваем игровое время на 1, если это не часть инициализации
     if not is_initial:
@@ -75,7 +86,7 @@ def update(gs, activity_definitions, scenario_definitions, is_initial=False):
 
     # 5. Применяем изменения и разрешаем конфликты до остановки лишних активностей,
     # чтобы условия были такими же, как в начале следующего тика
-    resolver_api.resolve_intents(gs)
+    resolver_api.resolve_intents(gs, resolvers)
 
     # 6. Останавливаем активности, которые больше не могут продолжаться
     # (игрок отпустил кнопку или не выполняется can_continue)
@@ -98,7 +109,9 @@ def update(gs, activity_definitions, scenario_definitions, is_initial=False):
     gs_api.set_activity_entries(gs, new_entries)
 
 
-def check_foreground_activities_running(gs, definitions):
+def check_foreground_activities_running(
+    gs: GameState, definitions: ActivityDefinitions
+) -> bool:
     entries = gs_api.get_activity_entries(gs)
     for entry in entries:
         activity = activities_api.configure_activity(definitions, entry)
@@ -109,7 +122,7 @@ def check_foreground_activities_running(gs, definitions):
 
 def main():
     # Инициализация
-    game_state = gs_api.get_initial_gs()
+    game_state = gs_api.get_initial_gs(initial_state)
     definitions = load_definitions("content")
     scenarios_api.start_all_scenarios(
         game_state, definitions["activities"], definitions["scenarios"]
@@ -119,10 +132,11 @@ def main():
         game_state, definitions["activities"], definitions["scenarios"], is_initial=True
     )
 
-    while not gs_api.get_flag(game_state, "is_end"):
+    while gs_api.is_running(game_state):
         log(
-            f"time: {gs_api.get_time(game_state)}, vitals: {game_state["vitals"]}, stats: {game_state["stats"]},"
-            f" flags: {game_state["flags"]}, activity entries: {gs_api.get_activity_entries(game_state)}",
+            f"time: {gs_api.get_time(game_state)}, vitals: {game_state["gameplay"]["vitals"]},",
+            f"stats: {game_state["gameplay"]["stats"]},",
+            f"activity entries: {gs_api.get_activity_entries(game_state)}",
             log_type="status",
         )
         ui.show_stats(game_state)

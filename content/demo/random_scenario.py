@@ -1,7 +1,9 @@
-from engine import scenarios_api, gs_api
-from interface import ui
 import random
+
+from engine import scenarios_api, gs_api
 from engine import state_api
+from gameplay.api import vitals
+from interface import ui
 
 
 def random_scenario(state=None):
@@ -14,7 +16,7 @@ def random_scenario(state=None):
         return gs_api.get_time(gs) == state["tick"]
 
     def eff(gs):
-        gs_api.mod_vital(gs, "fatigue", +5)
+        vitals.mod(gs, vitals.fatigue, +5)
         ui.display("Вы РАНДОМНО устали")
 
     return scenarios_api.base_scenario(

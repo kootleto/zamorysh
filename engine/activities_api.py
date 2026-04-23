@@ -5,20 +5,31 @@ from tools.logger import log
 from tools.utils import call_with_gs, ensure_callable
 from . import gs_api
 from . import state_api
+from .schema import (
+    Activity,
+    ActivityDefinition,
+    ActivityEntry,
+    ActivityDefinitions,
+    GameState,
+)
 
 
 # Все параметры активности, кроме имени и param_space,
 # хранятся как callable, чтобы их можно было изменять динамически
 # Например, в композитных активностях hold_required и is_stackable совпадают с соответствующими свойствами
 # текущей подактивности
+
+
 def base_activity(
-    tick_effect: Callable[[dict], None] | Callable[[], None] = lambda gs: None,
-    can_continue: bool | Callable[[dict], bool] | Callable[[], bool] = lambda gs: True,
+    tick_effect: Callable[[GameState], None] | Callable[[], None] = lambda gs: None,
+    can_continue: (
+        bool | Callable[[GameState], bool] | Callable[[], bool]
+    ) = lambda gs: True,
     hold_required: bool | Callable[[], bool] = False,
     is_stackable: bool | Callable[[], bool] = False,
     is_background: bool | Callable[[], bool] = False,
     name: str = "default",
-) -> dict:
+) -> Activity:
     """
     Создать активность с указанными свойствами и методами.
 
@@ -50,27 +61,27 @@ def base_activity(
     }
 
 
-def apply_tick_effect(gs, activity):
+def apply_tick_effect(gs: GameState, activity: Activity):
     call_with_gs(gs, activity["tick_effect"])
 
 
-def check_can_continue(gs, activity):
+def check_can_continue(gs: GameState, activity: Activity) -> bool:
     return call_with_gs(gs, activity["can_continue"])
 
 
-def check_hold_required(activity):
+def check_hold_required(activity: Activity) -> bool:
     return activity["hold_required"]()
 
 
-def check_is_stackable(activity):
+def check_is_stackable(activity: Activity) -> bool:
     return activity["is_stackable"]()
 
 
-def check_is_background(activity):
+def check_is_background(activity: Activity) -> bool:
     return activity["is_background"]()
 
 
-def get_activity_name(activity):
+def get_activity_name(activity: Activity) -> str:
     return activity["name"]
 
 
@@ -90,7 +101,7 @@ def with_param_space(param_space: Iterable | Callable[[dict], Iterable]):
     return wrapper
 
 
-def get_param_space(gs, definition):
+def get_param_space(gs: GameState, definition: ActivityDefinition) -> Iterable:
     # Атрибут функции можно узнать, не вызывая ее, чем мы и пользуемся
     param_space = getattr(definition, "param_space", None)
 
@@ -109,12 +120,12 @@ def with_auto_start(definition):
     return definition
 
 
-def check_auto_start(definition):
+def check_auto_start(definition: ActivityDefinition) -> bool:
     # Если такого атрибута присвоено не было, то автозапуск нам не нужен
     return getattr(definition, "auto_start", False)
 
 
-def override_activity(activity: dict, **overrides) -> dict:
+def override_activity(activity: Activity, **overrides) -> Activity:
     """
     Заменить любые элементы словаря активности: `tick_effect`, `can_continue`, `hold_required`,
     `is_stackable`, `param_space`, `name`.
@@ -128,7 +139,7 @@ def override_activity(activity: dict, **overrides) -> dict:
     return base_activity(**new_data)
 
 
-def create_activity_entry(definition, param=None) -> dict:
+def create_activity_entry(definition: ActivityDefinition, param=None) -> ActivityEntry:
     """
     Создать запись активности (entry).
 
@@ -155,7 +166,9 @@ def create_activity_entry(definition, param=None) -> dict:
     }
 
 
-def configure_activity(definitions: dict, entry: dict) -> dict:
+def configure_activity(
+    definitions: ActivityDefinitions, entry: ActivityEntry
+) -> Activity:
     """
     Создать активность на основе definitions (списка определений) и entry.
 
@@ -195,7 +208,9 @@ def configure_activity(definitions: dict, entry: dict) -> dict:
 
 # Используется движком в pick_activity, чтобы предложить игроку все доступные активности
 # со всеми доступными параметрами на выбор
-def get_allowed_activity_entries(gs, definitions):
+def get_allowed_activity_entries(
+    gs: GameState, definitions: ActivityDefinitions
+) -> list[ActivityEntry]:
     allowed_entries = []
     # Проходим по всем определениям
     for definition in definitions.values():
@@ -233,7 +248,9 @@ def get_allowed_activity_entries(gs, definitions):
     return allowed_entries
 
 
-def start_activity(gs: dict, definitions: dict, entry: dict):
+def start_activity(
+    gs: GameState, definitions: ActivityDefinitions, entry: ActivityEntry
+):
     """
     Добавить entry в список текущих активностей.
     Если активность не-stackable, остановить другие не-stackable активности.
@@ -241,23 +258,23 @@ def start_activity(gs: dict, definitions: dict, entry: dict):
     # Создаем активность, чтобы понять, стакается ли она
     activity = configure_activity(definitions, entry)
     if not check_is_stackable(activity):
-        gs["activity_entries"] = [
+        gs["system"]["activity_entries"] = [
             entry
-            for entry in gs["activity_entries"]
+            for entry in gs["system"]["activity_entries"]
             if check_is_stackable(configure_activity(definitions, entry))
         ]
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему.
     # До добавления в gs такой необходимости нет
     entry_with_id = gs_api.with_id(gs, entry)
-    gs["activity_entries"].append(entry_with_id)
+    gs["system"]["activity_entries"].append(entry_with_id)
 
 
 def composite_activity(
-    definitions: dict,
-    init_queue: Callable[[], list],
+    definitions: ActivityDefinitions,
+    init_queue: Callable[[], list[ActivityEntry]],
     state: dict = None,
     name="default",
-):
+) -> Activity:
     """
     Создать композитную активность, состояющую из нескольких подактивностей, выполняющихся последовательно.
     Следующая подактивность начинает выполняться, как только `can_continue` предыдущей подактивности становится `False`.
