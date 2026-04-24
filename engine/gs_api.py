@@ -12,7 +12,7 @@ initial_system_data: SystemState = {
     "intents": [],
     "next_id": 0,
     "is_running": True,
-    "tick_interval": 0.1,
+    "tick_interval": 0.15,
 }
 
 

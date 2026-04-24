@@ -1,4 +1,4 @@
-from typing import Callable, TypedDict, Any, Literal, Protocol
+from typing import Callable, TypedDict, Any, Literal, Protocol, Awaitable
 
 
 # Сущности внутри gs
@@ -43,6 +43,10 @@ class GameState(TypedDict):
     system: SystemState
 
 
+EffectResult = None | Awaitable[None]
+Effect = Callable[[GameState], EffectResult] | Callable[[], EffectResult]
+
+
 # Сценарии
 Transition = TypedDict(
     "Transition",
@@ -50,7 +54,7 @@ Transition = TypedDict(
         "from": Any,
         "to": Any,
         "trigger": Callable[[GameState], bool] | Callable[[], bool],
-        "effect": Callable[[GameState], None] | Callable[[], None],
+        "effect": Effect,
     },
 )
 
@@ -71,7 +75,7 @@ ScenarioDefinitions = dict[str, ScenarioDefinition]
 
 # Активности
 class Activity(TypedDict):
-    tick_effect: Callable[[GameState], None] | Callable[[], None]
+    tick_effect: Effect
     can_continue: Callable[[GameState], bool] | Callable[[], bool]
     hold_required: Callable[[], bool]
     is_stackable: Callable[[], bool]

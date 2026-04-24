@@ -1,11 +1,10 @@
 import asyncio
-import os
-import traceback
 
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.properties import DictProperty
+from kivy.properties import DictProperty, BooleanProperty
 
 from interface import ui
 
@@ -22,29 +21,26 @@ class GameApp(App):
         }
     )
 
-    def __init__(self, gs, **kwargs):
+    key_enter_pressed = BooleanProperty(False)
+
+    def __init__(self, gs, get_options_func, **kwargs):
         super().__init__(**kwargs)
         self.gs = gs
+        self.get_options_func = get_options_func
+        self.activity_options = []
         self.ready = asyncio.Future()
 
     def build(self):
-        print("STYLE LOADING STARTED")
-        try:
-            current_dir = os.path.dirname(__file__)
-            kv_path = os.path.join(current_dir, "style.kv")
-            root = Builder.load_file(kv_path)
-            return root
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-        finally:
-            print("STYLE LOADING FINISHED")
+        return Builder.load_file("interface/gui/style.kv")
 
     def on_start(self):
+        Window.bind(on_key_down=self._on_key_down)
+        Window.bind(on_key_up=self._on_key_up)
+
         self.ready.set_result(True)
 
         def update(_):
-            ui.refresh_stats(self.gs)
+            ui.refresh_stats(self.gs, self.get_options_func())
 
         Clock.schedule_interval(update, 1 / 60)
 
@@ -54,3 +50,12 @@ class GameApp(App):
             f"fatigue: {value['fatigue']}   money: {value['money']}   social: {value['social']}   "
             f"mental: {value['mental']}   knowledge: {value['knowledge']}"
         )
+
+    def _on_key_down(self, _window, key, *_args):
+        if key == 13:
+            self.key_enter_pressed = True
+            self.root.ids.button.dispatch("on_press")
+
+    def _on_key_up(self, _window, key, *_args):
+        if key == 13:
+            self.key_enter_pressed = False

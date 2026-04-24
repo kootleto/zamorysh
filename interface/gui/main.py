@@ -1,12 +1,12 @@
 import asyncio
 
-from engine import runner
+from engine import runner, controller
 from engine.schema import Definitions, GameState
 from interface.gui.app import GameApp
 
 
 async def start(gs: GameState, definitions: Definitions):
-    app = GameApp(gs)
+    app = GameApp(gs, lambda: controller.get_activity_options(gs, definitions))
 
     kivy_task = asyncio.create_task(app.async_run())
 

@@ -1,16 +1,18 @@
 from engine import activities_api, gs_api
+from gameplay.activity_wrappers import single_tick_activity
 from gameplay.api import timers, vitals
 from interface import ui
 
 
-def set_alarm():  # игрок должен ввести время будильника
+def set_alarm(state=None):  # игрок должен ввести время будильника
 
     async def tick_effect(gs):
         time = int(await ui.prompt("Установите время: "))
         timers.set(gs, "alarm", time)
 
-    return activities_api.base_activity(
-        tick_effect, hold_required=True, name="set_alarm"
+    return single_tick_activity(
+        activities_api.base_activity(tick_effect, hold_required=True, name="set_alarm"),
+        state,
     )
 
 

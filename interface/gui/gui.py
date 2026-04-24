@@ -50,7 +50,7 @@ async def prompt(*message, sep: str = " ") -> str:
     app_input.focus = True
     app_input.disabled = False
     app_input.hint_text = message
-    await _wait_for_event(app_input, "on_text_validate")
+    await _wait_for_event(app.root.ids.button, "on_press")
     response = app_input.text
     app_input.text = ""
     app_input.hint_text = ""
@@ -60,10 +60,10 @@ async def prompt(*message, sep: str = " ") -> str:
 
 
 def check_button_pressed():
-    return app.root.ids.button.state == "down"
+    return app.root.ids.button.state == "down" or app.key_enter_pressed
 
 
-def refresh_stats(gs: GameState):
+def refresh_stats(gs: GameState, options: ActivityOptions):
     app.stats = {
         "time": f"{time.get_hour(gs):02}:{time.get_minute(gs):02}",
         "fatigue": vitals.get(gs, vitals.fatigue),
@@ -72,6 +72,10 @@ def refresh_stats(gs: GameState):
         "mental": vitals.get(gs, vitals.mental),
         "knowledge": stats.get(gs, stats.knowledge),
     }
+
+    new_labels = [option["label"] for option in options]
+    if app.root.ids.activity_list.items != new_labels:
+        app.root.ids.activity_list.items = new_labels
 
 
 async def on_finish():

@@ -92,7 +92,7 @@ async def prompt_activity(options: ActivityOptions) -> int:
     return selected_index
 
 
-def refresh_stats(gs: GameState):
+def refresh_stats(gs: GameState, _options):
     display(
         f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.fatigue)}, Money: {stats.get(gs, stats.money)}"
     )

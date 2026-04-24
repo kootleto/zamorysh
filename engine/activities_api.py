@@ -15,6 +15,7 @@ from .schema import (
     ActivityEntry,
     ActivityDefinitions,
     GameState,
+    Effect,
 )
 
 
@@ -25,7 +26,7 @@ from .schema import (
 
 
 def base_activity(
-    tick_effect: Callable[[GameState], None] | Callable[[], None] = lambda gs: None,
+    tick_effect: Effect = lambda gs: None,
     can_continue: (
         bool | Callable[[GameState], bool] | Callable[[], bool]
     ) = lambda gs: True,
@@ -316,7 +317,7 @@ def composite_activity(
     def get_next():
         return configure_activity(definitions, state["queue"][state["next_index"]])
 
-    def tick_effect(gs):
+    async def tick_effect(gs):
         # 0. На всякий случай повторная проверка: мы могли запустить активность, не выполняя can_continue
         if state["next_index"] is None:
             state["next_index"] = 0
@@ -326,7 +327,7 @@ def composite_activity(
 
         # 2. Выполняем эффект текущей подактивности
         current = get_current()
-        apply_tick_effect(gs, current)
+        await apply_tick_effect(gs, current)
 
     def can_continue(gs):
         # 0. Защита от пустой очереди

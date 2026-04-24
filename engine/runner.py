@@ -17,7 +17,7 @@ async def run(
 
     while controller.is_running(gs):
         if refresh_ui:
-            ui.refresh_stats(gs)
+            ui.refresh_stats(gs, controller.get_activity_options(gs, definitions))
         # Если не запущена ни одна не-фоновая, игрок должен выбрать активность
         if controller.prompt_required(gs, definitions):
             options = controller.get_activity_options(gs, definitions)
@@ -33,18 +33,15 @@ async def run(
             log(f"Lag detected: {abs(delay):.4f}s", log_type="warning")
 
         if use_sleep:
-            start = time.perf_counter()
             await asyncio.sleep(max(0.0, delay))
-            end = time.perf_counter()
 
         await controller.update(
             gs, definitions, check_button_pressed=ui.check_button_pressed
         )
 
         next_tick_at += controller.get_tick_interval(gs)
-        print("NOW", round(time.perf_counter(), 4))
 
     if refresh_ui:
-        ui.refresh_stats(gs)
+        ui.refresh_stats(gs, controller.get_activity_options(gs, definitions))
 
     await ui.on_finish()

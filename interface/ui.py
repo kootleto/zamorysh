@@ -8,9 +8,11 @@ _ui_wait_time = 0.0
 
 if settings.gui:
     from .gui import gui
+
     interface = gui
 else:
     from .cli import cli
+
     interface = cli
 
 
@@ -54,8 +56,8 @@ async def prompt_activity(options: ActivityOptions) -> int:
     return index
 
 
-def refresh_stats(gs: GameState):
-    interface.refresh_stats(gs)
+def refresh_stats(gs: GameState, options: ActivityOptions):
+    interface.refresh_stats(gs, options)
 
 
 def check_button_pressed():
