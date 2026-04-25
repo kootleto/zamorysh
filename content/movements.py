@@ -1,6 +1,5 @@
 from engine import activities_api
 from gameplay.api import location
-from tools.logger import log
 
 DIRECTIONS = {"north": (0, 1), "south": (0, -1), "east": (1, 0), "west": (-1, 0)}
 
@@ -13,7 +12,6 @@ def move(param=None):
         location.mod(gs, location.y, DIRECTIONS[param][1])
 
     def can_continue(gs):
-        log(param)
         return (
             location.WEST_BORDER
             <= location.get(gs, location.x) + DIRECTIONS[param][0]
