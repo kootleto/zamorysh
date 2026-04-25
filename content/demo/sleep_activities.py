@@ -17,12 +17,12 @@ def set_alarm():  # игрок должен ввести время будиль
 def sleep():
 
     def tick_effect(gs):
-        vitals.mod(gs, vitals.sleepiness, -2)  # 20 каждый час
+        vitals.mod(gs, vitals.SLEEPINESS, -2)  # 20 каждый час
 
     def can_continue(gs):
         return (
             gs_api.get_time(gs) < timers.get(gs, "alarm")
-            and vitals.get(gs, vitals.sleepiness) > 0
+            and vitals.get(gs, vitals.SLEEPINESS) > 0
         )
 
     return activities_api.base_activity(tick_effect, can_continue, name="sleep")

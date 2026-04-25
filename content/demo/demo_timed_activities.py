@@ -12,7 +12,7 @@ def display_numbers_for_10_ticks(state=None):
     def tick_effect(gs):
         ui.display(state["number"])
         state["number"] *= 2
-        stats.mod(gs, stats.knowledge, 1)
+        stats.mod(gs, stats.KNOWLEDGE, 1)
 
     # Обратите внимание: мы передаем в обертку уже готовую активность,
     # а не ее кусочки вроде tick_effect или can_continue

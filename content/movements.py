@@ -8,16 +8,16 @@ DIRECTIONS = {"north": (0, 1), "south": (0, -1), "east": (1, 0), "west": (-1, 0)
 def move(param=None):
 
     def tick_effect(gs):
-        location.mod(gs, location.x, DIRECTIONS[param][0])
-        location.mod(gs, location.y, DIRECTIONS[param][1])
+        location.mod(gs, location.X, DIRECTIONS[param][0])
+        location.mod(gs, location.Y, DIRECTIONS[param][1])
 
     def can_continue(gs):
         return (
             location.WEST_BORDER
-            <= location.get(gs, location.x) + DIRECTIONS[param][0]
+            <= location.get(gs, location.X) + DIRECTIONS[param][0]
             <= location.EAST_BORDER
             and location.SOUTH_BORDER
-            <= location.get(gs, location.y) + DIRECTIONS[param][1]
+            <= location.get(gs, location.Y) + DIRECTIONS[param][1]
             <= location.NORTH_BORDER
         )
 

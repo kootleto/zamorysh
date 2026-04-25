@@ -93,9 +93,9 @@ def handle_input(activities_ui_info: list[tuple]) -> int:
 
 def show_stats(gs):
     display(
-        f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.fatigue)}, Money: {stats.get(gs, stats.money)}"
+        f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.FATIGUE)}, Money: {stats.get(gs, stats.MONEY)}"
     )
     display(
-        f"Social: {stats.get(gs, stats.social)}, Mental: {vitals.get(gs, vitals.mental)}"
+        f"Social: {stats.get(gs, stats.SOCIAL)}, Mental: {vitals.get(gs, vitals.MENTAL)}"
     )
-    display(f"Knowledge: {stats.get(gs, stats.knowledge)}")
+    display(f"Knowledge: {stats.get(gs, stats.KNOWLEDGE)}")

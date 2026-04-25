@@ -16,7 +16,7 @@ def random_scenario(state=None):
         return gs_api.get_time(gs) == state["tick"]
 
     def eff(gs):
-        vitals.mod(gs, vitals.fatigue, +5)
+        vitals.mod(gs, vitals.FATIGUE, +5)
         ui.display("Вы РАНДОМНО устали")
 
     return scenarios_api.base_scenario(
