@@ -1,12 +1,15 @@
 import random
 
+from gameplay.api import stats, vitals
+from tools.logger import log
+
 
 def exam(gs):
-    knowledge = gs_api.get_stat(gs, "knowledge")
-    mental = gs_api.get_stat(gs, "mental")
-    fatigue = gs_api.get_stat(gs, "fatigue")
-    sleepiness = gs_api.get_stat(gs, "sleepiness")
-    social = gs_api.get_stat(gs, "social")
+    knowledge = stats.get(gs, stats.knowledge)
+    mental = vitals.get(gs, vitals.mental)
+    fatigue = vitals.get(gs, vitals.fatigue)
+    sleepiness = vitals.get(gs, vitals.sleepiness)
+    social = stats.get(gs, stats.social)
 
     all_parameters = {
         "knowledge": knowledge,
@@ -62,13 +65,13 @@ def exam(gs):
             }
         )
 
-    print("=== EXAM RESULTS ===\n")
+    log("=== EXAM RESULTS ===\n")
     for res in results:
-        print(f"Exam {res['exam']}:")
-        print(f"  Parameters: {res['used_parameters']} = {res['parameter_values']}")
-        print(f"  Luck: {res['luck_score']} points")
-        print(f"  Total fraction: {res['total_fraction']:.3f}")
-        print(f"  Score (0-10): {res['score_0_to_10']}")
-        print(f"  Result: {'PASSED' if res['passed'] else 'FAILED'}\n")
+        log(f"Exam {res['exam']}:")
+        log(f"  Parameters: {res['used_parameters']} = {res['parameter_values']}")
+        log(f"  Luck: {res['luck_score']} points")
+        log(f"  Total fraction: {res['total_fraction']:.3f}")
+        log(f"  Score (0-10): {res['score_0_to_10']}")
+        log(f"  Result: {'PASSED' if res['passed'] else 'FAILED'}\n")
 
     return results
