@@ -2,16 +2,25 @@ from inspect import signature
 from typing import Any, Callable
 
 from tools.logger import log
-from tools.utils import call_with_gs
+from tools.utils import call_with_gs, ensure_callable
 from . import gs_api
+from .schema import (
+    GameState,
+    Transition,
+    Scenario,
+    ScenarioDefinition,
+    ScenarioEntry,
+    ActivityDefinitions,
+    ScenarioDefinitions,
+)
 
 
 def base_transition(
     node_from: Any,
     node_to: Any,
-    trigger: Callable[[dict], bool] | Callable[[], bool],
-    effect: Callable[[dict], None] | Callable[[], None],
-) -> dict:
+    trigger: Callable[[GameState], bool] | Callable[[], bool] | bool,
+    effect: Callable[[GameState], None] | Callable[[], None],
+) -> Transition:
     """
     Создать переход из одного node сценария в другой.
 
@@ -23,31 +32,32 @@ def base_transition(
         trigger: Условие перехода.
         effect: Функция, которая выполняется при переходе. Принимает `gs`.
     """
+
     return {
         "from": node_from,
         "to": node_to,
-        "trigger": trigger,
+        "trigger": ensure_callable(trigger),
         "effect": effect,
     }
 
 
-def get_node_from(transition):
+def get_node_from(transition: Transition) -> Any:
     return transition["from"]
 
 
-def get_node_to(transition):
+def get_node_to(transition: Transition) -> Any:
     return transition["to"]
 
 
-def check_trigger(gs, transition):
+def check_trigger(gs: GameState, transition: Transition) -> bool:
     return call_with_gs(gs, transition["trigger"])
 
 
-def apply_effect(gs, transition):
+def apply_effect(gs: GameState, transition: Transition):
     call_with_gs(gs, transition["effect"])
 
 
-def base_scenario(transitions: list[dict] = None, start_node: Any = 0) -> dict:
+def base_scenario(transitions: list[Transition], start_node: Any = 0) -> Scenario:
     """
     Создать сценарий с указанными переходами и стартовым состоянием.
     Базовое определение (definition) сценария.
@@ -68,15 +78,15 @@ def base_scenario(transitions: list[dict] = None, start_node: Any = 0) -> dict:
     }
 
 
-def get_start_node(scenario):
+def get_start_node(scenario: Scenario) -> Any:
     return scenario["start_node"]
 
 
-def get_transitions(scenario):
+def get_transitions(scenario: Scenario) -> list[Transition]:
     return scenario["transitions"]
 
 
-def create_scenario_entry(definition) -> dict:
+def create_scenario_entry(definition: ScenarioDefinition) -> ScenarioEntry:
     """
     Создать запись сценария (entry).
 
@@ -103,15 +113,19 @@ def create_scenario_entry(definition) -> dict:
     }
 
 
-def get_node(entry):
+def get_node(entry: ScenarioEntry) -> Any:
     return entry["node"]
 
 
-def set_node(entry, node):
+def set_node(entry: ScenarioEntry, node: Any):
     entry["node"] = node
 
 
-def configure_scenario(definitions, entry):
+def configure_scenario(
+    activity_definitions: ActivityDefinitions,
+    scenario_definitions: ScenarioDefinitions,
+    entry: ScenarioEntry,
+) -> Scenario:
     """
     Создать сценарий на основе definitions (списка определений) и entry.
 
@@ -121,7 +135,7 @@ def configure_scenario(definitions, entry):
     log(f"Scenario entry: {entry}", log_type="config")
 
     # Собираем данные из entry
-    definition = definitions[entry["scenario_name"]]
+    definition = scenario_definitions[entry["scenario_name"]]
     state = entry["state"]
 
     # Даем определению state только в том случае, если он ему нужен.
@@ -130,21 +144,34 @@ def configure_scenario(definitions, entry):
     kwargs = {}
     if "state" in sig.parameters:
         kwargs["state"] = state
+    if "activity_definitions" in sig.parameters:
+        kwargs["activity_definitions"] = activity_definitions
 
     return definition(**kwargs)
 
 
-def start_scenario(gs, definitions, scenario_entry):
+def start_scenario(
+    gs: GameState,
+    activity_definitions: ActivityDefinitions,
+    scenario_definitions: ScenarioDefinitions,
+    scenario_entry: ScenarioEntry,
+):
     """Добавить entry в список текущих сценариев."""
-    scenario = configure_scenario(definitions, scenario_entry)
+    scenario = configure_scenario(
+        activity_definitions, scenario_definitions, scenario_entry
+    )
     set_node(scenario_entry, get_start_node(scenario))
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему
     entry_with_id = gs_api.with_id(gs, scenario_entry)
-    gs["scenario_entries"].append(entry_with_id)
+    gs["system"]["scenario_entries"].append(entry_with_id)
 
 
 # В начале игры движок запускает все сценарии
-def start_all_scenarios(gs, definitions):
-    for definition in definitions.values():
+def start_all_scenarios(
+    gs: GameState,
+    activity_definitions: ActivityDefinitions,
+    scenario_definitions: ScenarioDefinitions,
+):
+    for definition in scenario_definitions.values():
         entry = create_scenario_entry(definition)
-        start_scenario(gs, definitions, entry)
+        start_scenario(gs, activity_definitions, scenario_definitions, entry)

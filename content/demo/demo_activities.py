@@ -1,4 +1,5 @@
-from engine import activities_api, gs_api, state_api
+from engine import activities_api, state_api
+from gameplay.api import vitals, stats
 
 
 # Параметрами активности может быть что угодно.
@@ -8,11 +9,11 @@ from engine import activities_api, gs_api, state_api
 # потому что их легко можно переопределить с помощью override_activity
 def work(fatigue_cost=1, earn_money=1):
     def tick_effect(gs):
-        gs_api.mod_vital(gs, "fatigue", +fatigue_cost)
-        gs_api.mod_stat(gs, "money", +earn_money)
+        vitals.mod(gs, vitals.fatigue, +fatigue_cost)
+        stats.mod(gs, stats.money, +earn_money)
 
     def can_continue(gs):
-        return gs_api.get_vital(gs, "fatigue") < 10
+        return vitals.get(gs, vitals.fatigue) < 10
 
     return activities_api.base_activity(tick_effect, can_continue, False, name="work")
 
@@ -22,7 +23,7 @@ def work(fatigue_cost=1, earn_money=1):
 # Если операций больше одной, выносите в отдельную функцию внутри определения, как в примере выше
 def rest():
     return activities_api.base_activity(
-        lambda gs: gs_api.mod_vital(gs, "fatigue", -1),
+        lambda gs: vitals.mod(gs, vitals.fatigue, -1),
         True,
         True,
         name="rest",
@@ -67,7 +68,7 @@ def cry(state=None):
     state = state_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
-        gs_api.mod_vital(gs, "fatigue", +1)
+        vitals.mod(gs, vitals.fatigue, +1)
         state["counter"] -= 1
 
     # Если функции не нужен gs, его можно не передавать как параметр
@@ -76,63 +77,6 @@ def cry(state=None):
         return state["counter"] > 0
 
     return activities_api.base_activity(tick_effect, can_continue, True, name="cry")
-
-
-def drink_coffee(state=None, hold_required=True):
-    state = activities_api.init_defaults(state, counter=10)
-
-    def tick_effect(gs):
-        gs_api.mod_vital(gs, "sleepiness", -1)
-        gs_api.mod_vital(gs, "mental", -1)
-        state["counter"] -= 1
-
-    def can_continue(gs):
-        return gs_api.get_vital(gs, "sleepiness") > 0
-
-    return activities_api.base_activity(
-        tick_effect,
-        can_continue,
-        hold_required,
-        name="drink coffee",
-    )
-
-
-def socialize(hold_required=False, earn_fatigue=1, earn_mental=1, state=None):
-    state = activities_api.init_defaults(state, counter=10)
-
-    def tick_effect(gs):
-        gs_api.mod_vital(gs, "fatigue", +earn_fatigue)
-        gs_api.mod_vital(gs, "mental", +earn_mental)
-        state["counter"] -= 1
-
-    def can_continue(gs):
-        return state["counter"] > 0
-
-    return activities_api.base_activity(
-        tick_effect,
-        hold_required,
-        can_continue,
-        name="socialize",
-    )
-
-
-def listen_to_music(hold_required=False, earn_mental=-5, earn_sleepiness=1, state=None):
-    state = activities_api.init_defaults(state, counter=10)
-
-    def tick_effect(gs):
-        gs_api.mod_vital(gs, "mental", +earn_mental)
-        gs_api.mod_vital(gs, "sleepiness", +earn_sleepiness)
-        state["counter"] -= 1
-
-    def can_continue(gs):
-        return state["counter"] > 0
-
-    return activities_api.base_activity(
-        tick_effect,
-        hold_required,
-        can_continue,
-        name="listen to music",
-    )
 
 
 # Пример активности с параметром
@@ -146,21 +90,31 @@ def listen_to_music(hold_required=False, earn_mental=-5, earn_sleepiness=1, stat
         # list comprehension: из 5, 10 и 15 выбираем то, что не больше, чем у нас есть денег
         amount
         for amount in [5, 10, 15]
-        if amount <= gs_api.get_stat(gs, "money")
+        if amount <= stats.get(gs, stats.money)
     ]
 )
 def waste_money(param, state=None):
     state = state_api.init_defaults(state, wasted=0)
 
     def tick_effect(gs):
-        gs_api.mod_stat(gs, "money", -1)
+        stats.mod(gs, stats.money, -1)
         state["wasted"] += 1
 
     def can_continue(gs):
-        return state["wasted"] < param and gs_api.get_stat(gs, "money") > 0
+        return state["wasted"] < param and stats.get(gs, stats.money) > 0
 
     return activities_api.base_activity(
         tick_effect, can_continue, name=f"waste {param} money"
+    )
+
+
+@activities_api.with_auto_start
+def get_tired():
+    def tick_effect(gs):
+        vitals.mod(gs, vitals.sleepiness, 1)
+
+    return activities_api.base_activity(
+        tick_effect, True, is_stackable=True, is_background=True
     )
 
 
@@ -170,10 +124,6 @@ activities = [
     rest_hard,
     work_and_rest,
     cry,
-    socialize,
-    drink_coffee,
-    listen_to_music,
     waste_money,
+    get_tired,
 ]
-
-# Раскомментируйте эту строчку, чтобы добавить в игру демо-активности
