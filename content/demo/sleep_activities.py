@@ -1,4 +1,5 @@
 from engine import activities_api, gs_api
+from gameplay.api import timers, vitals
 from interface import ui
 
 
@@ -6,7 +7,7 @@ def set_alarm():  # игрок должен ввести время будиль
 
     def tick_effect(gs):
         time = int(ui.prompt("Установите время: "))
-        gs_api.set_timer(gs, "alarm", time)
+        timers.set(gs, "alarm", time)
 
     return activities_api.base_activity(
         tick_effect, hold_required=True, name="set_alarm"
@@ -16,12 +17,12 @@ def set_alarm():  # игрок должен ввести время будиль
 def sleep():
 
     def tick_effect(gs):
-        gs_api.mod_vital(gs, "sleepiness", -2)  # 20 каждый час
+        vitals.mod(gs, vitals.sleepiness, -2)  # 20 каждый час
 
     def can_continue(gs):
         return (
-            gs_api.get_time(gs) < gs_api.get_timer(gs, "alarm")
-            and gs_api.get_vital(gs, "sleepiness") > 0
+            gs_api.get_time(gs) < timers.get(gs, "alarm")
+            and vitals.get(gs, vitals.sleepiness) > 0
         )
 
     return activities_api.base_activity(tick_effect, can_continue, name="sleep")

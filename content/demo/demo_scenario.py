@@ -1,4 +1,5 @@
 from engine import scenarios_api, gs_api
+from gameplay.api import stats
 from interface import ui
 
 
@@ -6,7 +7,7 @@ from interface import ui
 # Эффекты могут быть не только выводом в консоль. Они могут и как-то менять gs
 def rich_scenario():
     def check_rich(gs):
-        return gs_api.get_stat(gs, "money") >= 20
+        return stats.get(gs, stats.money) >= 20
 
     # Если функции не нужен gs, его можно не передавать как параметр
     # благодаря обертке call_with_gs в tools/utils: если gs нет в параметрах, он не будет передан
@@ -14,11 +15,11 @@ def rich_scenario():
         ui.display("--- HI THERE! YOU ARE RICH! ---")
 
     def check_ultra_rich(gs):
-        return gs_api.get_stat(gs, "money") >= 50
+        return stats.get(gs, stats.money) >= 50
 
     def game_over(gs):
         ui.display("--- GAME OVER: YOU ARE TOO RICH FOR THIS WORLD ---")
-        gs_api.set_flag(gs, "is_end", True)
+        gs_api.stop(gs)
 
     return scenarios_api.base_scenario(
         [
@@ -29,4 +30,4 @@ def rich_scenario():
 
 
 # scenarios = [rich_scenario]
-# Раскомментируйте эту строчку, чтобы добавить в игру демо-сценарий
+# Строчка закомментирована, потому что аналогичный сценарий уже есть в endings
