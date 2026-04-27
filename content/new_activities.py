@@ -3,6 +3,7 @@ import random
 from engine import activities_api
 from gameplay.activity_wrappers import single_tick_activity, timed_activity
 from gameplay.api import vitals, stats
+from interface import ui
 
 
 def drink_coffee(
@@ -34,6 +35,8 @@ def socialize(state=None, hold_required=True):
         vitals.mod(gs, vitals.fatigue, +5)
         vitals.mod(gs, vitals.mental, +2)
         stats.mod(gs, stats.social, +5)
+        stats.mod(gs, stats.money, +5)
+        ui.display("You're not really into talking right now, but...")
 
     return timed_activity(
         activities_api.base_activity(
@@ -51,6 +54,7 @@ def walk(state=None, hold_required=True):
     def tick_effect(gs):
         vitals.mod(gs, vitals.fatigue, -5)
         vitals.mod(gs, vitals.mental, +10)
+        ui.display("Fresh air felt nice on your face...")
 
     return timed_activity(
         activities_api.base_activity(
@@ -68,8 +72,10 @@ def scroll(state=None, hold_required=True):
     def tick_effect(gs):
         if random.choice([True, False]):
             vitals.mod(gs, vitals.mental, +5)
+            ui.display("Youtube-Shorts seem fun...For some time.")
         else:
             vitals.mod(gs, vitals.mental, -5)
+            ui.display("You feel demotivated.")
         stats.mod(gs, stats.knowledge, -2)
 
     return timed_activity(
@@ -88,6 +94,7 @@ def eat_lunch(hold_required=True):
     def tick_effect(gs):
         stats.mod(gs, stats.money, -10)
         vitals.mod(gs, vitals.fatigue, -10)
+        ui.display("You got no maggots for lunch! Okay...")
 
     def can_continue(gs):
         return stats.get(gs, stats.money) > 9
@@ -106,12 +113,17 @@ def study(state=None, hold_required=True):
         vitals.mod(gs, vitals.fatigue, +5)
         vitals.mod(gs, vitals.mental, -5)
         stats.mod(gs, stats.knowledge, +5)
+        ui.display("You studied for some time! How intellectual of you...")
 
-    return timed_activity(activities_api.base_activity(
-        tick_effect,
-        hold_required=hold_required,
-        name="study",
-    ), state, duration=10)
+    return timed_activity(
+        activities_api.base_activity(
+            tick_effect,
+            hold_required=hold_required,
+            name="study",
+        ),
+        state,
+        duration=10,
+    )
 
 
 activities = [drink_coffee, socialize, walk, scroll, eat_lunch, study]
