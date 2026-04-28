@@ -118,7 +118,7 @@ def get_tired():
     )
 
 
-activities = [
+ACTIVITIES = [
     work,
     rest,
     rest_hard,

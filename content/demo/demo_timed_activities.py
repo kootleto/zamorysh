@@ -35,4 +35,4 @@ def display_hello_world(state=None):
     )
 
 
-activities = [display_numbers_for_10_ticks, display_hello_world]
+ACTIVITIES = [display_numbers_for_10_ticks, display_hello_world]

@@ -26,4 +26,4 @@ def random_scenario(state=None):
     )
 
 
-scenarios = [random_scenario]
+SCENARIOS = [random_scenario]

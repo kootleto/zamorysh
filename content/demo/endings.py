@@ -113,7 +113,7 @@ def win_scenario():
     )
 
 
-scenarios = [
+SCENARIOS = [
     rich_scenario,
     breakdown_scenario,
     eternalsleep_scenario,

@@ -26,4 +26,4 @@ def move(param=None):
     )
 
 
-activities = [move]
+ACTIVITIES = [move]

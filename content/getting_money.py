@@ -15,4 +15,4 @@ def money_getting():
     )
 
 
-scenarios = [money_getting]
+SCENARIOS = [money_getting]

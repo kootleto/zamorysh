@@ -30,4 +30,4 @@ def rich_scenario():
     )
 
 
-scenarios = [rich_scenario]
+SCENARIOS = [rich_scenario]

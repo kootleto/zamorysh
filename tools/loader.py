@@ -42,8 +42,8 @@ def load_definitions(package_name: str) -> dict[str, dict]:
     """
 
     skip = lambda name: "demo" in name and not settings.include_demo
-    activities = load_from_package(package_name, "activities", skip)
-    scenarios = load_from_package(package_name, "scenarios", skip)
+    activities = load_from_package(package_name, "ACTIVITIES", skip)
+    scenarios = load_from_package(package_name, "SCENARIOS", skip)
 
     activity_definitions = {
         f"{k}.{f.__name__}": f for k, funcs in activities.items() for f in funcs

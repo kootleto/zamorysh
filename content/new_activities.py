@@ -118,4 +118,4 @@ def study(state=None, hold_required=True):
     )
 
 
-activities = [drink_coffee, socialize, walk, scroll, eat_lunch, study]
+ACTIVITIES = [drink_coffee, socialize, walk, scroll, eat_lunch, study]

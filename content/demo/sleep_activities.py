@@ -28,4 +28,4 @@ def sleep():
     return activities_api.base_activity(tick_effect, can_continue, name="sleep")
 
 
-activities = [set_alarm, sleep]
+ACTIVITIES = [set_alarm, sleep]
