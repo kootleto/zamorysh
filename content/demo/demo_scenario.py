@@ -20,7 +20,6 @@ def rich_scenario():
     def game_over(gs):
         ui.display("--- GAME OVER: YOU ARE TOO RICH FOR THIS WORLD ---")
         gs_api.stop(gs)
-        print()
 
     return scenarios_api.base_scenario(
         [
