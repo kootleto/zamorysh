@@ -29,4 +29,5 @@ def rich_scenario():
     )
 
 
-SCENARIOS = [rich_scenario]
+# SCENARIOS = [rich_scenario]
+# Строчка закомментирована, потому что аналогичный сценарий уже есть в endings
