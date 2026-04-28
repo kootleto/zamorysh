@@ -35,7 +35,6 @@ def socialize(state=None, hold_required=True):
         vitals.mod(gs, vitals.fatigue, +5)
         vitals.mod(gs, vitals.mental, +2)
         stats.mod(gs, stats.social, +5)
-        stats.mod(gs, stats.money, +5)
         ui.display("You're not really into talking right now, but...")
 
     return timed_activity(
