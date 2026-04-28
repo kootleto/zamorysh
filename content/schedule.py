@@ -1,8 +1,6 @@
-from datetime import datetime
-
 from gameplay.api import time
 
-week_schedule = {
+WEEK_SCHEDULE = {
     time.MONDAY: {"13:00": "Лингвистическая антропология"},
     time.TUESDAY: {
         "11:10": "Языковое разнообразие (лекция)",
@@ -10,7 +8,7 @@ week_schedule = {
         "14:40": "Язык",
     },
     time.WEDNESDAY: {
-        "9:30": "Дискретная математика (лекция)",
+        "09:30": "Дискретная математика (лекция)",
         "11:10": "Старославянский",
         "12:30": "Языковое разнообразие (семинар)",
         "14:40": "Дискретная математика (семинар)",
@@ -22,6 +20,7 @@ week_schedule = {
         "16:20": "Лингвистические данные (семинар)",
     },
     time.FRIDAY: {
+        "11:10": "Цифровая грамотность",
         "13:00": "НИС",
         "14:40": "Язык",
         "16:20": "Введение в лингвистику (лекция)",
@@ -31,19 +30,22 @@ week_schedule = {
 
 
 def get_week_schedule():
-    return week_schedule
+    return WEEK_SCHEDULE
 
 
-def get_day_schedule(weekday, gs):
-    return week_schedule[weekday]
-
-
-def scheduled_time(sch_time: str):
-    return datetime.strptime(sch_time, '%H:%M')
+def get_day_schedule(weekday):
+    return WEEK_SCHEDULE[weekday]
 
 
 def get_current_lesson(gs):
-    for lesson_time, lesson in get_day_schedule(gs):
-        if (time.get_time(gs) - scheduled_time(lesson_time)).minute <= 120:
+    for lesson_time, lesson in get_day_schedule(time.get_weekday(gs)).items():
+        if (
+            0
+            <= time.get_hour(gs) * 60
+            + time.get_minute(gs)
+            - int(lesson_time[:2]) * 60
+            - int(lesson_time[3:5])
+            <= 120
+        ):
             return lesson
     return "Сейчас нет пар"
