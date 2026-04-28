@@ -1,4 +1,4 @@
-from config import settings
+from config import SETTINGS
 
 # Доступные через escape-коды цвета.
 # Escape-коды — последовательности символов, которые терминал распознает как команды, а не как текст
@@ -40,7 +40,7 @@ def log(*message, log_type="log", color: str = None, sep=" "):
     """
     message = sep.join(map(str, message))
     log_type = log_type.lower()
-    if not settings.log_enabled:
+    if not SETTINGS.log_enabled:
         return
     chosen_color = color or LOG_TYPE_COLORS.get(log_type, "blue")
     color_code = COLORS.get(chosen_color, COLORS["blue"])

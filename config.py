@@ -34,4 +34,4 @@ def _parse_args():
     return parser.parse_args()
 
 
-settings = _parse_args()
+SETTINGS = _parse_args()
