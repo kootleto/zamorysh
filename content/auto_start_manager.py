@@ -13,4 +13,4 @@ def auto_start_manager(activity_definitions):
     )
 
 
-scenarios = [auto_start_manager]
+SCENARIOS = [auto_start_manager]
