@@ -1,8 +1,8 @@
 from tools.loader import load_from_package
 
-raw_initials = load_from_package(__name__, "initial")
-raw_resolvers = load_from_package(__name__, "resolve")
-domains = load_from_package(__name__, "domain")
+raw_initials = load_from_package(__name__, "_INITIAL")
+raw_resolvers = load_from_package(__name__, "_resolve")
+domains = load_from_package(__name__, "_DOMAIN")
 
 initial_state = {}
 resolvers = {}

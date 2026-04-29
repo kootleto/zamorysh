@@ -1,8 +1,8 @@
 import importlib
 import pkgutil
 
-from config import settings
 from engine.schema import Definitions
+from config import SETTINGS
 from tools.logger import log
 
 
@@ -42,9 +42,9 @@ def load_definitions(package_name: str) -> Definitions:
         Словарь с ключами `activities` и `scenarios`, по которым лежат словари с парами `"модуль.функция"` — `функция`.
     """
 
-    skip = lambda name: "demo" in name and not settings.include_demo
-    activities = load_from_package(package_name, "activities", skip)
-    scenarios = load_from_package(package_name, "scenarios", skip)
+    skip = lambda name: "demo" in name and not SETTINGS.include_demo
+    activities = load_from_package(package_name, "ACTIVITIES", skip)
+    scenarios = load_from_package(package_name, "SCENARIOS", skip)
 
     activity_definitions = {
         f"{k}.{f.__name__}": f for k, funcs in activities.items() for f in funcs

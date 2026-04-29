@@ -1,12 +1,12 @@
 import functools
 import time
 
-from config import settings
+from config import SETTINGS
 from engine.schema import GameState, ActivityOptions
 
 _ui_wait_time = 0.0
 
-if settings.gui:
+if SETTINGS.gui:
     from .gui import gui
 
     interface = gui

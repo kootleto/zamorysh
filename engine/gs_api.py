@@ -5,7 +5,7 @@ from typing import Any, TypeVar
 from engine.schema import GameState, SystemState, Operation, ActivityEntry
 from tools.logger import log
 
-initial_system_data: SystemState = {
+INITIAL_SYSTEM_DATA: SystemState = {
     "time": 0,
     "activity_entries": [],
     "scenario_entries": [],
@@ -20,7 +20,7 @@ def init_gs(initial_state: dict[str, dict]) -> GameState:
     # deepcopy позволяет возвращать не ссылку на словарь и не словарь ссылок, а истинную копию словаря
     return {
         "gameplay": deepcopy(initial_state),
-        "system": deepcopy(initial_system_data),
+        "system": deepcopy(INITIAL_SYSTEM_DATA),
     }
 
 

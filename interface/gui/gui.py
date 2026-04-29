@@ -66,11 +66,11 @@ def check_button_pressed():
 def refresh_stats(gs: GameState, options: ActivityOptions):
     app.stats = {
         "time": f"{time.get_hour(gs):02}:{time.get_minute(gs):02}",
-        "fatigue": vitals.get(gs, vitals.fatigue),
-        "money": stats.get(gs, stats.money),
-        "social": stats.get(gs, stats.social),
-        "mental": vitals.get(gs, vitals.mental),
-        "knowledge": stats.get(gs, stats.knowledge),
+        "fatigue": vitals.get(gs, vitals.FATIGUE),
+        "money": stats.get(gs, stats.MONEY),
+        "social": stats.get(gs, stats.SOCIAL),
+        "mental": vitals.get(gs, vitals.MENTAL),
+        "knowledge": stats.get(gs, stats.KNOWLEDGE),
     }
 
     new_labels = [option["label"] for option in options]

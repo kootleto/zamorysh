@@ -10,12 +10,12 @@ def drink_coffee(
 ):
 
     def tick_effect(gs):
-        vitals.mod(gs, vitals.sleepiness, earn_sleepiness)
-        vitals.mod(gs, vitals.mental, earn_mental)
-        stats.mod(gs, stats.money, earn_money)
+        vitals.mod(gs, vitals.SLEEPINESS, earn_sleepiness)
+        vitals.mod(gs, vitals.MENTAL, earn_mental)
+        stats.mod(gs, stats.MONEY, earn_money)
 
     def can_continue(gs):
-        return stats.get(gs, stats.money) > 9
+        return stats.get(gs, stats.MONEY) > 9
 
     return single_tick_activity(
         activities_api.base_activity(
@@ -31,9 +31,9 @@ def drink_coffee(
 def socialize(state=None, hold_required=True):
 
     def tick_effect(gs):
-        vitals.mod(gs, vitals.fatigue, +5)
-        vitals.mod(gs, vitals.mental, +2)
-        stats.mod(gs, stats.social, +5)
+        vitals.mod(gs, vitals.FATIGUE, +5)
+        vitals.mod(gs, vitals.MENTAL, +2)
+        stats.mod(gs, stats.SOCIAL, +5)
 
     return timed_activity(
         activities_api.base_activity(
@@ -49,8 +49,8 @@ def socialize(state=None, hold_required=True):
 def walk(state=None, hold_required=True):
 
     def tick_effect(gs):
-        vitals.mod(gs, vitals.fatigue, -5)
-        vitals.mod(gs, vitals.mental, +10)
+        vitals.mod(gs, vitals.FATIGUE, -5)
+        vitals.mod(gs, vitals.MENTAL, +10)
 
     return timed_activity(
         activities_api.base_activity(
@@ -67,10 +67,10 @@ def scroll(state=None, hold_required=True):
 
     def tick_effect(gs):
         if random.choice([True, False]):
-            vitals.mod(gs, vitals.mental, +5)
+            vitals.mod(gs, vitals.MENTAL, +5)
         else:
-            vitals.mod(gs, vitals.mental, -5)
-        stats.mod(gs, stats.knowledge, -2)
+            vitals.mod(gs, vitals.MENTAL, -5)
+        stats.mod(gs, stats.KNOWLEDGE, -2)
 
     return timed_activity(
         activities_api.base_activity(
@@ -86,11 +86,11 @@ def scroll(state=None, hold_required=True):
 def eat_lunch(hold_required=True):
 
     def tick_effect(gs):
-        stats.mod(gs, stats.money, -10)
-        vitals.mod(gs, vitals.fatigue, -10)
+        stats.mod(gs, stats.MONEY, -10)
+        vitals.mod(gs, vitals.FATIGUE, -10)
 
     def can_continue(gs):
-        return stats.get(gs, stats.money) > 9
+        return stats.get(gs, stats.MONEY) > 9
 
     return activities_api.base_activity(
         tick_effect,
@@ -103,15 +103,19 @@ def eat_lunch(hold_required=True):
 def study(state=None, hold_required=True):
 
     def tick_effect(gs):
-        vitals.mod(gs, vitals.fatigue, +5)
-        vitals.mod(gs, vitals.mental, -5)
-        stats.mod(gs, stats.knowledge, +5)
+        vitals.mod(gs, vitals.FATIGUE, +5)
+        vitals.mod(gs, vitals.MENTAL, -5)
+        stats.mod(gs, stats.KNOWLEDGE, +5)
 
-    return timed_activity(activities_api.base_activity(
-        tick_effect,
-        hold_required=hold_required,
-        name="study",
-    ), state, duration=10)
+    return timed_activity(
+        activities_api.base_activity(
+            tick_effect,
+            hold_required=hold_required,
+            name="study",
+        ),
+        state,
+        duration=10,
+    )
 
 
-activities = [drink_coffee, socialize, walk, scroll, eat_lunch, study]
+ACTIVITIES = [drink_coffee, socialize, walk, scroll, eat_lunch, study]

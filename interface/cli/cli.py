@@ -3,7 +3,7 @@ import sys
 
 import keyboard
 
-from config import settings
+from config import SETTINGS
 from engine import gs_api
 from engine.schema import GameState, ActivityOptions
 from gameplay.api import vitals, stats
@@ -17,7 +17,7 @@ def display(*message, sep: str = " "):
     Аналог стандартной функции `print`.
     """
     message = sep.join(map(str, message))
-    if settings.log_enabled:
+    if SETTINGS.log_enabled:
         log(message, log_type="ui")
     else:
         print(message)
@@ -32,7 +32,7 @@ async def prompt(*message, sep: str = " ") -> str:
     """
 
     message = sep.join(map(str, message))
-    if settings.log_enabled:
+    if SETTINGS.log_enabled:
         log(message, log_type="ui")
         response = input()
     else:
@@ -94,12 +94,12 @@ async def prompt_activity(options: ActivityOptions) -> int:
 
 def refresh_stats(gs: GameState, _options):
     display(
-        f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.fatigue)}, Money: {stats.get(gs, stats.money)}"
+        f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.FATIGUE)}, Money: {stats.get(gs, stats.MONEY)}"
     )
     display(
-        f"Social: {stats.get(gs, stats.social)}, Mental: {vitals.get(gs, vitals.mental)}"
+        f"Social: {stats.get(gs, stats.SOCIAL)}, Mental: {vitals.get(gs, vitals.MENTAL)}"
     )
-    display(f"Knowledge: {stats.get(gs, stats.knowledge)}")
+    display(f"Knowledge: {stats.get(gs, stats.KNOWLEDGE)}")
 
 
 async def on_finish():

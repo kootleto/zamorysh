@@ -1,13 +1,14 @@
 import asyncio
 import os
 
-from config import settings
+from config import SETTINGS
 from engine import controller
 
 os.environ["KIVY_NO_ARGS"] = "1"
 
+
 async def main():
-    if settings.gui:
+    if SETTINGS.gui:
         from interface.gui.main import start
     else:
         from interface.cli.main import start
