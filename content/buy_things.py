@@ -1,12 +1,7 @@
-import random
-
-import keyboard
-
+from engine import activities_api
+from gameplay.activity_wrappers import single_tick_activity
 from gameplay.api import location
-from engine import activities_api, state_api
-from gameplay.activity_wrappers import single_tick_activity, timed_activity
 from gameplay.api import vitals, stats
-from gameplay.api.location import y, x
 from interface import ui
 
 
@@ -20,12 +15,12 @@ def buy_drink1(hold_required=False, state=None):
         ui.display("Buy coffee2 for 2$? (Press b + Enter)")
         vv = ui.prompt("Pick your poison: ")
         if vv == "a":
-            vitals.mod(gs, vitals.fatigue, -5)
-            stats.mod(gs, stats.money, -2)
+            vitals.mod(gs, vitals.FATIGUE, -5)
+            stats.mod(gs, stats.MONEY, -2)
             ui.display("You bought tasty coffee1. You feel better.")
         if vv == "b":
-            vitals.mod(gs, vitals.fatigue, -5)
-            stats.mod(gs, stats.money, -2)
+            vitals.mod(gs, vitals.FATIGUE, -5)
+            stats.mod(gs, stats.MONEY, -2)
             ui.display("You bought tasty coffee2. You feel better.")
         # if keyboard.is_pressed("space"):
         # keyboard.write("\n You chose a")
@@ -40,9 +35,9 @@ def buy_drink1(hold_required=False, state=None):
         # 1 == 1
 
     def can_continue(gs):
-        return stats.get(gs, stats.money) > 2 and (
-            (location.get(gs, y) == 5 and location.get(gs, x) == 10)
-            or (location.get(gs, y) == 5 and location.get(gs, x) == 60)
+        return stats.get(gs, stats.MONEY) > 2 and (
+            (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 10)
+            or (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60)
         )
         # return stats.get(gs, stats.money) > 2
 
@@ -57,4 +52,4 @@ def buy_drink1(hold_required=False, state=None):
     )
 
 
-activities = [buy_drink1]
+ACTIVITIES = [buy_drink1]
