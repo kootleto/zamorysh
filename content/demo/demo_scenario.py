@@ -7,7 +7,7 @@ from interface import ui
 # Эффекты могут быть не только выводом в консоль. Они могут и как-то менять gs
 def rich_scenario():
     def check_rich(gs):
-        return stats.get(gs, stats.money) >= 20
+        return stats.get(gs, stats.MONEY) >= 20
 
     # Если функции не нужен gs, его можно не передавать как параметр
     # благодаря обертке call_with_gs в tools/utils: если gs нет в параметрах, он не будет передан
@@ -15,7 +15,7 @@ def rich_scenario():
         ui.display("--- HI THERE! YOU ARE RICH! ---")
 
     def check_ultra_rich(gs):
-        return stats.get(gs, stats.money) >= 50
+        return stats.get(gs, stats.MONEY) >= 50
 
     def game_over(gs):
         ui.display("--- GAME OVER: YOU ARE TOO RICH FOR THIS WORLD ---")
@@ -29,5 +29,5 @@ def rich_scenario():
     )
 
 
-# scenarios = [rich_scenario]
+# SCENARIOS = [rich_scenario]
 # Строчка закомментирована, потому что аналогичный сценарий уже есть в endings

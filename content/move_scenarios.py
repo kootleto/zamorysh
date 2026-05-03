@@ -49,7 +49,7 @@ def university_scenario():
     return move_scenario("university")
 
 
-scenarios = [
+SCENARIOS = [
     home_scenario,
     metro_scenario,
     coffee_scenario,

@@ -1,24 +1,24 @@
 from engine import gs_api
 from engine.resolver_api import resolve_generic
 
-domain = "stats"
+_DOMAIN = "stats"
 
-money = "money"
-social = "social"
-knowledge = "knowledge"
+MONEY = "money"
+SOCIAL = "social"
+KNOWLEDGE = "knowledge"
 
-initial = {
-    money: 0,
-    social: 0,
-    knowledge: 0,
+_INITIAL = {
+    MONEY: 0,
+    SOCIAL: 0,
+    KNOWLEDGE: 0,
 }
 
 
-def resolve(gs, intents):
+def _resolve(gs, intents):
     resolve_generic(
         gs,
         intents,
-        domain,
+        _DOMAIN,
         set_fn=min,  # Обычно для игрока чем ниже, тем хуже
         mod_fn=sum,
         clamp_fn=lambda v: max(0, v),
@@ -26,12 +26,12 @@ def resolve(gs, intents):
 
 
 def get(gs, stat):
-    return gs_api.get_value(gs, domain, stat)
+    return gs_api.get_value(gs, _DOMAIN, stat)
 
 
 def set(gs, stat, value):
-    gs_api.set_value(gs, domain, stat, value)
+    gs_api.set_value(gs, _DOMAIN, stat, value)
 
 
 def mod(gs, stat, delta):
-    gs_api.mod_value(gs, domain, stat, delta)
+    gs_api.mod_value(gs, _DOMAIN, stat, delta)
