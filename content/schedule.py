@@ -3,7 +3,7 @@ from gameplay.api import time
 WEEK_SCHEDULE = {
     time.MONDAY: {"13:00": {"subject": "Английский", "room": 205, "type": "семинар"}},
     time.TUESDAY: {
-        "11:10": {"subject": "Языковое разнообразие", "room": 510, "type": "лекция"},
+        "11:10": {"subject": "Языковое разнообразие", "room": 511, "type": "лекция"},
         "13:00": {"subject": "Латынь", "room": 506, "type": "семинар"},
         "14:40": {"subject": "Язык", "room": 516, "type": "семинар"},
     },
