@@ -51,7 +51,7 @@ def get_current_lesson(gs):
             current_lesson["subject"] = lesson["subject"]
             current_lesson["room"] = lesson["room"]
             current_lesson["type"] = lesson["type"]
-            return current_lesson
+    return current_lesson
 
 
 def get_current_subject(gs):
