@@ -1,8 +1,12 @@
-from inspect import signature
 from typing import Callable, Iterable
 
 from tools.logger import log
-from tools.utils import call_with_gs, ensure_callable
+from tools.utils import (
+    call_with_gs,
+    ensure_callable,
+    call_with_gs_async,
+    accepts,
+)
 from . import gs_api
 from . import state_api
 from .schema import (
@@ -11,6 +15,7 @@ from .schema import (
     ActivityEntry,
     ActivityDefinitions,
     GameState,
+    Effect,
 )
 
 
@@ -21,7 +26,7 @@ from .schema import (
 
 
 def base_activity(
-    tick_effect: Callable[[GameState], None] | Callable[[], None] = lambda gs: None,
+    tick_effect: Effect = lambda gs: None,
     can_continue: (
         bool | Callable[[GameState], bool] | Callable[[], bool]
     ) = lambda gs: True,
@@ -61,8 +66,8 @@ def base_activity(
     }
 
 
-def apply_tick_effect(gs: GameState, activity: Activity):
-    call_with_gs(gs, activity["tick_effect"])
+async def apply_tick_effect(gs: GameState, activity: Activity):
+    await call_with_gs_async(gs, activity["tick_effect"])
 
 
 def check_can_continue(gs: GameState, activity: Activity) -> bool:
@@ -154,9 +159,8 @@ def create_activity_entry(definition: ActivityDefinition, param=None) -> Activit
     # пройдет инициализация, и в этом словаре окажутся значения по умолчанию.
     # Иначе явно показываем, что state активности не нужен.
     # Чтобы понять, нужен ли активности state, смотрим, есть ли среди аргументов функции аргумент с именем `state`
-    sig = signature(definition)
     state = None
-    if "state" in sig.parameters:
+    if accepts("state", definition):
         state = {}
 
     return {
@@ -187,20 +191,19 @@ def configure_activity(
 
     # Даем определению аргументы только в том случае, если они ему нужны.
     # Чтобы понять, нужны ли аргументы, смотрим сигнатуру функции
-    sig = signature(definition)
     kwargs = {}
 
     # Если в качестве параметра при создании entry передано None,
     # мы считаем это отсутствием параметра и, следовательно,
     # definition будет использовать параметр по умолчанию
-    if "param" in sig.parameters and param is not None:
+    if accepts("param", definition) and param is not None:
         kwargs["param"] = param
     # Передаем state из entry, если он нужен definition
-    if "state" in sig.parameters:
+    if accepts("state", definition):
         kwargs["state"] = state
     # Definition могут быть нужны определения, если оно внутри себя вызывает другие активности.
     # Например, это нужно композитным активностям
-    if "definitions" in sig.parameters:
+    if accepts("definitions", definition):
         kwargs["definitions"] = definitions
 
     return definition(**kwargs)
@@ -215,9 +218,8 @@ def get_allowed_activity_entries(
     # Проходим по всем определениям
     for definition in definitions.values():
         # Если активности нужны definitions (например, если это композитная активность), передадим их
-        sig = signature(definition)
         kwargs = {}
-        if "definitions" in sig.parameters:
+        if accepts("definitions", definition):
             kwargs["definitions"] = definitions
 
         # Смотрим, есть ли у активности параметр
@@ -315,7 +317,7 @@ def composite_activity(
     def get_next():
         return configure_activity(definitions, state["queue"][state["next_index"]])
 
-    def tick_effect(gs):
+    async def tick_effect(gs):
         # 0. На всякий случай повторная проверка: мы могли запустить активность, не выполняя can_continue
         if state["next_index"] is None:
             state["next_index"] = 0
@@ -325,7 +327,7 @@ def composite_activity(
 
         # 2. Выполняем эффект текущей подактивности
         current = get_current()
-        apply_tick_effect(gs, current)
+        await apply_tick_effect(gs, current)
 
     def can_continue(gs):
         # 0. Защита от пустой очереди

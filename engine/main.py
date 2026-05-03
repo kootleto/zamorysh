@@ -122,7 +122,7 @@ def check_foreground_activities_running(
 
 def main():
     # Инициализация
-    game_state = gs_api.get_initial_gs(initial_state)
+    game_state = gs_api.init_gs(initial_state)
     definitions = load_definitions("content")
     scenarios_api.start_all_scenarios(
         game_state, definitions["activities"], definitions["scenarios"]

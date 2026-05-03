@@ -67,5 +67,8 @@ def resolve_generic(
 
 # Обработка остановки игры
 def resolve_system(gs: GameState, intents: list[Intent]):
-    if any(intent["target"] == "is_end" and intent["value"] for intent in intents):
-        gs["system"]["is_end"] = True
+    if any(
+        intent["target"] == "is_running" and intent["value"] == False
+        for intent in intents
+    ):
+        gs["system"]["is_running"] = False

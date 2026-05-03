@@ -11,11 +11,12 @@ INITIAL_SYSTEM_DATA: SystemState = {
     "scenario_entries": [],
     "intents": [],
     "next_id": 0,
-    "is_end": False,
+    "is_running": True,
+    "tick_interval": 0.15,
 }
 
 
-def get_initial_gs(initial_state: dict[str, dict]) -> GameState:
+def init_gs(initial_state: dict[str, dict]) -> GameState:
     # deepcopy позволяет возвращать не ссылку на словарь и не словарь ссылок, а истинную копию словаря
     return {
         "gameplay": deepcopy(initial_state),
@@ -46,7 +47,7 @@ def mod_value(gs: GameState, domain: str, key: str, delta: Any):
 
 
 def stop(gs: GameState):
-    set_value(gs, "system", "is_end", True)
+    set_value(gs, "system", "is_running", False)
 
 
 def get_time(gs: GameState) -> int:
@@ -59,11 +60,15 @@ def get_time(gs: GameState) -> int:
 
 
 def is_running(gs: GameState) -> bool:
-    return not gs["system"]["is_end"]
+    return gs["system"]["is_running"]
 
 
 def tick(gs: GameState):
     gs["system"]["time"] += 1
+
+
+def get_tick_interval(gs: GameState) -> float:
+    return gs["system"]["tick_interval"]
 
 
 def get_activity_entries(gs: GameState) -> list[ActivityEntry]:

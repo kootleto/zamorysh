@@ -1,4 +1,4 @@
-from typing import Callable, TypedDict, Any, Literal, Protocol
+from typing import Callable, TypedDict, Any, Literal, Protocol, Awaitable
 
 
 # Сущности внутри gs
@@ -31,7 +31,8 @@ class SystemState(TypedDict):
     scenario_entries: list[ScenarioEntry]
     intents: list[Intent]
     next_id: int
-    is_end: bool
+    is_running: bool
+    tick_interval: float
 
 
 GameplayState = dict[str, dict[str, Any]]
@@ -42,6 +43,10 @@ class GameState(TypedDict):
     system: SystemState
 
 
+EffectResult = None | Awaitable[None]
+Effect = Callable[[GameState], EffectResult] | Callable[[], EffectResult]
+
+
 # Сценарии
 Transition = TypedDict(
     "Transition",
@@ -49,7 +54,7 @@ Transition = TypedDict(
         "from": Any,
         "to": Any,
         "trigger": Callable[[GameState], bool] | Callable[[], bool],
-        "effect": Callable[[GameState], None] | Callable[[], None],
+        "effect": Effect,
     },
 )
 
@@ -70,7 +75,7 @@ ScenarioDefinitions = dict[str, ScenarioDefinition]
 
 # Активности
 class Activity(TypedDict):
-    tick_effect: Callable[[GameState], None] | Callable[[], None]
+    tick_effect: Effect
     can_continue: Callable[[GameState], bool] | Callable[[], bool]
     hold_required: Callable[[], bool]
     is_stackable: Callable[[], bool]
@@ -87,5 +92,19 @@ class ActivityDefinition(Protocol):
 ActivityDefinitions = dict[str, ActivityDefinition]
 
 
+class Definitions(TypedDict):
+    activities: ActivityDefinitions
+    scenarios: ScenarioDefinitions
+
+
 # Резолвер
 Resolver = Callable[[GameState, list[Intent]], None]
+
+
+# Описание активностей для UI
+class ActivityOption(TypedDict):
+    label: str
+    hold_required: bool
+
+
+ActivityOptions = list[ActivityOption]

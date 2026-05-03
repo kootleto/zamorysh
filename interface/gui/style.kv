@@ -1,0 +1,77 @@
+#:import components interface.gui.components
+
+<SelectableList>:
+    do_scroll_x: False
+
+    BoxLayout:
+        id: container
+        orientation: 'vertical'
+        size_hint_y: None
+        height: self.minimum_height
+
+<ListButton>:
+    size_hint_y: None
+    height: 40
+    background_color: 0.4, 0.4, 0.4, 1
+
+<LogView>:
+    do_scroll_x: False
+    canvas.before:
+        Color:
+            rgba: 0.2, 0.2, 0.2, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        id: container
+        orientation: 'vertical'
+        size_hint_y: None
+        height: self.minimum_height
+        canvas.before:
+            Color:
+                rgba: 0.3, 0.3, 0.3, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+<LogLabel>:
+    size_hint_y: None
+    height: 30
+
+<MainButton@Button>:
+    size_hint_y: None
+    height: 50
+    text: "Action button"
+
+<MyInput@TextInput>:
+    size_hint_y: None
+    height: 50
+    hint_text: ""
+    disabled: True
+    multiline: False
+
+<InfoPanel@Label>:
+    size_hint_y: None
+    height: 50
+    halign: "left"
+    valign: "center"
+    text_size: self.size
+
+BoxLayout:
+    orientation: "vertical"
+    InfoPanel:
+        id: info
+        text: ""
+    BoxLayout:
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_x: 0.3
+            SelectableList:
+                id: activity_list
+            MyInput:
+                id: input
+        LogView:
+            id: logger
+            size_hint_x: 0.7
+    MainButton:
+        id: button

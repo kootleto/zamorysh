@@ -2,7 +2,7 @@ from inspect import signature
 from typing import Any, Callable
 
 from tools.logger import log
-from tools.utils import call_with_gs, ensure_callable
+from tools.utils import call_with_gs, ensure_callable, call_with_gs_async
 from . import gs_api
 from .schema import (
     GameState,
@@ -53,8 +53,8 @@ def check_trigger(gs: GameState, transition: Transition) -> bool:
     return call_with_gs(gs, transition["trigger"])
 
 
-def apply_effect(gs: GameState, transition: Transition):
-    call_with_gs(gs, transition["effect"])
+async def apply_effect(gs: GameState, transition: Transition):
+    return await call_with_gs_async(gs, transition["effect"])
 
 
 def base_scenario(transitions: list[Transition], start_node: Any = 0) -> Scenario:
