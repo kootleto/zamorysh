@@ -10,16 +10,21 @@ def check_today_schedule():
         for lesson_time, lesson in schedule.get_day_schedule(
             time.get_weekday(gs)
         ).items():
-            ui.display(f"{lesson_time}: {lesson}")
+            ui.display(
+                f"{lesson_time} {lesson["subject"]} ({lesson["type"]}) в кабинете {lesson["room"]}"
+            )
 
     def can_continue(gs):
         return time.get_weekday(gs) != time.SUNDAY
 
-    return activities_api.base_activity(
-        tick_effect,
-        can_continue,
-        hold_required=True,
-        name="посмотреть расписание на сегодня",
+    return activity_wrappers.single_tick_activity(
+        activities_api.base_activity(
+            tick_effect,
+            can_continue,
+            hold_required=True,
+            name="посмотреть расписание на сегодня",
+        ),
+        state=None,
     )
 
 
@@ -29,39 +34,54 @@ def check_tomorrow_schedule():
             for lesson_time, lesson in schedule.get_day_schedule(
                 time.get_weekday(gs) + 1
             ).items():
-                ui.display(f"{lesson_time}: {lesson}")
+                ui.display(
+                    f"{lesson_time} {lesson["subject"]} ({lesson["type"]}) в кабинете {lesson["room"]}"
+                )
         else:
             for lesson_time, lesson in schedule.get_day_schedule(time.MONDAY).items():
-                ui.display(f"{lesson_time}: {lesson}")
+                ui.display(
+                    f"{lesson_time} {lesson["subject"]} ({lesson["type"]}) в кабинете {lesson["room"]}"
+                )
 
     def can_continue(gs):
         return time.get_weekday(gs) != time.SATURDAY
 
-    return activities_api.base_activity(
-        tick_effect,
-        can_continue,
-        hold_required=True,
-        name="посмотреть расписание на завтра",
+    return activity_wrappers.single_tick_activity(
+        activities_api.base_activity(
+            tick_effect,
+            can_continue,
+            hold_required=True,
+            name="посмотреть расписание на завтра",
+        ),
+        state=None,
     )
 
 
 def check_current_lesson():
     def tick_effect(gs):
-        ui.display(schedule.get_current_lesson(gs))
+        if schedule.get_current_lesson(gs)["subject"] is not None:
+            ui.display(
+                f"{schedule.get_current_subject(gs)} ({schedule.get_current_type(gs)} в кабинете {schedule.get_current_room(gs)}"
+            )
+        else:
+            ui.display("Сейчас нет пар")
 
     def can_continue(gs):
         return time.get_weekday(gs) != time.SUNDAY
 
-    return activities_api.base_activity(
-        tick_effect,
-        can_continue,
-        hold_required=True,
-        name="посмотреть текущую пару",
+    return activity_wrappers.single_tick_activity(
+        activities_api.base_activity(
+            tick_effect,
+            can_continue,
+            hold_required=True,
+            name="посмотреть текущую пару",
+        ),
+        state=None,
     )
 
 
-activities = [
-    activity_wrappers.single_tick_activity(check_today_schedule),
-    activity_wrappers.single_tick_activity(check_tomorrow_schedule),
-    activity_wrappers.single_tick_activity(check_current_lesson),
+ACTIVITIES = [
+    check_today_schedule,
+    check_tomorrow_schedule,
+    check_current_lesson,
 ]
