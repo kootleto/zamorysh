@@ -1,31 +1,31 @@
 from gameplay.api import time
 
 WEEK_SCHEDULE = {
-    time.MONDAY: {"13:00": "Лингвистическая антропология"},
+    time.MONDAY: {"13:00": {"subject": "Английский", "room": 205, "type": "семинар"}},
     time.TUESDAY: {
-        "11:10": "Языковое разнообразие (лекция)",
-        "13:00": "Латынь",
-        "14:40": "Язык",
+        "11:10": {"subject": "Языковое разнообразие", "room": 510, "type": "лекция"},
+        "13:00": {"subject": "Латынь", "room": 506, "type": "семинар"},
+        "14:40": {"subject": "Язык", "room": 516, "type": "семинар"},
     },
     time.WEDNESDAY: {
-        "09:30": "Дискретная математика (лекция)",
-        "11:10": "Старославянский",
-        "12:30": "Языковое разнообразие (семинар)",
-        "14:40": "Дискретная математика (семинар)",
-        "16:20": "Введение в лингвистику (семинар)",
+        "09:30": {"subject": "Дискретная математика", "room": 501, "type": "лекция"},
+        "11:10": {"subject": "Старославянский", "room": 507, "type": "семинар"},
+        "12:30": {"subject": "Языковое разнообразие", "room": 316, "type": "семинар"},
+        "14:40": {"subject": "Дискретная математика", "room": 505, "type": "семинар"},
+        "16:20": {"subject": "Введение в лингвистику", "room": 507, "type": "семинар"},
     },
     time.THURSDAY: {
-        "13:00": "Лингвистические данные (лекция)",
-        "14:40": "Латынь",
-        "16:20": "Лингвистические данные (семинар)",
+        "13:00": {"subject": "Лингвистические данные", "room": 501, "type": "лекция"},
+        "14:40": {"subject": "Латынь", "room": 506, "type": "семинар"},
+        "16:20": {"subject": "Лингвистические данные", "room": 401, "type": "семинар"},
     },
     time.FRIDAY: {
-        "11:10": "Цифровая грамотность",
-        "13:00": "НИС",
-        "14:40": "Язык",
-        "16:20": "Введение в лингвистику (лекция)",
+        "11:10": {"subject": "Цифровая грамотность", "room": 509, "type": "семинар"},
+        "13:00": {"subject": "НИС", "room": 505, "type": "семинар"},
+        "14:40": {"subject": "Язык", "room": 516, "type": "семинар"},
+        "16:20": {"subject": "Введение в лингвистику", "room": 501, "type": "лекция"},
     },
-    time.SATURDAY: {"11:10": "История"},
+    time.SATURDAY: {"11:10": {"subject": "История", "room": 502, "type": "семинар"}},
 }
 
 
@@ -38,6 +38,7 @@ def get_day_schedule(weekday):
 
 
 def get_current_lesson(gs):
+    current_lesson = {"subject": None, "room": None, "type": None}
     for lesson_time, lesson in get_day_schedule(time.get_weekday(gs)).items():
         if (
             0
@@ -47,5 +48,19 @@ def get_current_lesson(gs):
             - int(lesson_time[3:5])
             <= 120
         ):
-            return lesson
-    return "Сейчас нет пар"
+            current_lesson["subject"] = lesson["subject"]
+            current_lesson["room"] = lesson["room"]
+            current_lesson["type"] = lesson["type"]
+            return current_lesson
+
+
+def get_current_subject(gs):
+    return get_current_lesson(gs)["subject"]
+
+
+def get_current_type(gs):
+    return get_current_lesson(gs)["type"]
+
+
+def get_current_room(gs):
+    return get_current_lesson(gs)["room"]
