@@ -6,6 +6,12 @@ from interface import ui
 
 # Пример активности с ограничением по времени
 # Эта активность будет длиться всего пять тиков. Теперь не надо вручную прописывать счетчик!
+@activities_api.on_finish(
+    lambda gs, entry: ui.display(
+        f"Следующим числом было бы {entry["state"]["number"]}, но нам надоело считать, "
+        f"ведь у нас всего {stats.get(gs, stats.KNOWLEDGE)} knowledge..."
+    )
+)
 def display_numbers_for_10_ticks(state=None):
     state = state_api.init_defaults(state, number=2)
 

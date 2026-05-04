@@ -1,9 +1,8 @@
 from inspect import signature
 from typing import Any, Callable
 
-from tools.logger import log
 from tools.utils import call_with_gs, ensure_callable, call_with_gs_async
-from . import gs_api
+from . import gs_api, gs_core
 from .schema import (
     GameState,
     Transition,
@@ -132,7 +131,7 @@ def configure_scenario(
     Definition — логика сценария, entry — данные о нем. Совместив их, мы получаем сценарий, то есть
     объект, у которого есть список переходов и начальное состояние.
     """
-    log(f"Scenario entry: {entry}", log_type="config")
+    # log(f"Scenario entry: {entry}", log_type="config")
 
     # Собираем данные из entry
     definition = scenario_definitions[entry["scenario_name"]]
@@ -163,7 +162,7 @@ def start_scenario(
     set_node(scenario_entry, get_start_node(scenario))
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему
     entry_with_id = gs_api.with_id(gs, scenario_entry)
-    gs["system"]["scenario_entries"].append(entry_with_id)
+    gs_core.add_scenario_entry(gs, entry_with_id)
 
 
 # В начале игры движок запускает все сценарии

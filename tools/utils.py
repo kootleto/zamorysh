@@ -12,23 +12,23 @@ def accepts(param: str, func: Callable) -> bool:
     return param in sig.parameters
 
 
-def _get_result(gs: GameState, func: Callable):
+def _get_result(gs: GameState, func: Callable, *args, **kwargs):
     if accepts("gs", func):
-        return func(gs)
-    return func()
+        return func(gs, *args, **kwargs)
+    return func(*args, **kwargs)
 
 
-def call_with_gs(gs: GameState, func: Callable):
+def call_with_gs(gs: GameState, func: Callable, *args, **kwargs):
     """
     Передать `gs`, если функция ожидает этот аргумент, иначе вызвать функцию без аргументов.
 
     Позволяет не прописывать этот параметр в функциях, которым он не нужен.
     """
-    return _get_result(gs, func)
+    return _get_result(gs, func, *args, **kwargs)
 
 
-async def call_with_gs_async(gs: GameState, func: Callable):
-    result = _get_result(gs, func)
+async def call_with_gs_async(gs: GameState, func: Callable, *args, **kwargs):
+    result = _get_result(gs, func, *args, **kwargs)
     return await result if isawaitable(result) else result
 
 
