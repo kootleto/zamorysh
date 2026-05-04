@@ -1,6 +1,5 @@
 from typing import Callable, Iterable
 
-from tools.logger import log
 from tools.utils import (
     call_with_gs,
     ensure_callable,
@@ -283,19 +282,16 @@ def start_activity(
     Добавить entry в список текущих активностей.
     Если активность не-stackable, остановить другие не-stackable активности.
     """
-    log("Start activity", entry)
     # Создаем активность, чтобы понять, стакается ли она
     activity = configure_activity(definitions, entry)
     # Удаляем из списка запущенных все не стакающиеся
     if not check_is_stackable(activity):
-        log("Not stackable")
         new_entries = []
         for active_entry in gs_core.get_activity_entries(gs):
             if check_is_stackable(configure_activity(definitions, active_entry)):
                 new_entries.append(active_entry)
             else:
                 gs_core.add_finished_entry(gs, active_entry)
-        log("New entries:", new_entries)
         gs_core.set_activity_entries(gs, new_entries)
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему.
     # До добавления в gs такой необходимости нет
