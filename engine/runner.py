@@ -1,5 +1,6 @@
 import asyncio
 import time
+from copy import deepcopy
 
 from engine import controller
 from engine.schema import GameState, Definitions
@@ -38,6 +39,12 @@ async def run(
         await controller.update(
             gs, definitions, check_button_pressed=ui.check_button_pressed
         )
+
+        just_finished = controller.get_just_finished(gs)
+        if just_finished:
+            read_only_gs = deepcopy(gs)
+            for entry in just_finished:
+                controller.call_on_finish(read_only_gs, definitions, entry)
 
         next_tick_at += controller.get_tick_interval(gs)
 

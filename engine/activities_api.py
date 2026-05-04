@@ -1,13 +1,12 @@
 from typing import Callable, Iterable
 
-from tools.logger import log
 from tools.utils import (
     call_with_gs,
     ensure_callable,
     call_with_gs_async,
     accepts,
 )
-from . import gs_api
+from . import gs_api, gs_core
 from . import state_api
 from .schema import (
     Activity,
@@ -16,6 +15,7 @@ from .schema import (
     ActivityDefinitions,
     GameState,
     Effect,
+    FinishCallback,
 )
 
 
@@ -119,10 +119,35 @@ def get_param_space(gs: GameState, definition: ActivityDefinition) -> Iterable:
 
 
 # Это декоратор. Он делает то же, что и with_param_space: присваивает объекту атрибут
-def with_auto_start(definition):
+def with_auto_start(definition: ActivityDefinition):
     """Запустить активность в начале игры."""
     definition.auto_start = True
     return definition
+
+
+def on_finish(callback: FinishCallback):
+    """Сделать что-то после того, как активность завершится. То, что внутри, будет вызвано после окончания тика.
+    Функция может принимать в качестве аргументов `gs` и `entry` (оба аргумента опциональны,
+    писать именно в таком порядке).
+
+    Эта функция НЕ МОЖЕТ менять gs, но может что-то выводить на экран."""
+
+    def wrapper(definition):
+        definition.on_finish = callback
+        return definition
+
+    return wrapper
+
+
+def call_on_finish(
+    gs: GameState, definitions: ActivityDefinitions, entry: ActivityEntry
+):
+    definition = definitions[entry["activity_name"]]
+    callback = getattr(definition, "on_finish", None)
+
+    if callback:
+        args = [entry] if accepts("entry", callback) else []
+        call_with_gs(gs, callback, *args)
 
 
 def check_auto_start(definition: ActivityDefinition) -> bool:
@@ -182,7 +207,7 @@ def configure_activity(
     Если `param` в entry равен `None`, то в definition ничего не передается, и будет использован параметр,
     указанный в definition по умолчанию. Поэтому не используйте `None` в качестве значения параметра!
     """
-    log(f"Activity entry: {entry}", log_type="config")
+    # log(f"Activity entry: {entry}", log_type="config")
 
     # Собираем данные из entry
     definition = definitions[entry["activity_name"]]
@@ -259,16 +284,19 @@ def start_activity(
     """
     # Создаем активность, чтобы понять, стакается ли она
     activity = configure_activity(definitions, entry)
+    # Удаляем из списка запущенных все не стакающиеся
     if not check_is_stackable(activity):
-        gs["system"]["activity_entries"] = [
-            entry
-            for entry in gs["system"]["activity_entries"]
-            if check_is_stackable(configure_activity(definitions, entry))
-        ]
+        new_entries = []
+        for active_entry in gs_core.get_activity_entries(gs):
+            if check_is_stackable(configure_activity(definitions, active_entry)):
+                new_entries.append(active_entry)
+            else:
+                gs_core.add_finished_entry(gs, active_entry)
+        gs_core.set_activity_entries(gs, new_entries)
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему.
     # До добавления в gs такой необходимости нет
     entry_with_id = gs_api.with_id(gs, entry)
-    gs["system"]["activity_entries"].append(entry_with_id)
+    gs_core.add_activity_entry(gs, entry_with_id)
 
 
 def composite_activity(

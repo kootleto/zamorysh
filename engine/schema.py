@@ -1,4 +1,4 @@
-from typing import Callable, TypedDict, Any, Literal, Protocol, Awaitable
+from typing import Callable, TypedDict, Any, Literal, Protocol, Awaitable, Union
 
 
 # Сущности внутри gs
@@ -30,6 +30,7 @@ class SystemState(TypedDict):
     activity_entries: list[ActivityEntry]
     scenario_entries: list[ScenarioEntry]
     intents: list[Intent]
+    just_finished: list[ActivityEntry]
     next_id: int
     is_running: bool
     tick_interval: float
@@ -81,6 +82,13 @@ class Activity(TypedDict):
     is_stackable: Callable[[], bool]
     is_background: Callable[[], bool]
     name: str
+
+
+FinishCallback = Union[
+    Callable[[GameState, ActivityEntry], Any],  # (gs, entry)
+    Callable[[ActivityEntry], Any],  # (entry)
+    Callable[[], Any],  # ()
+]
 
 
 class ActivityDefinition(Protocol):
