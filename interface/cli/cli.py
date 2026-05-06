@@ -91,15 +91,7 @@ async def prompt_activity(options: ActivityOptions) -> int:
     return selected_index
 
 
-def play_music(title: str):
-    display(f"Играет музыка: {title}")
-
-
-def stop_music():
-    display("Музыка остановлена.")
-
-
-def refresh_ui(gs: GameState, _vs, _options):
+def refresh_ui(gs: GameState, _options):
     display(
         f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.FATIGUE)}, Money: {stats.get(gs, stats.MONEY)}"
     )

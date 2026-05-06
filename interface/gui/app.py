@@ -51,7 +51,7 @@ class GameApp(App):
         self.ready.set_result(True)
 
         def update(_):
-            ui.refresh_ui(self.gs, self.vs, self.get_options_func())
+            ui.refresh_ui(self.gs, self.get_options_func())
 
         Clock.schedule_interval(update, 1 / 60)
 
