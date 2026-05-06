@@ -1,9 +1,11 @@
 import asyncio
+from copy import deepcopy
+from typing import TypedDict
 
 from kivy.app import App
 
 from engine.schema import ActivityOptions, GameState
-from gameplay.api import vitals, stats, time
+from gameplay.api import vitals, stats, time, music
 
 
 class AppProxy:
@@ -17,10 +19,40 @@ class AppProxy:
 app = AppProxy()
 
 
+class KivyState(TypedDict):
+    track_title: str | None
+    volume: int
+    fullscreen: bool
+
+
+INITIAL_UI_STATE: KivyState = {"track_title": None, "volume": 100, "fullscreen": False}
+
+
+def init_ui() -> KivyState:
+    return deepcopy(INITIAL_UI_STATE)
+
+
 def display(*message, sep: str = " "):
 
     message = sep.join(map(str, message))
     app.root.ids.logger.add_line(message)
+
+
+async def prompt(*message, sep: str = " ") -> str:
+    app_input = app.root.ids.input
+
+    message = sep.join(map(str, message))
+
+    app_input.focus = True
+    app_input.disabled = False
+    app_input.hint_text = message
+    await _wait_for_event(app.root.ids.button, "on_press")
+    response = app_input.text
+    app_input.text = ""
+    app_input.hint_text = ""
+    app_input.disabled = True
+
+    return response
 
 
 async def prompt_activity(options: ActivityOptions) -> int:
@@ -42,28 +74,7 @@ async def prompt_activity(options: ActivityOptions) -> int:
     return index
 
 
-async def prompt(*message, sep: str = " ") -> str:
-    app_input = app.root.ids.input
-
-    message = sep.join(map(str, message))
-
-    app_input.focus = True
-    app_input.disabled = False
-    app_input.hint_text = message
-    await _wait_for_event(app.root.ids.button, "on_press")
-    response = app_input.text
-    app_input.text = ""
-    app_input.hint_text = ""
-    app_input.disabled = True
-
-    return response
-
-
-def check_button_pressed():
-    return app.root.ids.button.state == "down" or app.key_enter_pressed
-
-
-def refresh_stats(gs: GameState, options: ActivityOptions):
+def refresh_ui(gs: GameState, options: ActivityOptions):
     app.stats = {
         "time": f"{time.get_hour(gs):02}:{time.get_minute(gs):02}",
         "fatigue": vitals.get(gs, vitals.FATIGUE),
@@ -72,10 +83,15 @@ def refresh_stats(gs: GameState, options: ActivityOptions):
         "mental": vitals.get(gs, vitals.MENTAL),
         "knowledge": stats.get(gs, stats.KNOWLEDGE),
     }
-
+    app.track_title = music.get_current_track(gs)
     new_labels = [option["label"] for option in options]
+
     if app.root.ids.activity_list.items != new_labels:
         app.root.ids.activity_list.items = new_labels
+
+
+def check_button_pressed():
+    return app.root.ids.button.state == "down" or app.key_enter_pressed
 
 
 async def on_finish():

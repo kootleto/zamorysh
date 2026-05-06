@@ -1,12 +1,16 @@
 import asyncio
+import os.path
 
+import pygame
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.properties import DictProperty, BooleanProperty
+from kivy.properties import DictProperty, BooleanProperty, StringProperty
 
+from engine.schema import GameState
 from interface import ui
+from interface.gui.gui import KivyState
 
 
 class GameApp(App):
@@ -20,17 +24,24 @@ class GameApp(App):
             "knowledge": 0,
         }
     )
+    track_title = StringProperty(None)
 
     key_enter_pressed = BooleanProperty(False)
 
-    def __init__(self, gs, get_options_func, **kwargs):
+    def __init__(self, gs: GameState, vs: KivyState, get_options_func, **kwargs):
         super().__init__(**kwargs)
         self.gs = gs
+        self.vs = vs
         self.get_options_func = get_options_func
         self.activity_options = []
         self.ready = asyncio.Future()
 
     def build(self):
+        pygame.mixer.pre_init(buffer=512)
+        pygame.mixer.init()
+        warmup = pygame.mixer.Sound(buffer=bytes(1024))
+        warmup.play()
+
         return Builder.load_file("interface/gui/style.kv")
 
     def on_start(self):
@@ -40,7 +51,7 @@ class GameApp(App):
         self.ready.set_result(True)
 
         def update(_):
-            ui.refresh_stats(self.gs, self.get_options_func())
+            ui.refresh_ui(self.gs, self.get_options_func())
 
         Clock.schedule_interval(update, 1 / 60)
 
@@ -51,6 +62,20 @@ class GameApp(App):
             f"mental: {value['mental']}   knowledge: {value['knowledge']}"
         )
 
+    def on_track_title(self, _, value):
+        pygame.mixer.music.fadeout(0)
+
+        if not value:
+            return
+
+        path = f"assets/music/{value}"
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"File '{path}' not found")
+
+        pygame.mixer.music.load(path)
+        pygame.mixer.music.set_volume(self.vs["volume"] / 100)
+        Clock.schedule_once(lambda dt: pygame.mixer.music.play(loops=-1), 0)
+
     def _on_key_down(self, _window, key, *_args):
         if key == 13:
             self.key_enter_pressed = True
@@ -59,3 +84,6 @@ class GameApp(App):
     def _on_key_up(self, _window, key, *_args):
         if key == 13:
             self.key_enter_pressed = False
+
+    def on_stop(self):
+        pygame.mixer.quit()
