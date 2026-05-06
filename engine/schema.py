@@ -1,4 +1,4 @@
-from typing import Callable, TypedDict, Any, Literal, Protocol
+from typing import Callable, TypedDict, Any, Literal, Protocol, Awaitable, Union
 
 
 # Сущности внутри gs
@@ -30,8 +30,10 @@ class SystemState(TypedDict):
     activity_entries: list[ActivityEntry]
     scenario_entries: list[ScenarioEntry]
     intents: list[Intent]
+    just_finished: list[ActivityEntry]
     next_id: int
-    is_end: bool
+    is_running: bool
+    tick_interval: float
 
 
 GameplayState = dict[str, dict[str, Any]]
@@ -42,6 +44,10 @@ class GameState(TypedDict):
     system: SystemState
 
 
+EffectResult = None | Awaitable[None]
+Effect = Callable[[GameState], EffectResult] | Callable[[], EffectResult]
+
+
 # Сценарии
 Transition = TypedDict(
     "Transition",
@@ -49,7 +55,7 @@ Transition = TypedDict(
         "from": Any,
         "to": Any,
         "trigger": Callable[[GameState], bool] | Callable[[], bool],
-        "effect": Callable[[GameState], None] | Callable[[], None],
+        "effect": Effect,
     },
 )
 
@@ -70,12 +76,19 @@ ScenarioDefinitions = dict[str, ScenarioDefinition]
 
 # Активности
 class Activity(TypedDict):
-    tick_effect: Callable[[GameState], None] | Callable[[], None]
+    tick_effect: Effect
     can_continue: Callable[[GameState], bool] | Callable[[], bool]
     hold_required: Callable[[], bool]
     is_stackable: Callable[[], bool]
     is_background: Callable[[], bool]
     name: str
+
+
+FinishCallback = Union[
+    Callable[[GameState, ActivityEntry], Any],  # (gs, entry)
+    Callable[[ActivityEntry], Any],  # (entry)
+    Callable[[], Any],  # ()
+]
 
 
 class ActivityDefinition(Protocol):
@@ -87,5 +100,19 @@ class ActivityDefinition(Protocol):
 ActivityDefinitions = dict[str, ActivityDefinition]
 
 
+class Definitions(TypedDict):
+    activities: ActivityDefinitions
+    scenarios: ScenarioDefinitions
+
+
 # Резолвер
 Resolver = Callable[[GameState, list[Intent]], None]
+
+
+# Описание активностей для UI
+class ActivityOption(TypedDict):
+    label: str
+    hold_required: bool
+
+
+ActivityOptions = list[ActivityOption]

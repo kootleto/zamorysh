@@ -10,10 +10,10 @@ def buy_drink1(hold_required=False, state=None):
     # return stats.get(gs, stats.money) < 0
     # state = state_api.init_defaults(state, counter=1)
 
-    def tick_effect(gs):
+    async def tick_effect(gs):
         ui.display("Buy coffee1 for 2$? (Press a + Enter)")
         ui.display("Buy coffee2 for 2$? (Press b + Enter)")
-        vv = ui.prompt("Pick your poison: ")
+        vv = await ui.prompt("Pick your poison: ")
         if vv == "a":
             vitals.mod(gs, vitals.FATIGUE, -5)
             stats.mod(gs, stats.MONEY, -2)
@@ -37,7 +37,9 @@ def buy_drink1(hold_required=False, state=None):
     def can_continue(gs):
         return stats.get(gs, stats.MONEY) > 2 and (
             (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 10)
-            or (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60)
+            or (
+                location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60
+            )
         )
         # return stats.get(gs, stats.money) > 2
 

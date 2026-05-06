@@ -33,8 +33,12 @@ def metro_scenario():
     return move_scenario("metro")
 
 
-def coffee_scenario():
-    return move_scenario("coffee house")
+def surfcoffee_scenario():
+    return move_scenario("Surf coffee")
+
+
+def anothercoffee_scenario():
+    return move_scenario("Другая кофейня")
 
 
 def club_scenario():
@@ -52,7 +56,8 @@ def university_scenario():
 SCENARIOS = [
     home_scenario,
     metro_scenario,
-    coffee_scenario,
+    surfcoffee_scenario,
+    anothercoffee_scenario,
     club_scenario,
     park_scenario,
     university_scenario,

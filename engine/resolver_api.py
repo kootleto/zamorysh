@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import Callable, Iterable, Any
 
+from engine import gs_api, gs_core
 from engine.schema import GameState, Intent, Resolver
 from tools.logger import log
 
@@ -11,7 +12,7 @@ def resolve_intents(gs: GameState, resolvers: dict[str, Resolver]):
 
     # Группируем интенты по категории в gs, к которой относится цель
     grouped_intents = defaultdict(list)
-    for intent in gs["system"]["intents"]:
+    for intent in gs_core.get_intents(gs):
         grouped_intents[intent["domain"]].append(intent)
 
     # Для каждого типа пытаемся применить резолвер с соответствующим именем.
@@ -26,7 +27,7 @@ def resolve_intents(gs: GameState, resolvers: dict[str, Resolver]):
             )
 
     # После обработки интентов очищаем массив в gs
-    gs["system"]["intents"].clear()
+    gs_core.clear_intents(gs)
 
 
 def resolve_generic(
@@ -56,16 +57,20 @@ def resolve_generic(
         if grouped["set"]:
             value = set_fn([i["value"] for i in grouped["set"]])
         else:
-            value = gs["gameplay"][domain][target]
+            value = gs_api.get_value(gs, domain, target)
         value += mod_fn([i["value"] for i in grouped["mod"]])
         value = clamp_fn(value)
         log(
-            f"{target} {gs["gameplay"][domain][target]} -> {value}", log_type="resolver"
+            f"{target} {gs_api.get_value(gs, domain, target)} -> {value}",
+            log_type="resolver",
         )
-        gs["gameplay"][domain][target] = value
+        gs_core.apply_value(gs, domain, target, value)
 
 
 # Обработка остановки игры
 def resolve_system(gs: GameState, intents: list[Intent]):
-    if any(intent["target"] == "is_end" and intent["value"] for intent in intents):
-        gs["system"]["is_end"] = True
+    if any(
+        intent["target"] == "is_running" and intent["value"] == False
+        for intent in intents
+    ):
+        gs_core.apply_is_running(gs, False)

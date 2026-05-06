@@ -1,5 +1,6 @@
 from engine import activities_api, state_api
 from gameplay.api import vitals, stats
+from interface import ui
 
 
 # Параметрами активности может быть что угодно.
@@ -56,29 +57,6 @@ def work_and_rest(definitions, state=None):
     )
 
 
-# Пример использования state
-# По умолчанию state, если он есть, должен быть None. Не забывайте прописывать это!
-# Это значит, что, если мы не передадим в определение никакой словарь, определение не сломается,
-# а просто увидит, что ему ничего не передано, и создаст словарь самостоятельно,
-# не изменяя никакие данные по ссылке
-def cry(state=None):
-    # Присваивание (state =) имеет смысл только в том случае, если state=None
-    # Python хранит словари как ссылки, а init_defaults мутирует словарь, так что в остальных случаях
-    # достаточно вызова функции. Но переприсваивание не повредит, а код так становится короче
-    state = state_api.init_defaults(state, counter=10)
-
-    def tick_effect(gs):
-        vitals.mod(gs, vitals.FATIGUE, +1)
-        state["counter"] -= 1
-
-    # Если функции не нужен gs, его можно не передавать как параметр
-    # благодаря обертке call_with_gs в tools/utils: если gs нет в параметрах, он не будет передан
-    def can_continue():
-        return state["counter"] > 0
-
-    return activities_api.base_activity(tick_effect, can_continue, True, name="cry")
-
-
 # Пример активности с параметром
 # Сначала мы указываем область параметра - по этой области будет проходить
 # get_allowed_activity_entries и проверять для каждого параметра из этой области, можно ли начать такую активность.
@@ -106,6 +84,32 @@ def waste_money(param, state=None):
     return activities_api.base_activity(
         tick_effect, can_continue, name=f"waste {param} money"
     )
+
+
+# Пример использования on_finish. В скобках надо указать, что мы хотим вызвать после тика, в котором
+# активность завершится. Эта функция может принимать gs и entry завершившейся активности, а может и не принимать
+@activities_api.on_finish(lambda: ui.display("Слезами горю не поможешь..."))
+# Пример использования state
+# По умолчанию state, если он есть, должен быть None. Не забывайте прописывать это!
+# Это значит, что, если мы не передадим в определение никакой словарь, определение не сломается,
+# а просто увидит, что ему ничего не передано, и создаст словарь самостоятельно,
+# не изменяя никакие данные по ссылке
+def cry(state=None):
+    # Присваивание (state =) имеет смысл только в том случае, если state=None
+    # Python хранит словари как ссылки, а init_defaults мутирует словарь, так что в остальных случаях
+    # достаточно вызова функции. Но переприсваивание не повредит, а код так становится короче
+    state = state_api.init_defaults(state, counter=10)
+
+    def tick_effect(gs):
+        vitals.mod(gs, vitals.FATIGUE, +1)
+        state["counter"] -= 1
+
+    # Если функции не нужен gs, его можно не передавать как параметр
+    # благодаря обертке call_with_gs в tools/utils: если gs нет в параметрах, он не будет передан
+    def can_continue():
+        return state["counter"] > 0
+
+    return activities_api.base_activity(tick_effect, can_continue, True, name="cry")
 
 
 @activities_api.with_auto_start
