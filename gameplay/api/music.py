@@ -24,9 +24,9 @@ def get_current_track(gs) -> str:
     return gs_api.get_value(gs, _DOMAIN, TRACK_TITLE)
 
 
-def play_music(gs, title: str):
+def play(gs, title: str):
     gs_api.set_value(gs, _DOMAIN, TRACK_TITLE, title)
 
 
-def stop_music(gs):
+def stop(gs):
     gs_api.set_value(gs, _DOMAIN, TRACK_TITLE, None)
