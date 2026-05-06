@@ -42,7 +42,10 @@ def fifth_floor():
 
 def get_classrooms(floor_number):
     def check(gs):
-        return floors.get(gs, floors.FLOOR) == floor_number
+        return (
+            floors.get(gs, floors.FLOOR) == floor_number
+            and floors.get(gs, floors.CLASSROOM) == 0
+        )
 
     def show_classrooms():
         ui.display(f"Аудитории: {", ".join(floors.CLASSROOMS[floor_number])}")

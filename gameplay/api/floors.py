@@ -8,9 +8,9 @@ _DOMAIN = "floors"
 FLOOR = "floor"
 CLASSROOM = "classroom"
 
-_INITIAl = {FLOOR: 1, CLASSROOM: None}
+_INITIAL = {FLOOR: 1, CLASSROOM: 0}
 CLASSROOMS = {
-    0: ["дизайнеры"],
+    0: [1],
     2: [205],
     3: [316],
     4: [401],

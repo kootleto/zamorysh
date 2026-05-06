@@ -35,9 +35,9 @@ def move_down():
 def go_to_classroom(state=None):
     def tick_effect(gs):
         ui.display(
-            f"Выберите кабинет: {floors.CLASSROOMS[floors.get(gs, floors.CLASSROOM)]}"
+            f"Выберите кабинет: {floors.CLASSROOMS[floors.get(gs, floors.FLOOR)]}"
         )
-        floors.set(gs, floors.CLASSROOM, ui.prompt())
+        floors.set(gs, floors.CLASSROOM, int(ui.prompt()))
 
     def can_continue(gs):
         return (
@@ -49,4 +49,16 @@ def go_to_classroom(state=None):
     )
 
 
-ACTIVITIES = [move_up, move_down, go_to_classroom]
+def go_out_of_classroom(state=None):
+    def tick_effect(gs):
+        floors.set(gs, floors.CLASSROOM, 0)
+
+    def can_continue(gs):
+        return floors.get(gs, floors.CLASSROOM) != 0
+
+    return single_tick_activity(
+        base_activity(tick_effect, can_continue, name="выйти из кабинета"), state
+    )
+
+
+ACTIVITIES = [move_up, move_down, go_to_classroom, go_out_of_classroom]
