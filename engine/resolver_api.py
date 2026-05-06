@@ -58,7 +58,8 @@ def resolve_generic(
             value = set_fn([i["value"] for i in grouped["set"]])
         else:
             value = gs_api.get_value(gs, domain, target)
-        value += mod_fn([i["value"] for i in grouped["mod"]])
+        if grouped["mod"]:
+            value += mod_fn([i["value"] for i in grouped["mod"]])
         value = clamp_fn(value)
         log(
             f"{target} {gs_api.get_value(gs, domain, target)} -> {value}",

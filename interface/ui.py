@@ -60,16 +60,8 @@ async def prompt_activity(options: ActivityOptions) -> int:
     return index
 
 
-def play_music(title: str):
-    interface.play_music(title)
-
-
-def stop_music():
-    interface.stop_music()
-
-
-def refresh_ui(gs: GameState, vs, options: ActivityOptions):
-    interface.refresh_ui(gs, vs, options)
+def refresh_ui(gs: GameState, options: ActivityOptions):
+    interface.refresh_ui(gs, options)
 
 
 def check_button_pressed():

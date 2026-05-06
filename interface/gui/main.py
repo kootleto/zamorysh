@@ -14,7 +14,7 @@ async def start(gs: GameState, definitions: Definitions, vs: KivyState):
     await app.ready
 
     engine_task = asyncio.create_task(
-        runner.run(gs, vs, definitions, refresh_ui=False, use_sleep=True)
+        runner.run(gs, definitions, refresh_ui=False, use_sleep=True)
     )
 
     done, pending = await asyncio.wait(
