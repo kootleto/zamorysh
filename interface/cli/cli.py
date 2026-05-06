@@ -10,6 +10,10 @@ from gameplay.api import vitals, stats
 from tools.logger import log
 
 
+def init_ui():
+    return {}
+
+
 def display(*message, sep: str = " "):
     """
     Вывести в консоль сообщение с разделителем sep. Если логирование включено, вывести как лог типа UI.
@@ -57,11 +61,6 @@ def _clear_input_buffer():
         termios.tcflush(sys.stdin, termios.TCIFLUSH)
 
 
-def check_button_pressed():
-    """Проверить, нажата ли клавиша Space."""
-    return keyboard.is_pressed("space")
-
-
 async def prompt_activity(options: ActivityOptions) -> int:
     """
     Запросить у игрока выбор активности. Если он выберет активность, для которой требуется зажать клавишу,
@@ -92,7 +91,15 @@ async def prompt_activity(options: ActivityOptions) -> int:
     return selected_index
 
 
-def refresh_stats(gs: GameState, _options):
+def play_music(title: str):
+    display(f"Играет музыка: {title}")
+
+
+def stop_music():
+    display("Музыка остановлена.")
+
+
+def refresh_ui(gs: GameState, _vs, _options):
     display(
         f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.FATIGUE)}, Money: {stats.get(gs, stats.MONEY)}"
     )
@@ -100,6 +107,11 @@ def refresh_stats(gs: GameState, _options):
         f"Social: {stats.get(gs, stats.SOCIAL)}, Mental: {vitals.get(gs, vitals.MENTAL)}"
     )
     display(f"Knowledge: {stats.get(gs, stats.KNOWLEDGE)}")
+
+
+def check_button_pressed():
+    """Проверить, нажата ли клавиша Space."""
+    return keyboard.is_pressed("space")
 
 
 async def on_finish():

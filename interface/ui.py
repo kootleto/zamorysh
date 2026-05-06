@@ -16,7 +16,7 @@ else:
     interface = cli
 
 
-def record_wait_time(func):
+def _record_wait_time(func):
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         global _ui_wait_time
@@ -40,24 +40,36 @@ def pop_wait_time():
     return total
 
 
+def init_ui():
+    return interface.init_ui()
+
+
 def display(*message, sep: str = " "):
     interface.display(*message, sep=sep)
 
 
-@record_wait_time
+@_record_wait_time
 async def prompt(*message, sep: str = " ") -> str:
     response = await interface.prompt(*message, sep=sep)
     return response
 
 
-@record_wait_time
+@_record_wait_time
 async def prompt_activity(options: ActivityOptions) -> int:
     index = await interface.prompt_activity(options)
     return index
 
 
-def refresh_stats(gs: GameState, options: ActivityOptions):
-    interface.refresh_stats(gs, options)
+def play_music(title: str):
+    interface.play_music(title)
+
+
+def stop_music():
+    interface.stop_music()
+
+
+def refresh_ui(gs: GameState, vs, options: ActivityOptions):
+    interface.refresh_ui(gs, vs, options)
 
 
 def check_button_pressed():

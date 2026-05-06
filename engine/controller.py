@@ -25,15 +25,18 @@ def _scenario_definitions(definitions: Definitions) -> ScenarioDefinitions:
     return definitions["scenarios"]
 
 
-async def init_game():
+def init_game():
     game_state = gs_core.init_gs(initial_state)
     definitions = load_definitions("content")
+    return game_state, definitions
+
+
+async def start_game(gs: GameState, definitions: Definitions):
     scenarios_api.start_all_scenarios(
-        game_state, definitions["activities"], definitions["scenarios"]
+        gs, _activity_definitions(definitions), _scenario_definitions(definitions)
     )
     # Обновление, чтобы проверить триггеры сценариев (какие-то триггеры могут сработать уже при initial_gs)
-    await update(game_state, definitions, is_initial=True)
-    return game_state, definitions
+    await update(gs, definitions, is_initial=True)
 
 
 async def update(
