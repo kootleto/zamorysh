@@ -75,6 +75,7 @@ class GameApp(App):
         pygame.mixer.music.load(path)
         pygame.mixer.music.set_volume(self.vs["volume"] / 100)
         pygame.mixer.music.play(loops=-1)
+        pygame.mixer.music.set_pos(0)
 
     def _on_key_down(self, _window, key, *_args):
         if key == 13:

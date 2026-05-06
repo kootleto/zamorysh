@@ -3,7 +3,6 @@ import random
 from engine import activities_api
 from gameplay.activity_wrappers import single_tick_activity, timed_activity
 from gameplay.api import vitals, stats
-from interface import ui
 
 
 def drink_coffee(
@@ -107,7 +106,6 @@ def study(state=None, hold_required=True):
         vitals.mod(gs, vitals.FATIGUE, +5)
         vitals.mod(gs, vitals.MENTAL, -5)
         stats.mod(gs, stats.KNOWLEDGE, +5)
-        ui.play_music("2.wav")
 
     return timed_activity(
         activities_api.base_activity(
