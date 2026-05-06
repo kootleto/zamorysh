@@ -44,5 +44,9 @@ def get_weekday(gs):
     return Weekday(_get_datetime(gs).weekday())
 
 
+def get_time(gs):
+    return _get_datetime(gs).time()
+
+
 def datetime_to_tick(dt):
     return int((dt - START_DATETIME).total_seconds() / 60)
