@@ -3,6 +3,8 @@ import random
 from engine import scenarios_api, gs_api
 from engine import state_api
 from gameplay.api import stats, vitals, location
+from gameplay.api.location import get, get_place
+from gameplay.api.time import get_day, get_hour, get_minute
 from interface import ui
 
 
@@ -32,7 +34,7 @@ def random_scenario2(state=None):
 
     state = state_api.init_fn(state, check_tick2)
 
-    def ti(gs):
+    def tr(gs):
         return gs_api.get_time(gs) == state["tick"]
 
     def eff(gs):
@@ -67,22 +69,22 @@ def random_scenario2(state=None):
 
     return scenarios_api.base_scenario(
         [
-            scenarios_api.base_transition(0, 1, ti, eff),
+            scenarios_api.base_transition(0, 1, tr, eff),
         ]
     )
 
 
 def random_home_scenario(state=None):
-    def check_tick2():
+    def check():
         return {"tick": random.randint(10, 11), "X": 0, "Y": 0}
 
-    state = state_api.init_fn(state, check_tick2)
+    state = state_api.init_fn(state, check)
 
-    def ti(gs):
+    def tr(gs):
         return (
             gs_api.get_time(gs) == state["tick"]
-            and location.get(gs, location.Y) == state["Y"]
-            and location.get(gs, location.X) == state["X"]
+            and get(gs, location.Y) == state["Y"]
+            and get(gs, location.X) == state["X"]
         )
 
     def eff(gs):
@@ -97,42 +99,47 @@ def random_home_scenario(state=None):
         def f3(gs):
             ui.display("Ничего не произощло")
 
-        spis_func = [f1, f2, f3]
-        chs = random.choice(spis_func)
+        functions = [f1, f2, f3]
+        chs = random.choice(functions)
         return chs(gs)
 
     return scenarios_api.base_scenario(
         [
-            scenarios_api.base_transition(0, 1, ti, eff),
+            scenarios_api.base_transition(0, 1, tr, eff),
         ]
     )
 
 
-def early_coffeehouse_scenario(state=None): # Акция "бесплатный кофе первому посетителю" в Surf Coffee
+def early_coffeehouse_scenario(
+    state=None,
+):  # Акция "бесплатный кофе первому посетителю" в Surf Coffee
     def initl():
         # (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 10) or (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60)
         return {"tick": random.randint(15, 17), "X": 10, "Y": 5}
 
     state = state_api.init_fn(state, initl)
 
-    def us(gs):
+    def tr(gs):
         return (
             gs_api.get_time(gs) == state["tick"]
             and location.get(gs, location.Y) == state["Y"]
             and location.get(gs, location.X) == state["X"]
         )
 
-    def efc(gs):
+    def eff(gs):
         if random.choice([True, False]):
             vitals.mod(gs, vitals.MENTAL, -2)
             vitals.mod(gs, vitals.SLEEPINESS, -2)
             ui.display("You came first and got free coffee. Yay.")
         else:
             vitals.mod(gs, vitals.FATIGUE, +2)
-            ui.display("No luck today! Someone has already got your free coffee. (At least you're not gonna be late.)")
+            ui.display(
+                "No luck today! Someone has already got your free coffee. (At least you're not gonna be late.)"
+            )
+
     return scenarios_api.base_scenario(
         [
-            scenarios_api.base_transition(0, 1, us, efc),
+            scenarios_api.base_transition(0, 1, tr, eff),
         ]
     )
 
@@ -143,21 +150,21 @@ def random_park_scenario(state=None):
 
     state = state_api.init_fn(state, initl)
 
-    def us(gs):
+    def tr(gs):
         return (
             gs_api.get_time(gs) == state["tick"]
             and location.get(gs, location.Y) == state["Y"]
             and location.get(gs, location.X) == state["X"]
         )
 
-    def efc(gs):
+    def eff(gs):
         vitals.mod(gs, vitals.MENTAL, -5)
         stats.mod(gs, stats.SOCIAL, +5)
         ui.display("You bumped into your classmate. You were forced to have a chat.")
 
     return scenarios_api.base_scenario(
         [
-            scenarios_api.base_transition(0, 1, us, efc),
+            scenarios_api.base_transition(0, 1, tr, eff),
         ]
     )
 
