@@ -72,6 +72,42 @@ def random_scenario2(state=None):
     )
 
 
+def random_home_scenario(state=None):
+    def check_tick2():
+        return {"tick": random.randint(10, 11), "X": 0, "Y": 0}
+
+    state = state_api.init_fn(state, check_tick2)
+
+    def ti(gs):
+        return (
+            gs_api.get_time(gs) == state["tick"]
+            and location.get(gs, location.Y) == state["Y"]
+            and location.get(gs, location.X) == state["X"]
+        )
+
+    def eff(gs):
+        def f1(gs):
+            stats.mod(gs, stats.SOCIAL, -5)
+            ui.display("Вы разбили любимую чашку. Жалко.")
+
+        def f2(gs):
+            stats.mod(gs, stats.MONEY, +2)
+            ui.display("Вы нашли 2$ под подушкой.")
+
+        def f3(gs):
+            ui.display("Ничего не произощло")
+
+        spis_func = [f1, f2, f3]
+        chs = random.choice(spis_func)
+        return chs(gs)
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, 1, ti, eff),
+        ]
+    )
+
+
 def random_coffeehouse_scenario(state=None):
     def initl():
         # (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 10) or (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60)
@@ -127,4 +163,5 @@ SCENARIOS = [
     random_scenario2,
     random_coffeehouse_scenario,
     random_park_scenario,
+    random_home_scenario,
 ]
