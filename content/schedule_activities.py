@@ -4,7 +4,7 @@ from gameplay.api import time, schedule
 from interface import ui
 
 
-def check_today_schedule():
+def check_today_schedule(state=None):
     def tick_effect(gs):
         for lesson_time, lesson in schedule.get_day_schedule(
             time.get_weekday(gs)
@@ -22,11 +22,11 @@ def check_today_schedule():
             can_continue,
             name="посмотреть расписание на сегодня",
         ),
-        state=None,
+        state,
     )
 
 
-def check_tomorrow_schedule():
+def check_tomorrow_schedule(state=None):
     def tick_effect(gs):
         if time.get_weekday(gs) != time.Weekday.SUNDAY:
             for lesson_time, lesson in schedule.get_day_schedule(
@@ -52,11 +52,11 @@ def check_tomorrow_schedule():
             can_continue,
             name="посмотреть расписание на завтра",
         ),
-        state=None,
+        state,
     )
 
 
-def check_current_lesson():
+def check_current_lesson(state=None):
     def tick_effect(gs):
         if schedule.get_current_lesson(gs)["subject"] is not None:
             ui.display(
@@ -74,7 +74,7 @@ def check_current_lesson():
             can_continue,
             name="посмотреть текущую пару",
         ),
-        state=None,
+        state,
     )
 
 
