@@ -34,6 +34,7 @@ def socialize(state=None, hold_required=True):
         vitals.mod(gs, vitals.fatigue, +5)
         vitals.mod(gs, vitals.mental, +2)
         stats.mod(gs, stats.social, +5)
+        stats.mod(gs, stats.money, +5)
 
     return timed_activity(
         activities_api.base_activity(
@@ -107,11 +108,15 @@ def study(state=None, hold_required=True):
         vitals.mod(gs, vitals.mental, -5)
         stats.mod(gs, stats.knowledge, +5)
 
-    return timed_activity(activities_api.base_activity(
-        tick_effect,
-        hold_required=hold_required,
-        name="study",
-    ), state, duration=10)
+    return timed_activity(
+        activities_api.base_activity(
+            tick_effect,
+            hold_required=hold_required,
+            name="study",
+        ),
+        state,
+        duration=10,
+    )
 
 
 activities = [drink_coffee, socialize, walk, scroll, eat_lunch, study]

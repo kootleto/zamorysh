@@ -27,17 +27,6 @@ def buy_drink1(hold_required=False, state=None):
             vitals.mod(gs, vitals.fatigue, -5)
             stats.mod(gs, stats.money, -2)
             ui.display("You bought tasty coffee2. You feel better.")
-        # if keyboard.is_pressed("space"):
-        # keyboard.write("\n You chose a")
-
-        # state["counter"] -= 1
-        # if keyboard.is_pressed("b"):
-        # vitals.mod(gs, vitals.fatigue, -5)
-        # stats.mod(gs, stats.money, -0)
-        # ui.display("You bought coffee. You feel better.")
-        # state["counter"] -= 1
-        # else:
-        # 1 == 1
 
     def can_continue(gs):
         return stats.get(gs, stats.money) > 2 and (

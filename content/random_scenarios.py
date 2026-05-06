@@ -35,7 +35,9 @@ def random_scenario2(state=None):
         return gs_api.get_time(gs) == state["tick"]
 
     def eff(gs):
-        r = random.randint(1, 100) # У событий не одинаковые вероятности, потому что в жизни так не бывает.
+        r = random.randint(
+            1, 100
+        )  # У событий не одинаковые вероятности, потому что в жизни так не бывает.
         if r % 6 == 0:
             stats.mod(gs, "money", -5)
             ui.display(
