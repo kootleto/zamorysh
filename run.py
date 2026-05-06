@@ -1,10 +1,11 @@
 import asyncio
 import os
 
+os.environ["KIVY_NO_ARGS"] = "1"
+
 from config import SETTINGS
 from engine import controller
-
-os.environ["KIVY_NO_ARGS"] = "1"
+from interface import ui
 
 
 async def main():
@@ -13,8 +14,9 @@ async def main():
     else:
         from interface.cli.main import start
 
-    game_state, definitions = await controller.init_game()
-    await start(game_state, definitions)
+    game_state, definitions = controller.init_game()
+    view_state = ui.init_ui()
+    await start(game_state, definitions, view_state)
 
 
 if __name__ == "__main__":
