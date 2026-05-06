@@ -108,10 +108,10 @@ def random_home_scenario(state=None):
     )
 
 
-def random_coffeehouse_scenario(state=None):
+def early_coffeehouse_scenario(state=None): # Акция "бесплатный кофе первому посетителю" в Surf Coffee
     def initl():
         # (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 10) or (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60)
-        return {"tick": random.randint(20, 25), "X": 10, "Y": 5}
+        return {"tick": random.randint(15, 17), "X": 10, "Y": 5}
 
     state = state_api.init_fn(state, initl)
 
@@ -123,9 +123,13 @@ def random_coffeehouse_scenario(state=None):
         )
 
     def efc(gs):
-        vitals.mod(gs, vitals.MENTAL, +5)
-        ui.display("You got free coffee. Yay.")
-
+        if random.choice([True, False]):
+            vitals.mod(gs, vitals.MENTAL, -2)
+            vitals.mod(gs, vitals.SLEEPINESS, -2)
+            ui.display("You came first and got free coffee. Yay.")
+        else:
+            vitals.mod(gs, vitals.FATIGUE, +2)
+            ui.display("No luck today! Someone has already got your free coffee. (At least you're not gonna be late.)")
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, us, efc),
@@ -161,7 +165,7 @@ def random_park_scenario(state=None):
 SCENARIOS = [
     random_scenario,
     random_scenario2,
-    random_coffeehouse_scenario,
+    early_coffeehouse_scenario,
     random_park_scenario,
     random_home_scenario,
 ]
