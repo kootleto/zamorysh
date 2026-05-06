@@ -47,8 +47,8 @@ places = {
     "home": lambda gs: get(gs, Y) == 0 and get(gs, X) == 0,
     "metro": lambda gs: 10 < get(gs, X) < 40,
     "park": lambda gs: get(gs, Y) == 5 and get(gs, X) == 0,
-    "coffee house": lambda gs: get(gs, Y) == 5
-    and (get(gs, X) == 10 or get(gs, X) == 60),
+    "Surf coffee": lambda gs: get(gs, Y) == 5 and get(gs, X) == 10,
+    "Другая кофейня": lambda gs: get(gs, Y) == 5 and get(gs, X) == 60,
     "club": lambda gs: get(gs, Y) == 5 and get(gs, X) == 40,
     "university": lambda gs: get(gs, Y) == 0 and get(gs, X) == 60,
 }
