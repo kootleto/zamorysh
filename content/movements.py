@@ -1,5 +1,6 @@
 from engine import activities_api
 from gameplay.api import location
+from interface import ui
 
 DIRECTIONS = {"north": (0, 1), "south": (0, -1), "east": (1, 0), "west": (-1, 0)}
 
@@ -10,6 +11,7 @@ def move(param=None):
     def tick_effect(gs):
         location.mod(gs, location.X, DIRECTIONS[param][0])
         location.mod(gs, location.Y, DIRECTIONS[param][1])
+        ui.play_music("1.wav")
 
     def can_continue(gs):
         return (

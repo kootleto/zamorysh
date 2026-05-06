@@ -1,9 +1,9 @@
 import asyncio
 import os.path
 
+import pygame
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.core.audio import SoundLoader
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import DictProperty, BooleanProperty, StringProperty
@@ -33,11 +33,15 @@ class GameApp(App):
         self.gs = gs
         self.vs = vs
         self.get_options_func = get_options_func
-        self.track_source = None
         self.activity_options = []
         self.ready = asyncio.Future()
 
     def build(self):
+        pygame.mixer.pre_init(buffer=512)
+        pygame.mixer.init()
+        warmup = pygame.mixer.Sound(buffer=bytes(1024))
+        warmup.play()
+
         return Builder.load_file("interface/gui/style.kv")
 
     def on_start(self):
@@ -59,22 +63,18 @@ class GameApp(App):
         )
 
     def on_track_title(self, _, value):
-        if self.track_source:
-            self.track_source.stop()
-            self.track_source.unload()
-            self.track_source = None
+        pygame.mixer.music.fadeout(0)
 
         if not value:
             return
 
-        path = f"assets/music/{value}.wav"
+        path = f"assets/music/{value}"
         if not os.path.exists(path):
             raise FileNotFoundError(f"File '{path}' not found")
 
-        self.track_source = SoundLoader.load(path)
-        self.track_source.loop = True
-        self.track_source.volume = self.vs["volume"] / 100
-        Clock.schedule_once(lambda *args: self.track_source.play(), 0.1)
+        pygame.mixer.music.load(path)
+        pygame.mixer.music.set_volume(self.vs["volume"] / 100)
+        pygame.mixer.music.play(loops=-1)
 
     def _on_key_down(self, _window, key, *_args):
         if key == 13:
@@ -84,3 +84,6 @@ class GameApp(App):
     def _on_key_up(self, _window, key, *_args):
         if key == 13:
             self.key_enter_pressed = False
+
+    def on_stop(self):
+        pygame.mixer.quit()
