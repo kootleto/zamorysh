@@ -2,7 +2,7 @@ import random
 
 from engine import scenarios_api, gs_api
 from engine import state_api
-from gameplay.api import stats, vitals
+from gameplay.api import stats, vitals, location
 from interface import ui
 
 
@@ -36,7 +36,9 @@ def random_scenario2(state=None):
         return gs_api.get_time(gs) == state["tick"]
 
     def eff(gs):
-        r = random.randint(1, 100) # У событий не одинаковые вероятности, потому что в жизни так не бывает.
+        r = random.randint(
+            1, 100
+        )  # У событий не одинаковые вероятности, потому что в жизни так не бывает.
         if r % 6 == 0:
             stats.mod(gs, stats.MONEY, -5)
             ui.display(
@@ -70,4 +72,59 @@ def random_scenario2(state=None):
     )
 
 
-SCENARIOS = [random_scenario, random_scenario2]
+def random_coffeehouse_scenario(state=None):
+    def initl():
+        # (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 10) or (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60)
+        return {"tick": random.randint(20, 25), "X": 10, "Y": 5}
+
+    state = state_api.init_fn(state, initl)
+
+    def us(gs):
+        return (
+            gs_api.get_time(gs) == state["tick"]
+            and location.get(gs, location.Y) == state["Y"]
+            and location.get(gs, location.X) == state["X"]
+        )
+
+    def efc(gs):
+        vitals.mod(gs, vitals.MENTAL, +5)
+        ui.display("You got free coffee. Yay.")
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, 1, us, efc),
+        ]
+    )
+
+
+def random_park_scenario(state=None):
+    def initl():
+        return {"tick": random.randint(10, 15), "X": 5, "Y": 0}
+
+    state = state_api.init_fn(state, initl)
+
+    def us(gs):
+        return (
+            gs_api.get_time(gs) == state["tick"]
+            and location.get(gs, location.Y) == state["Y"]
+            and location.get(gs, location.X) == state["X"]
+        )
+
+    def efc(gs):
+        vitals.mod(gs, vitals.MENTAL, -5)
+        stats.mod(gs, stats.SOCIAL, +5)
+        ui.display("You bumped into your classmate. You were forced to have a chat.")
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, 1, us, efc),
+        ]
+    )
+
+
+SCENARIOS = [
+    random_scenario,
+    random_scenario2,
+    random_coffeehouse_scenario,
+    random_park_scenario,
+]
