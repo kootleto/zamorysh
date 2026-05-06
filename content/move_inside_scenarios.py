@@ -1,11 +1,11 @@
 from engine import scenarios_api
-from gameplay.api import floor
+from gameplay.api import floors
 from interface import ui
 
 
 def floor_scenario(floor_number):
     def check(gs):
-        return floor.get(gs) == floor_number
+        return floors.get(gs, floors.FLOOR) == floor_number
 
     def enter():
         ui.display(f"{floor_number} этаж")
@@ -42,10 +42,10 @@ def fifth_floor():
 
 def get_classrooms(floor_number):
     def check(gs):
-        return floor.get(gs) == floor_number
+        return floors.get(gs, floors.FLOOR) == floor_number
 
     def show_classrooms():
-        ui.display(f"Аудитории: {", ".join(floor.CLASSROOMS[floor_number])}")
+        ui.display(f"Аудитории: {", ".join(floors.CLASSROOMS[floor_number])}")
 
     return scenarios_api.base_scenario(
         [
@@ -55,3 +55,37 @@ def get_classrooms(floor_number):
             ),
         ]
     )
+
+
+def first_floor_classrooms():
+    return get_classrooms(1)
+
+
+def second_floor_classrooms():
+    return get_classrooms(2)
+
+
+def third_floor_classrooms():
+    return get_classrooms(3)
+
+
+def fourth_floor_classrooms():
+    return get_classrooms(4)
+
+
+def fifth_floor_classrooms():
+    return get_classrooms(5)
+
+
+SCENARIOS = [
+    first_floor,
+    second_floor,
+    third_floor,
+    fourth_floor,
+    fifth_floor,
+    first_floor_classrooms,
+    second_floor_classrooms,
+    third_floor_classrooms,
+    fourth_floor_classrooms,
+    fifth_floor_classrooms,
+]

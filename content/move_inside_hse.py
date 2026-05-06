@@ -1,30 +1,52 @@
-from engine import activities_api
-from gameplay.api import floor
+from engine.activities_api import base_activity
+from gameplay.activity_wrappers import single_tick_activity
+from gameplay.api import location, floors
+from interface import ui
 
 
 def move_up():
     def tick_effect(gs):
-        floor.mod(gs, 1)
+        floors.mod_floor(gs, 1)
 
     def can_continue(gs):
-        return floor.get(gs) < 5
+        return (
+            floors.get(gs, floors.FLOOR) < 5 and location.get_place(gs) == "university"
+        )
 
-    return activities_api.base_activity(
-            tick_effect,
-            can_continue,
-            hold_required=True,
-            name="подняться наверх")
+    return base_activity(
+        tick_effect, can_continue, hold_required=True, name="подняться наверх"
+    )
 
 
 def move_down():
     def tick_effect(gs):
-        floor.mod(gs, -1)
+        floors.mod_floor(gs, -1)
 
     def can_continue(gs):
-        return floor.get(gs) > 1
+        return (
+            floors.get(gs, floors.FLOOR) > 0 and location.get_place(gs) == "university"
+        )
 
-    return activities_api.base_activity(
-            tick_effect,
-            can_continue,
-            hold_required=True,
-            name="спуститься вниз")
+    return base_activity(
+        tick_effect, can_continue, hold_required=True, name="спуститься вниз"
+    )
+
+
+def go_to_classroom(state=None):
+    def tick_effect(gs):
+        ui.display(
+            f"Выберите кабинет: {floors.CLASSROOMS[floors.get(gs, floors.CLASSROOM)]}"
+        )
+        floors.set(gs, floors.CLASSROOM, ui.prompt())
+
+    def can_continue(gs):
+        return (
+            location.get_place(gs) == "university" and floors.get(gs, floors.FLOOR) != 1
+        )
+
+    return single_tick_activity(
+        base_activity(tick_effect, can_continue, name="пойти в кабинет"), state
+    )
+
+
+ACTIVITIES = [move_up, move_down, go_to_classroom]
