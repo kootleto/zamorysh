@@ -11,6 +11,7 @@ from .schema import (
     ScenarioEntry,
     ActivityDefinitions,
     ScenarioDefinitions,
+    EffectResult,
 )
 
 
@@ -18,7 +19,7 @@ def base_transition(
     node_from: Any,
     node_to: Any,
     trigger: Callable[[GameState], bool] | Callable[[], bool] | bool,
-    effect: Callable[[GameState], None] | Callable[[], None],
+    effect: Callable[[GameState], EffectResult] | Callable[[], EffectResult] | None,
 ) -> Transition:
     """
     Создать переход из одного node сценария в другой.
@@ -36,7 +37,7 @@ def base_transition(
         "from": node_from,
         "to": node_to,
         "trigger": ensure_callable(trigger),
-        "effect": effect,
+        "effect": ensure_callable(effect),
     }
 
 
