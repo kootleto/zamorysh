@@ -33,11 +33,11 @@ def move_down():
 
 
 def go_to_classroom(state=None):
-    def tick_effect(gs):
-        ui.display(
+    async def tick_effect(gs):
+        await ui.display(
             f"Выберите аудиторию: {floors.CLASSROOMS[floors.get(gs, floors.FLOOR)]}"
         )
-        floors.set(gs, floors.CLASSROOM, int(ui.prompt()))
+        floors.set(gs, floors.CLASSROOM, int(await ui.prompt()))
 
     def can_continue(gs):
         return (
