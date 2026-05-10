@@ -2,9 +2,9 @@ import random
 
 from engine import scenarios_api, gs_api
 from engine import state_api
-from gameplay.api import stats, vitals, location
+from gameplay.api import stats, vitals, location, time
 from gameplay.api.location import get, get_place
-from gameplay.api.time import get_day, get_hour, get_minute
+from gameplay.api import time
 from interface import ui
 
 
@@ -169,10 +169,61 @@ def random_park_scenario(state=None):
     )
 
 
+def random_metro_scenario(state=None):
+    def check():
+        return {
+            "place": "metro",
+            "hour": random.randint(0, 24),
+            "minute": random.randint(0, 60),
+        }
+
+    state = state_api.init_fn(state, check)
+
+    def tr(gs):
+        return (
+            location.get_place(gs) == state["place"]
+            and time.get_hour(gs) == state["hour"]
+            and time.get_minute == state["minute"]
+        )
+
+    def eff(gs):
+        def f1(gs):
+            stats.mod(gs, stats.SOCIAL, -5)
+            ui.display("С вами кто-то столкнулся в метро. Ауч.")
+
+        def f2(gs):
+            vitals.mod(gs, vitals.MONEY, -5)
+            ui.display(
+                "Вы забыли карту москвича дома. Хорошо, что можно проехать по деньгам."
+            )
+
+        def f3(gs):
+            stats.mod(gs, stats.KNOWLEGE, +5)
+            ui.display("Вы увидели знак Т1 и порадовались, что знаете, что это.")
+
+        functions = [f1, f2, f3]
+        chs = random.choice(functions)
+        return chs(gs)
+
+    def tr1(gs):
+        return time.get_hour(gs) != state["hour"]
+
+    def eff1(gs):
+        pass  # Эффекта нет
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, 1, tr, eff),
+            scenarios_api.base_transition(1, 0, tr1, eff1),
+        ]
+    )
+
+
 SCENARIOS = [
     random_scenario,
     random_scenario2,
     early_coffeehouse_scenario,
     random_park_scenario,
     random_home_scenario,
+    random_metro_scenario,
 ]

@@ -3,6 +3,8 @@ import random
 from engine import activities_api
 from gameplay.activity_wrappers import single_tick_activity, timed_activity
 from gameplay.api import vitals, stats
+from gameplay.api.time import _get_datetime
+from interface import ui
 
 
 def drink_coffee(
@@ -34,6 +36,7 @@ def socialize(state=None, hold_required=True):
         vitals.mod(gs, vitals.FATIGUE, +5)
         vitals.mod(gs, vitals.MENTAL, +2)
         stats.mod(gs, stats.SOCIAL, +5)
+        stats.mod(gs, stats.MONEY, +5)
 
     return timed_activity(
         activities_api.base_activity(

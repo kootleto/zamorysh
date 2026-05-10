@@ -7,20 +7,12 @@ import random
 def earlybird_scenario(
     state=None,
 ):
-    def initl():
-        return {
-            "place": "Surf coffee",
-            "hour": 7,
-            "minute": 0,
-        }
-
-    state = state_api.init_fn(state, initl)
 
     def tr(gs):
         return (
-            location.get_place(gs) == state["place"]
-            and time.get_hour(gs) == state["hour"]
-            and time.get_minute(gs) == state["minute"]
+            location.get_place(gs) == "Surf coffee"
+            and time.get_hour(gs) == 7
+            and time.get_minute(gs) == 0
         )
 
     def eff(gs):
@@ -35,10 +27,10 @@ def earlybird_scenario(
             )
 
     def tr1(gs):
-        return time.get_hour(gs) != state["hour"]
+        return time.get_hour(gs) != 7
 
     def eff1(gs):
-        tr1(gs) == tr1(gs)  # Эффекта нет
+        pass  # Эффекта нет
 
     return scenarios_api.base_scenario(
         [
