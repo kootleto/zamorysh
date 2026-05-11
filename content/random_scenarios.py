@@ -115,22 +115,77 @@ def random_home_scenario(state=None):
     )
 
 
-def random_park_scenario(state=None):
+def random_park_day_scenario(state=None):
 
-    hour = random.randint(0, 23)
+    hour = random.randint(7, 21)  # В такое время в парке скорее такой набор событий.
     minute = random.randint(0, 59)
 
     def tr(gs):
         return (
             location.get_place(gs) == "park"
             and time.get_hour(gs) == hour
-            and time.get_minute == minute
+            and time.get_minute(gs) == minute
         )
 
     def eff(gs):
-        vitals.mod(gs, vitals.MENTAL, -5)
-        stats.mod(gs, stats.SOCIAL, +5)
-        ui.display("You bumped into your classmate. You were forced to have a chat.")
+        def f1(gs):
+            vitals.mod(gs, vitals.MENTAL, -5)
+            stats.mod(gs, stats.SOCIAL, +5)
+            ui.display(
+                "You bumped into your classmate. You were forced to have a chat."
+            )
+
+        def f2(gs):
+            ui.display("Вы наступили в лужу и простудились.")
+            vitals.mod(gs, vitals.FATIGUE, -7)
+
+        def f3(gs):
+            ui.display("Вы встретили Ландера. Вам ужасно неловко.")
+            stats.mod(gs, stats.SOCIAL, -5)
+            vitals.mod(gs, vitals.MENTAL, -5)
+
+        def f4(gs):
+            ui.display("Вам всучили брошюрку о вреде алкоголя. Вы и не собирались...")
+            stats.mod(gs, stats.KNOWLEDGE, +5)
+
+        def f5(gs):
+            ui.display("Вы нашли траву и ПОТРОГАЛИ ее.")
+            stats.mod(gs, stats.MENTAL, +15)
+            vitals.mod(gs, vitals.FATIGUE, -10)
+
+        def f6(gs):
+            ui.display(
+                "Собака, гуляющая в парке, украла ваш студак. Пока вы бежали за ней и отнимали его, вы очень устали."
+            )
+            vitals.mod(gs, vitals.FATIGUE, -5)
+
+        def f7(gs):
+            ui.display(
+                "Вода в парке очень красиво плещется. Вы засмотрелись на нее, и она убаюкала вас... "
+            )
+            vitals.mod(gs, vitals.SLEEPINESS, +7)
+
+        def f8(gs):
+            ui.display(
+                "С вами завел беседу бомж. Вы рассказали ему о своей курсовой. Он расстроился и дал вам 5 рублей."
+            )
+            stats.mod(gs, stats.MONEY, +5)
+
+        def f9(gs):
+            ui.display(
+                "Вы увидели уведомление от тгк <<на старой басманной все спокойно>> и обрадовались!"
+            )
+            stats.mod(gs, stats.MENTAL, +5)
+
+        def f10(gs):
+            ui.display(
+                "Солнце светило ярко, и вы решили поботать на природе... но ветер унес листы из вашего конспекта по дискре!"
+            )
+            stats.mod(gs, stats.KNOWLEDGE, -10)
+
+        functions = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
+        chs = random.choice(functions)
+        return chs(gs)
 
     def tr1(gs):
         return time.get_hour(gs) != hour
@@ -194,7 +249,7 @@ def random_metro_scenario(state=None):
 SCENARIOS = [
     random_scenario,
     random_scenario2,
-    random_park_scenario,
+    random_park_day_scenario,
     random_home_scenario,
     random_metro_scenario,
 ]
