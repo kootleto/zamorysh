@@ -36,7 +36,6 @@ def socialize(state=None, hold_required=True):
         vitals.mod(gs, vitals.FATIGUE, +5)
         vitals.mod(gs, vitals.MENTAL, +2)
         stats.mod(gs, stats.SOCIAL, +5)
-        stats.mod(gs, stats.MONEY, +5)
 
     return timed_activity(
         activities_api.base_activity(

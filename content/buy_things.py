@@ -24,27 +24,15 @@ def buy_drink1(hold_required=False, state=None):
             vitals.mod(gs, vitals.FATIGUE, -5)
             stats.mod(gs, stats.MONEY, -15)
             ui.display("You bought tasty coffee2. You feel better.")
-        # if keyboard.is_pressed("space"):
-        # keyboard.write("\n You chose a")
-
-        # state["counter"] -= 1
-        # if keyboard.is_pressed("b"):
-        # vitals.mod(gs, vitals.fatigue, -5)
-        # stats.mod(gs, stats.money, -0)
-        # ui.display("You bought coffee. You feel better.")
-        # state["counter"] -= 1
-        # else:
-        # 1 == 1
 
     def can_continue(gs):
         return stats.get(gs, stats.MONEY) > 9 and (
-            (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 10)
-            or (
-                location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60
+            (
+                location.get_place(gs) == "Surf coffee"
+                or location.get_place(gs) == "Другая кофейня"
             )
             and 6 < time.get_hour(gs) < 23
         )
-        # return stats.get(gs, stats.money) > 2
 
     return single_tick_activity(
         activities_api.base_activity(
@@ -57,7 +45,7 @@ def buy_drink1(hold_required=False, state=None):
     )
 
 
-def read_menu(hold_requiered=False, state=None):
+def read_menu(state=None):
     def tick_effect(gs):
         ui.display("Добро пожаловать в Surf Coffee!")
         ui.display("На данный момент в меню доступны следующие позиции:")
@@ -76,7 +64,6 @@ def read_menu(hold_requiered=False, state=None):
         activities_api.base_activity(
             tick_effect=tick_effect,
             can_continue=can_continue,
-            hold_required=hold_requiered,
             name="read_menu",
         ),
         state,

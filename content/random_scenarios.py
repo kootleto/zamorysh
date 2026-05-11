@@ -2,8 +2,7 @@ import random
 
 from engine import scenarios_api, gs_api
 from engine import state_api
-from gameplay.api import stats, vitals, location, time
-from gameplay.api.location import get, get_place
+from gameplay.api import stats, vitals, location
 from gameplay.api import time
 from interface import ui
 
@@ -75,16 +74,15 @@ def random_scenario2(state=None):
 
 
 def random_home_scenario(state=None):
-    def check():
-        return {"tick": random.randint(10, 11), "X": 0, "Y": 0}
 
-    state = state_api.init_fn(state, check)
+    hour = random.randint(0, 23)
+    minute = random.randint(0, 59)
 
     def tr(gs):
         return (
-            gs_api.get_time(gs) == state["tick"]
-            and get(gs, location.Y) == state["Y"]
-            and get(gs, location.X) == state["X"]
+            time.get_hour(gs) == hour
+            and time.get_minute(gs) == minute
+            and location.get_place(gs) == "home"
         )
 
     def eff(gs):
@@ -103,58 +101,30 @@ def random_home_scenario(state=None):
         chs = random.choice(functions)
         return chs(gs)
 
-    return scenarios_api.base_scenario(
-        [
-            scenarios_api.base_transition(0, 1, tr, eff),
-        ]
-    )
+    def tr1(gs):
+        return time.get_hour(gs) != hour
 
-
-def early_coffeehouse_scenario(
-    state=None,
-):  # Акция "бесплатный кофе первому посетителю" в Surf Coffee
-    def initl():
-        # (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 10) or (location.get(gs, location.Y) == 5 and location.get(gs, location.X) == 60)
-        return {"tick": random.randint(15, 17), "X": 10, "Y": 5}
-
-    state = state_api.init_fn(state, initl)
-
-    def tr(gs):
-        return (
-            gs_api.get_time(gs) == state["tick"]
-            and location.get(gs, location.Y) == state["Y"]
-            and location.get(gs, location.X) == state["X"]
-        )
-
-    def eff(gs):
-        if random.choice([True, False]):
-            vitals.mod(gs, vitals.MENTAL, -2)
-            vitals.mod(gs, vitals.SLEEPINESS, -2)
-            ui.display("You came first and got free coffee. Yay.")
-        else:
-            vitals.mod(gs, vitals.FATIGUE, +2)
-            ui.display(
-                "No luck today! Someone has already got your free coffee. (At least you're not gonna be late.)"
-            )
+    def eff1(gs):
+        pass  # Эффекта нет
 
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, tr, eff),
+            scenarios_api.base_transition(1, 0, tr1, eff1),
         ]
     )
 
 
 def random_park_scenario(state=None):
-    def initl():
-        return {"tick": random.randint(10, 15), "X": 5, "Y": 0}
 
-    state = state_api.init_fn(state, initl)
+    hour = random.randint(0, 23)
+    minute = random.randint(0, 59)
 
     def tr(gs):
         return (
-            gs_api.get_time(gs) == state["tick"]
-            and location.get(gs, location.Y) == state["Y"]
-            and location.get(gs, location.X) == state["X"]
+            location.get_place(gs) == "park"
+            and time.get_hour(gs) == hour
+            and time.get_minute == minute
         )
 
     def eff(gs):
@@ -162,28 +132,30 @@ def random_park_scenario(state=None):
         stats.mod(gs, stats.SOCIAL, +5)
         ui.display("You bumped into your classmate. You were forced to have a chat.")
 
+    def tr1(gs):
+        return time.get_hour(gs) != hour
+
+    def eff1(gs):
+        pass  # Эффекта нет
+
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, tr, eff),
+            scenarios_api.base_transition(1, 0, tr1, eff1),
         ]
     )
 
 
 def random_metro_scenario(state=None):
-    def check():
-        return {
-            "place": "metro",
-            "hour": random.randint(0, 24),
-            "minute": random.randint(0, 60),
-        }
 
-    state = state_api.init_fn(state, check)
+    hour = (random.randint(0, 23),)
+    minute = random.randint(0, 59)
 
     def tr(gs):
         return (
-            location.get_place(gs) == state["place"]
-            and time.get_hour(gs) == state["hour"]
-            and time.get_minute == state["minute"]
+            location.get_place(gs) == "metro"
+            and time.get_hour(gs) == hour
+            and time.get_minute == minute
         )
 
     def eff(gs):
@@ -206,7 +178,7 @@ def random_metro_scenario(state=None):
         return chs(gs)
 
     def tr1(gs):
-        return time.get_hour(gs) != state["hour"]
+        return time.get_hour(gs) != hour
 
     def eff1(gs):
         pass  # Эффекта нет
@@ -222,7 +194,6 @@ def random_metro_scenario(state=None):
 SCENARIOS = [
     random_scenario,
     random_scenario2,
-    early_coffeehouse_scenario,
     random_park_scenario,
     random_home_scenario,
     random_metro_scenario,
