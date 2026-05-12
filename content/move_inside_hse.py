@@ -34,14 +34,15 @@ def move_down():
 
 def go_to_classroom(state=None):
     async def tick_effect(gs):
-        await ui.display(
-            f"Выберите аудиторию: {floors.CLASSROOMS[floors.get(gs, floors.FLOOR)]}"
-        )
+        classrooms = floors.CLASSROOMS[floors.get(gs, floors.FLOOR)]
+        ui.display(f"Выберите аудиторию: {", ".join(map(str, classrooms))}")
         floors.set(gs, floors.CLASSROOM, int(await ui.prompt()))
 
     def can_continue(gs):
         return (
-            location.get_place(gs) == "university" and floors.get(gs, floors.FLOOR) != 1
+            location.get_place(gs) == "university"
+            and floors.get(gs, floors.FLOOR) != 1
+            and floors.get(gs, floors.CLASSROOM) == 0
         )
 
     return single_tick_activity(

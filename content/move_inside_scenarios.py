@@ -37,7 +37,24 @@ def third_floor():
 
 
 def fourth_floor():
-    return floor_scenario(4)
+    def check(gs):
+        return floors.get(gs, floors.FLOOR) == 4
+
+    def enter():
+        ui.display("Fourth floor")
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, "in", check, lambda: None),
+            scenarios_api.base_transition(
+                0, "out", lambda gs: not check(gs), lambda: None
+            ),
+            scenarios_api.base_transition("out", "in", check, enter),
+            scenarios_api.base_transition(
+                "in", "out", lambda gs: not check(gs), lambda: None
+            ),
+        ]
+    )
 
 
 def fifth_floor():
