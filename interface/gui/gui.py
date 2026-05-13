@@ -5,7 +5,7 @@ from typing import TypedDict
 from kivy.app import App
 
 from engine.schema import ActivityOptions, GameState
-from gameplay.api import vitals, stats, time, music
+from gameplay.api import vitals, stats, time, music, location
 
 
 class AppProxy:
@@ -76,13 +76,19 @@ async def prompt_activity(options: ActivityOptions) -> int:
 
 def refresh_ui(gs: GameState, options: ActivityOptions):
     app.stats = {
-        "time": f"{time.get_hour(gs):02}:{time.get_minute(gs):02}",
+        "datetime": time.get_datetime(gs),
+        "location": {
+            "place": location.get_place(gs),
+            "x": location.get(gs, location.X),
+            "y": location.get(gs, location.Y),
+        },
         "fatigue": vitals.get(gs, vitals.FATIGUE),
         "money": stats.get(gs, stats.MONEY),
         "social": stats.get(gs, stats.SOCIAL),
         "mental": vitals.get(gs, vitals.MENTAL),
         "knowledge": stats.get(gs, stats.KNOWLEDGE),
     }
+
     app.track_title = music.get_current_track(gs)
     new_labels = [option["label"] for option in options]
 

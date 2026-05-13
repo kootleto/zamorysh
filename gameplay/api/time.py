@@ -16,36 +16,36 @@ class Weekday(IntEnum):
     SUNDAY = 6
 
 
-def _get_datetime(gs):
+def get_datetime(gs):
     return START_DATETIME + timedelta(minutes=gs_api.get_time(gs))
 
 
 def get_year(gs):
-    return _get_datetime(gs).year
+    return get_datetime(gs).year
 
 
 def get_month(gs):
-    return _get_datetime(gs).month
+    return get_datetime(gs).month
 
 
 def get_day(gs):
-    return _get_datetime(gs).day
+    return get_datetime(gs).day
 
 
 def get_hour(gs):
-    return _get_datetime(gs).hour
+    return get_datetime(gs).hour
 
 
 def get_minute(gs):
-    return _get_datetime(gs).minute
+    return get_datetime(gs).minute
 
 
 def get_weekday(gs):
-    return Weekday(_get_datetime(gs).weekday())
+    return Weekday(get_datetime(gs).weekday())
 
 
 def get_time(gs):
-    return _get_datetime(gs).time()
+    return get_datetime(gs).time()
 
 
 def datetime_to_tick(dt):

@@ -6,9 +6,15 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.properties import DictProperty, BooleanProperty, StringProperty
+from kivy.properties import (
+    DictProperty,
+    BooleanProperty,
+    StringProperty,
+    NumericProperty,
+)
 
 from engine.schema import GameState
+from gameplay.api import formatters
 from interface import ui
 from interface.gui.gui import KivyState
 
@@ -17,6 +23,8 @@ class GameApp(App):
     stats = DictProperty(
         {
             "time": "undefined",
+            "date": "undefined",
+            "location": "undefined",
             "fatigue": 0,
             "money": 0,
             "social": 0,
@@ -25,6 +33,7 @@ class GameApp(App):
         }
     )
     track_title = StringProperty(None)
+    volume = NumericProperty(100)
 
     key_enter_pressed = BooleanProperty(False)
 
@@ -56,10 +65,15 @@ class GameApp(App):
         Clock.schedule_interval(update, 1 / 60)
 
     def on_stats(self, _, value):
-        self.root.ids.info.text = (
-            f"time: {value['time']}\n"
+        self.root.ids.stats_label.text = (
             f"fatigue: {value['fatigue']}   money: {value['money']}   social: {value['social']}   "
             f"mental: {value['mental']}   knowledge: {value['knowledge']}"
+        )
+        self.root.ids.time_label.text = formatters.get_formatted_time(value["datetime"])
+        self.root.ids.date_label.text = formatters.get_formatted_date(value["datetime"])
+        self.root.ids.map_label.text = (
+            f"Location: {value["location"]["place"]}\nX: {value["location"]["x"]}, "
+            f"Y: {value["location"]["y"]}"
         )
 
     def on_track_title(self, _, value):
@@ -73,8 +87,11 @@ class GameApp(App):
             raise FileNotFoundError(f"File '{path}' not found")
 
         pygame.mixer.music.load(path)
-        pygame.mixer.music.set_volume(self.vs["volume"] / 100)
+        pygame.mixer.music.set_volume(self.volume / 100)
         Clock.schedule_once(lambda dt: pygame.mixer.music.play(loops=-1), 0)
+
+    def on_volume(self, _, value):
+        pygame.mixer.music.set_volume(self.volume / 100)
 
     def _on_key_down(self, _window, key, *_args):
         if key == 13:
