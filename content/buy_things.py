@@ -13,8 +13,8 @@ def buy_drink1(hold_required=False, state=None):
     # state = state_api.init_defaults(state, counter=1)
 
     async def tick_effect(gs):
-        ui.display("Buy coffee1 for 15$? (Press a + Enter)")
-        ui.display("Buy coffee2 for 15$? (Press b + Enter)")
+        ui.display("Купить латте? (Press a + Enter)")
+        ui.display("Купить американо?  (Press b + Enter)")
         vv = await ui.prompt("Pick your poison: ")
         if vv == "a":
             vitals.mod(gs, vitals.FATIGUE, -5)

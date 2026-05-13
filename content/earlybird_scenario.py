@@ -19,23 +19,22 @@ def earlybird_scenario(
         if random.choice([True, False]):
             vitals.mod(gs, vitals.MENTAL, -2)
             vitals.mod(gs, vitals.SLEEPINESS, -2)
-            ui.display("You came first and got free coffee. Yay.")
+            ui.display(
+                "Поздравляю! Вы - первый покупатель. Наслаждайтесь своим бесплатным кофе!"
+            )
         else:
             vitals.mod(gs, vitals.FATIGUE, +2)
             ui.display(
-                "No luck today! Someone has already gotten your free coffee. (At least you're not gonna be late.)"
+                "Не повезло! Кто-то забрал ваш бесплатный кофе. (Зато вы не опоздаете в университет...)"
             )
 
     def tr1(gs):
         return time.get_hour(gs) != 7
 
-    def eff1(gs):
-        pass  # Эффекта нет
-
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, tr, eff),
-            scenarios_api.base_transition(1, 0, tr1, eff1),
+            scenarios_api.base_transition(1, 0, tr1, None),
         ]
     )
 

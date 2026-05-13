@@ -1,10 +1,8 @@
 import random
 
-from engine import scenarios_api, gs_api
-from engine import state_api
+from engine import scenarios_api, gs_api, state_api
 from engine.state_api import init_fn
-from gameplay.api import stats, vitals, location
-from gameplay.api import time
+from gameplay.api import stats, vitals, location, time
 from interface import ui
 
 
@@ -64,12 +62,12 @@ def random_university_day_scenario(state=None):
 
     def f1(gs):
         stats.mod(gs, stats.MONEY, -5)
-        ui.display("Вы оставили кошелек на Басмаче и оплатили проезд в метро деньгами.")
+        ui.display("")
 
     def f2(gs):
         vitals.mod(gs, vitals.SLEEPINESS, +20)
         ui.display(
-            "Одногруппник, сидящий рядом с вами на семинаре, зевнул. Вы тоже зевнули и захотели спать."
+            "Одногруппник, сидящий рядом с вами, зевнул. Вы тоже зевнули и захотели спать."
         )
 
     def f3(gs):
@@ -89,10 +87,25 @@ def random_university_day_scenario(state=None):
         stats.mod(gs, stats.SOCIAL, -10)
         ui.display("Вам пришлось говорить о СОПе с одногруппниками. Это тяжело.")
 
+    def f7(gs):
+        ui.display(
+            "Вы вспомнили, что не сделали домашку, дедлайн по которой был вчера. ААА!"
+        )
+        stats.mod(gs, stats.KNOWLEDGE, -5)
+        vitals.mod(gs, vitals.MENTAL, -20)
+
+    def f8(gs):
+        if random.choice([True, False]):
+            ui.display("Ваша одногруппница купила вам кофе! Как мило!")
+        else:
+            ui.display("Ваш одногруппник купил вам кофе! Как мило!")
+        vitals.mod(gs, vitals.MENTAL, +5)
+        vitals.mod(gs, vitals.SLEEPINESS, -5)
+
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-    events = [f1, f2, f3, f4, f5, f6]
+    events = [f1, f2, f3, f4, f5, f6, f7, f8]
     place = "university"
-    cooldown = 25
+    cooldown = 30
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
 
@@ -199,7 +212,7 @@ def random_park_day_scenario(state=None):
         ui.display(
             "Вы увидели уведомление от тгк <<на старой басманной все спокойно>> и обрадовались!"
         )
-        stats.mod(gs, stats.MENTAL, +5)
+        vitals.mod(gs, vitals.MENTAL, +5)
 
     def f10(gs):
         ui.display(
@@ -221,52 +234,57 @@ def random_park_night_scenario(state=None):
         ui.display("Фонарь резко заморгал. Вы испугались.")
 
     def f2(gs):
-        ui.display("Вы наступили в лужу и простудились.")
-        vitals.mod(gs, vitals.FATIGUE, -7)
+        ui.display(
+            "Огни бара напротив вас призывно мерцают, но вы не можете зайти внутрь из-за ваших дедлайнов."
+        )
+        vitals.mod(gs, vitals.MENTAL, -4)
 
     def f3(gs):
-        ui.display("Вы встретили Ландера. Вам ужасно неловко.")
-        stats.mod(gs, stats.SOCIAL, -5)
-        vitals.mod(gs, vitals.MENTAL, -5)
+        ui.display(
+            "Вы уютно устроились на скамейке и не заметили, как задремали на несколько секунд. Осторожно, это может быть опасно."
+        )
+        vitals.mod(gs, vitals.FATIGUE, -2)
+        vitals.mod(gs, vitals.SLEEPINESS, -2)
+        vitals.mod(gs, vitals.MENTAL, -10)
 
     def f4(gs):
-        ui.display("Вам всучили брошюрку о вреде алкоголя. Вы и не собирались...")
-        stats.mod(gs, stats.KNOWLEDGE, +5)
+        ui.display("Здесь очень темно. Вам страшно и хочется уйти.")
+        vitals.mod(gs, vitals.MENTAL, -7)
 
     def f5(gs):
-        ui.display("Вы нашли траву и ПОТРОГАЛИ ее.")
-        vitals.mod(gs, vitals.MENTAL, +15)
-        vitals.mod(gs, vitals.FATIGUE, -10)
-
-    def f6(gs):
         ui.display(
-            "Собака, гуляющая в парке, украла ваш студак. Пока вы бежали за ней и отнимали его, вы очень устали."
-        )
-        vitals.mod(gs, vitals.FATIGUE, -5)
-
-    def f7(gs):
-        ui.display(
-            "Вода в парке очень красиво плещется. Вы засмотрелись на нее, и она убаюкала вас... "
-        )
-        vitals.mod(gs, vitals.SLEEPINESS, +7)
-
-    def f8(gs):
-        ui.display(
-            "С вами завел беседу бомж. Вы рассказали ему о своей курсовой. Он расстроился и дал вам 5 рублей."
-        )
-        stats.mod(gs, stats.MONEY, +5)
-
-    def f9(gs):
-        ui.display(
-            "Вы увидели уведомление от тгк <<на старой басманной все спокойно>> и обрадовались!"
+            "Свет от фонарей так красиво ложится на воду... Вас очень обрадовал этот вид."
         )
         vitals.mod(gs, vitals.MENTAL, +5)
 
-    def f10(gs):
+    def f6(gs):
         ui.display(
-            "Солнце светило ярко, и вы решили поботать на природе... но ветер унес листы из вашего конспекта по дискре!"
+            "В темноте вы оставили какие-то важные записи на скамейке. (Вы не разглядели, какие.)"
         )
         stats.mod(gs, stats.KNOWLEDGE, -10)
+
+    def f7(gs):
+        ui.display("Упс! Ноут внезапно рарядился! Поботать не получилось...")
+        stats.mod(gs, stats.KNOWLEDGE, -2)
+        vitals.mod(gs, vitals.MENTAL, -2)
+
+    def f8(gs):
+        ui.display(
+            "Вам внезапно очень грустно... вы не спите ночью в парке... в одиночестве."
+        )
+        vitals.mod(gs, vitals.MENTAL, -2)
+
+    def f9(gs):
+        ui.display(
+            "Вы качаетесь на качелях, и они зловеще скрипят... Зато качели наконец-то не заняты!"
+        )
+        vitals.mod(gs, vitals.MENTAL, +1)
+
+    def f10(gs):
+        ui.display(
+            "Мимо вас пробегает маленькая крыса... Вы не понимаете, чувствуете ли вы жалость или дискомфорт."
+        )
+        stats.mod(gs, stats.SOCIAL, +1)
 
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     hours = [0, 1, 2, 3, 4, 5, 6, 22, 23]
@@ -291,11 +309,82 @@ def random_metro_day_scenario(state=None):
         stats.mod(gs, stats.KNOWLEDGE, +5)
         ui.display("Вы увидели знак Т1 и порадовались, что знаете, что это.")
 
+    def f4(gs):
+        ui.display("Вам все еще грустно из-за того, что ваш рюкзак досматривали.")
+        vitals.mod(gs, vitals.MENTAL, -2)
+
+    def f5(gs):
+        ui.display("Вы успели сесть на освободившееся место!")
+        vitals.mod(gs, vitals.FATIGUE, -5)
+        vitals.mod(gs, vitals.MENTAL, +2)
+
+    def f6(gs):
+        ui.display(
+            "Вы прочитали википедию про строительство новой Архангельско-Рублевской ветки!"
+        )
+        stats.mod(gs, stats.KNOWLEDGE, +3)
+
+    def f7(gs):
+        if random.choice([True, False]):
+            ui.display("Вы похвалили значки незнакомой девушки в вагоне... Вау.")
+        else:
+            ui.display("Вы похвалили значки незнакомого парня в вагоне... Вау.")
+        stats.mod(gs, stats.SOCIAL, +7)
+
+    def f8(gs):
+        ui.display(
+            "Вы насвистываете мелодию, которую играл скрипач в вестибюле. Вы чувствуете себя лучше."
+        )
+        vitals.mod(gs, vitals.MENTAL, +3)
+        vitals.mod(gs, vitals.SLEEPINESS, -3)
+
+    def f9(gs):
+        ui.display("Кофе в термосе протек... Сил вам.")
+        vitals.mod(gs, vitals.MENTAL, -8)
+        vitals.mod(gs, vitals.FATIGUE, +5)
+
+    def f10(gs):
+        ui.display("Слишком много людей... Вы чувствуете, что голова кружится...")
+        vitals.mod(gs, vitals.MENTAL, -5)
+
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-    events = [f1, f2, f3]
+    events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     place = "metro"
     cooldown = 25
     return random_scenario_somewhere(events, hours, place, cooldown, state)
+
+
+def random_Surf_coffee_scenario(state=None):
+    def f1(gs):
+        ui.display(
+            "О боже мой. С вами, кажется, флиртует бариста. Или нет?... Какой кошмар."
+        )
+        stats.mod(gs, stats.SOCIAL, -10)
+
+    def f2(gs):
+        ui.display("Вы поздоровались с кем-то с потока. Приятно, что вас помнят!")
+        stats.mod(gs, stats.SOCIAL, +4)
+
+    def f3(gs):
+        ui.display("Запах кофе приятно подрит...")
+        vitals.mod(gs, vitals.FATIGUE, -2)
+        vitals.mod(gs, vitals.MENTAL, +4)
+
+    def f4(gs):
+        ui.display("Играет знакомая песня, вы еле слышно подпеваете!")
+        vitals.mod(gs, vitals.MENTAL, +3)
+        stats.mod(gs, stats.KNOWLEDGE, +2)
+
+    def f5(gs):
+        ui.display(
+            "В заказе человека перед вами что-то настолько дорогое, что глаза на лоб лезут... Вам грустно."
+        )
+        vitals.mod(gs, vitals.MENTAL, -3)
+
+    hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+    events = [f1, f2, f3, f4, f5]
+    place = "Surf coffee"
+    cooldown = 40
 
 
 SCENARIOS = [
@@ -305,4 +394,5 @@ SCENARIOS = [
     random_home_day_scenario,
     random_metro_day_scenario,
     random_park_night_scenario,
+    random_Surf_coffee_scenario,
 ]
