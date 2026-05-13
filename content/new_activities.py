@@ -3,8 +3,6 @@ import random
 from engine import activities_api
 from gameplay.activity_wrappers import single_tick_activity, timed_activity
 from gameplay.api import vitals, stats
-from gameplay.api.time import _get_datetime
-from interface import ui
 
 
 def drink_coffee(
