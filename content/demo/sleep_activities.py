@@ -20,6 +20,7 @@ def sleep():
 
     def tick_effect(gs):
         vitals.mod(gs, vitals.SLEEPINESS, -2)  # 20 каждый час
+        gs_api.multiply_next_tick_interval(gs, 0.01)
 
     def can_continue(gs):
         return (
