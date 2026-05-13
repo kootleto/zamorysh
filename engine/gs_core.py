@@ -7,6 +7,8 @@ from typing import Any
 from engine.schema import SystemState, GameState, ActivityEntry, ScenarioEntry, Intent
 from tools.logger import log
 
+DEFAULT_TICK_INTERVAL = 0.15
+
 INITIAL_SYSTEM_DATA: SystemState = {
     "time": 0,
     "activity_entries": [],
@@ -15,7 +17,7 @@ INITIAL_SYSTEM_DATA: SystemState = {
     "just_finished": [],
     "next_id": 0,
     "is_running": True,
-    "tick_interval": 0.15,
+    "tick_interval": DEFAULT_TICK_INTERVAL,
 }
 
 
@@ -75,6 +77,10 @@ def clear_just_finished(gs: GameState):
 
 def apply_is_running(gs: GameState, value: bool):
     gs["system"]["is_running"] = value
+
+
+def apply_tick_interval(gs: GameState, interval: int | float):
+    gs["system"]["tick_interval"] = interval
 
 
 # Модификаторы

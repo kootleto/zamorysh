@@ -3,21 +3,10 @@ from typing import Any, TypeVar
 
 from engine.schema import (
     GameState,
-    SystemState,
     Operation,
 )
 from tools.logger import log
 
-INITIAL_SYSTEM_DATA: SystemState = {
-    "time": 0,
-    "activity_entries": [],
-    "scenario_entries": [],
-    "intents": [],
-    "just_finished": [],
-    "next_id": 0,
-    "is_running": True,
-    "tick_interval": 0.15,
-}
 
 # Функции не мутируют gs напрямую, а создают интенты (намерения),
 # которые потом считывает резолвер.
@@ -43,8 +32,23 @@ def mod_value(gs: GameState, domain: str, key: str, delta: Any):
     push_intent(gs, domain, key, delta, "mod")
 
 
+# Некоторые значения из SystemState можно менять или получать через gs_api
+
+
 def stop(gs: GameState):
     set_value(gs, "system", "is_running", False)
+
+
+def get_tick_interval(gs: GameState):
+    return gs["system"]["tick_interval"]
+
+
+def set_next_tick_interval(gs: GameState, interval: int | float):
+    set_value(gs, "system", "tick_interval", interval)
+
+
+def multiply_next_tick_interval(gs: GameState, multiplier: int | float):
+    mod_value(gs, "system", "tick_interval", multiplier)
 
 
 def get_time(gs: GameState) -> int:

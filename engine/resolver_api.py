@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 from typing import Callable, Iterable, Any
 
@@ -70,8 +71,31 @@ def resolve_generic(
 
 # Обработка остановки игры
 def resolve_system(gs: GameState, intents: list[Intent]):
-    if any(
-        intent["target"] == "is_running" and intent["value"] == False
-        for intent in intents
-    ):
-        gs_core.apply_is_running(gs, False)
+    grouped_intents = defaultdict(lambda: {"mod": [], "set": []})
+    for intent in intents:
+        grouped_intents[intent["target"]][intent["op"]].append(intent)
+
+    for target, grouped in grouped_intents.items():
+        if (
+            target == "is_running"
+            and grouped["set"]
+            and any(intent["value"] == False for intent in grouped["set"])
+        ):
+            log(
+                f"is_running True -> False",
+                log_type="resolver",
+            )
+            gs_core.apply_is_running(gs, False)
+        if target == "tick_interval":
+            if grouped["set"]:
+                value = min([i["value"] for i in grouped["set"]])
+            else:
+                value = gs_api.get_tick_interval(gs)
+            if grouped["mod"]:
+                value *= math.prod([i["value"] for i in grouped["mod"]])
+            value = max(0, value)
+            log(
+                f"tick_interval {gs_api.get_tick_interval(gs)} -> {value}",
+                log_type="resolver",
+            )
+            gs_core.apply_tick_interval(gs, value)
