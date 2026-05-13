@@ -54,8 +54,10 @@ async def update(
         log_type="status",
     )
 
-    # 0. Очищаем массив с информацией завершенных в предыдущем тике активностях
+    # 0. Очищаем массив с информацией завершенных в предыдущем тике активностях,
+    # устанавливаем интервал тика в дефолтный
     gs_core.clear_just_finished(gs)
+    gs_core.apply_tick_interval(gs, gs_core.DEFAULT_TICK_INTERVAL)
 
     # 1. Применяем tick_effect всех текущих активностей
     for entry in gs_core.get_activity_entries(gs):
