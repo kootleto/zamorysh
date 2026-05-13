@@ -385,6 +385,7 @@ def random_Surf_coffee_scenario(state=None):
     events = [f1, f2, f3, f4, f5]
     place = "Surf coffee"
     cooldown = 40
+    return random_scenario_somewhere(events, hours, place, cooldown, state)
 
 
 SCENARIOS = [
