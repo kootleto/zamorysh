@@ -38,15 +38,24 @@ def resolve_generic(
     set_fn: Callable[[Iterable[Any]], Any] = max,
     mod_fn: Callable[[Iterable[Any]], Any] = sum,
     clamp_fn: Callable = lambda x: x,
+    get_fn: Callable[[GameState, str, str], Any] = gs_api.get_value,
+    apply_fn: Callable[[GameState, str, str, Any], None] = gs_core.apply_value,
 ):
     """
     Универсальный резолвер для категории domain.
 
     Работает по следующему алгоритму:
-    1. Применяет изменения типа set при помощи set_fn.
+
+    1. Применяет изменения типа set при помощи set_fn. Если интентов типа set нет, получает значение через get_fn.
+
     2. К результату применяет изменения типа mod при помощи mod_fn.
-    3. Если результат выходит за границы допустимых значений, возвращает его в эти границы
-    при помощи clamp_fn.
+
+    3. Если результат выходит за границы допустимых значений, возвращает его в эти границы при помощи clamp_fn.
+
+    4. Передает результат в apply_fn.
+
+    В get_fn передаются gs, domain и target,
+    в apply_fn - gs, domain, target и value.
     """
     # Группируем интенты по цели и виду операции (mod или set)
     grouped_intents = defaultdict(lambda: {"mod": [], "set": []})
@@ -58,15 +67,15 @@ def resolve_generic(
         if grouped["set"]:
             value = set_fn([i["value"] for i in grouped["set"]])
         else:
-            value = gs_api.get_value(gs, domain, target)
+            value = get_fn(gs, domain, target)
         if grouped["mod"]:
             value += mod_fn([i["value"] for i in grouped["mod"]])
         value = clamp_fn(value)
         log(
-            f"{target} {gs_api.get_value(gs, domain, target)} -> {value}",
+            f"{target} {get_fn(gs, domain, target)} -> {value}",
             log_type="resolver",
         )
-        gs_core.apply_value(gs, domain, target, value)
+        apply_fn(gs, domain, target, value)
 
 
 # Обработка остановки игры
