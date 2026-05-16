@@ -1,9 +1,9 @@
 import asyncio
 import os.path
 
-import pygame
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import (
@@ -44,13 +44,9 @@ class GameApp(App):
         self.get_options_func = get_options_func
         self.activity_options = []
         self.ready = asyncio.Future()
+        self.current_track = None
 
     def build(self):
-        pygame.mixer.pre_init(buffer=512)
-        pygame.mixer.init()
-        warmup = pygame.mixer.Sound(buffer=bytes(1024))
-        warmup.play()
-
         return Builder.load_file("interface/gui/style.kv")
 
     def on_start(self):
@@ -77,7 +73,10 @@ class GameApp(App):
         )
 
     def on_track_title(self, _, value):
-        pygame.mixer.music.fadeout(0)
+        if self.current_track:
+            self.current_track.stop()
+            self.current_track.unload()
+            self.current_track = None
 
         if not value:
             return
@@ -86,12 +85,15 @@ class GameApp(App):
         if not os.path.exists(path):
             raise FileNotFoundError(f"File '{path}' not found")
 
-        pygame.mixer.music.load(path)
-        pygame.mixer.music.set_volume(self.volume / 100)
-        Clock.schedule_once(lambda dt: pygame.mixer.music.play(loops=-1), 0)
+        self.current_track = SoundLoader.load(path)
+        if self.current_track:
+            self.current_track.loop = True
+            self.current_track.volume = self.volume / 100
+            self.current_track.play()
 
     def on_volume(self, _, value):
-        pygame.mixer.music.set_volume(self.volume / 100)
+        if self.current_track:
+            self.current_track.volume = value / 100
 
     def _on_key_down(self, _window, key, *_args):
         if key == 13:
@@ -103,4 +105,6 @@ class GameApp(App):
             self.key_enter_pressed = False
 
     def on_stop(self):
-        pygame.mixer.quit()
+        if self.current_track:
+            self.current_track.stop()
+            self.current_track.unload()
