@@ -1,16 +1,26 @@
 from engine import gs_api
 from engine.resolver_api import resolve_generic
+from gameplay.api.schedule import Subject
 
 _DOMAIN = "stats"
 
 MONEY = "money"
 SOCIAL = "social"
-KNOWLEDGE = "knowledge"
 
 _INITIAL = {
     MONEY: 0,
     SOCIAL: 0,
-    KNOWLEDGE: 0,
+    Subject.ENGLISH: 0,
+    Subject.DIVERSITY: 0,
+    Subject.LATIN: 0,
+    Subject.LANGUAGE: 0,
+    Subject.MATH: 0,
+    Subject.OCS: 0,
+    Subject.INTRO: 0,
+    Subject.LINGDATA: 0,
+    Subject.DIGLIT: 0,
+    Subject.ELECTIVE: 0,
+    Subject.HISTORY: 0,
 }
 
 
