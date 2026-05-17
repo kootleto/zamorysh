@@ -22,15 +22,13 @@ def sleep():
     return activities_api.base_activity(tick_effect, can_continue, name="лечь спать")
 
 
-def set_alarm(state):
+def set_alarm(state=None):
     async def tick_effect(gs):
         time = int(await ui.prompt("Установите время: "))
         timers.set(gs, "alarm", time)
 
     return single_tick_activity(
-        activities_api.base_activity(
-            tick_effect, hold_required=True, name="поставить будильник"
-        ),
+        activities_api.base_activity(tick_effect, name="поставить будильник"),
         state,
     )
 
@@ -42,3 +40,6 @@ def get_sleepy():
     return activities_api.base_activity(
         tick_effect, True, is_stackable=True, is_background=True
     )
+
+
+ACTIVITIES = [sleep, set_alarm, get_sleepy]
