@@ -1,11 +1,14 @@
-"""Для Buildozer: ему жизненно необходимо, чтобы файл назывался именно main.py."""
+"""Для сборки EXE и APK."""
 
 import asyncio
+import os
+import sys
 
 import run
 
+# для Pyinstaller, чтобы Kivy не потерял пути
+if hasattr(sys, "_MEIPASS"):
+    os.chdir(getattr(sys, "_MEIPASS"))
+
 if __name__ == "__main__":
-    try:
-        asyncio.run(run.main())
-    except KeyboardInterrupt:
-        print("Stopped by user")
+    asyncio.run(run.main())

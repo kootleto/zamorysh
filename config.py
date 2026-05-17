@@ -38,16 +38,17 @@ def _parse_args():
     return parser.parse_args()
 
 
-if "ANDROID_ARGUMENT" not in os.environ:
-    SETTINGS = _parse_args()
-elif hasattr(sys, "frozen") or any("pyinstaller" in arg.lower() for arg in sys.argv):
-    sys.argv = [sys.argv[0]]  # очищаем от технических аргументов pyinstaller
-    SETTINGS = _parse_args()
-else:
+if (
+    "ANDROID_ARGUMENT" in os.environ
+    or hasattr(sys, "frozen")
+    or any("pyinstaller" in arg.lower() for arg in sys.argv)
+):
     # хардкодим, чтобы не мучаться с .env
-    class AndroidSettings:
-        include_demo = True
+    class BuildSettings:
+        include_demo = False
         log_enabled = False
         gui = True
 
-    SETTINGS = AndroidSettings()
+    SETTINGS = BuildSettings()
+else:
+    SETTINGS = _parse_args()
