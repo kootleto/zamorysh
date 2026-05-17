@@ -1,16 +1,13 @@
 import asyncio
 import sys
 
-from kivy.utils import platform
+import keyboard
 
 from config import SETTINGS
 from engine import gs_api
 from engine.schema import GameState, ActivityOptions
 from gameplay.api import vitals, stats
 from tools.logger import log
-
-if platform != "android":
-    import keyboard
 
 
 def init_ui():
@@ -107,8 +104,6 @@ def refresh_ui(gs: GameState, _options):
 def check_button_pressed():
     """Проверить, нажата ли клавиша Space."""
 
-    if platform == "android":
-        return False
     return keyboard.is_pressed("space")
 
 

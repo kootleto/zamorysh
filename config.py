@@ -3,9 +3,8 @@ import os
 
 from dotenv import load_dotenv
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-dotenv_path = os.path.join(current_dir, ".env")
-
+root_dir = os.path.dirname(os.path.abspath(__file__))
+dotenv_path = os.path.join(root_dir, ".env")
 load_dotenv(dotenv_path=dotenv_path)
 
 
@@ -38,4 +37,13 @@ def _parse_args():
     return parser.parse_args()
 
 
-SETTINGS = _parse_args()
+if "ANDROID_ARGUMENT" not in os.environ:
+    SETTINGS = _parse_args()
+else:
+
+    class AndroidSettings:
+        include_demo = True
+        log_enabled = False
+        gui = True
+
+    SETTINGS = AndroidSettings()
