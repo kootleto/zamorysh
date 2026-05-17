@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from dotenv import load_dotenv
 
@@ -39,8 +40,11 @@ def _parse_args():
 
 if "ANDROID_ARGUMENT" not in os.environ:
     SETTINGS = _parse_args()
+elif hasattr(sys, "frozen") or any("pyinstaller" in arg.lower() for arg in sys.argv):
+    sys.argv = [sys.argv[0]]  # очищаем от технических аргументов pyinstaller
+    SETTINGS = _parse_args()
 else:
-
+    # хардкодим, чтобы не мучаться с .env
     class AndroidSettings:
         include_demo = True
         log_enabled = False
