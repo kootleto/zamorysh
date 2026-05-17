@@ -22,7 +22,7 @@ def drink_coffee(
             tick_effect,
             can_continue,
             hold_required,
-            name="drink coffee",
+            name="выпить кофе",
         ),
         state,
     )
@@ -39,7 +39,7 @@ def socialize(state=None, hold_required=True):
         activities_api.base_activity(
             tick_effect,
             hold_required=hold_required,
-            name="socialize",
+            name="социализироваться",
         ),
         state,
         duration=10,
@@ -56,7 +56,7 @@ def walk(state=None, hold_required=True):
         activities_api.base_activity(
             tick_effect,
             hold_required=hold_required,
-            name="walk",
+            name="пойти прогуляться",
         ),
         state,
         duration=10,
@@ -76,7 +76,7 @@ def scroll(state=None, hold_required=True):
         activities_api.base_activity(
             tick_effect,
             hold_required=hold_required,
-            name="scroll",
+            name="скроллить",
         ),
         state,
         duration=10,
@@ -96,7 +96,7 @@ def eat_lunch(hold_required=True):
         tick_effect,
         can_continue,
         hold_required,
-        name="eat_lunch",
+        name="покушать",
     )
 
 
@@ -111,7 +111,7 @@ def study(state=None, hold_required=True):
         activities_api.base_activity(
             tick_effect,
             hold_required=hold_required,
-            name="study",
+            name="учиться",
         ),
         state,
         duration=10,

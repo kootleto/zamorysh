@@ -1,7 +1,7 @@
 from engine import activities_api
 from gameplay.api import location
 
-DIRECTIONS = {"north": (0, 1), "south": (0, -1), "east": (1, 0), "west": (-1, 0)}
+DIRECTIONS = {"север": (0, 1), "юг": (0, -1), "восток": (1, 0), "запад": (-1, 0)}
 
 
 @activities_api.with_param_space(location.get_directions)
@@ -22,7 +22,7 @@ def move(param=None):
         )
 
     return activities_api.base_activity(
-        tick_effect, can_continue, True, name=f"move to {param}"
+        tick_effect, can_continue, True, name=f"пойти на {param}"
     )
 
 
