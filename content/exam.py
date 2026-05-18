@@ -5,11 +5,11 @@ from tools.logger import log
 
 
 def exam(gs):
-    knowledge = stats.get(gs, stats.knowledge)
-    mental = vitals.get(gs, vitals.mental)
-    fatigue = vitals.get(gs, vitals.fatigue)
-    sleepiness = vitals.get(gs, vitals.sleepiness)
-    social = stats.get(gs, stats.social)
+    knowledge = stats.get(gs, stats.KNOWLEDGE)
+    mental = vitals.get(gs, vitals.MENTAL)
+    fatigue = vitals.get(gs, vitals.FATIGUE)
+    sleepiness = vitals.get(gs, vitals.SLEEPINESS)
+    social = stats.get(gs, stats.SOCIAL)
 
     all_parameters = {
         "knowledge": knowledge,

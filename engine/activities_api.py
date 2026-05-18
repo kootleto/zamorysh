@@ -1,9 +1,12 @@
-from inspect import signature
 from typing import Callable, Iterable
 
-from tools.logger import log
-from tools.utils import call_with_gs, ensure_callable
-from . import gs_api
+from tools.utils import (
+    call_with_gs,
+    ensure_callable,
+    call_with_gs_async,
+    accepts,
+)
+from . import gs_api, gs_core
 from . import state_api
 from .schema import (
     Activity,
@@ -11,6 +14,8 @@ from .schema import (
     ActivityEntry,
     ActivityDefinitions,
     GameState,
+    Effect,
+    FinishCallback,
 )
 
 
@@ -21,7 +26,7 @@ from .schema import (
 
 
 def base_activity(
-    tick_effect: Callable[[GameState], None] | Callable[[], None] = lambda gs: None,
+    tick_effect: Effect = lambda gs: None,
     can_continue: (
         bool | Callable[[GameState], bool] | Callable[[], bool]
     ) = lambda gs: True,
@@ -61,8 +66,8 @@ def base_activity(
     }
 
 
-def apply_tick_effect(gs: GameState, activity: Activity):
-    call_with_gs(gs, activity["tick_effect"])
+async def apply_tick_effect(gs: GameState, activity: Activity):
+    await call_with_gs_async(gs, activity["tick_effect"])
 
 
 def check_can_continue(gs: GameState, activity: Activity) -> bool:
@@ -114,10 +119,35 @@ def get_param_space(gs: GameState, definition: ActivityDefinition) -> Iterable:
 
 
 # Это декоратор. Он делает то же, что и with_param_space: присваивает объекту атрибут
-def with_auto_start(definition):
+def with_auto_start(definition: ActivityDefinition):
     """Запустить активность в начале игры."""
     definition.auto_start = True
     return definition
+
+
+def on_finish(callback: FinishCallback):
+    """Сделать что-то после того, как активность завершится. То, что внутри, будет вызвано после окончания тика.
+    Функция может принимать в качестве аргументов `gs` и `entry` (оба аргумента опциональны,
+    писать именно в таком порядке).
+
+    Эта функция НЕ МОЖЕТ менять gs, но может что-то выводить на экран."""
+
+    def wrapper(definition):
+        definition.on_finish = callback
+        return definition
+
+    return wrapper
+
+
+def call_on_finish(
+    gs: GameState, definitions: ActivityDefinitions, entry: ActivityEntry
+):
+    definition = definitions[entry["activity_name"]]
+    callback = getattr(definition, "on_finish", None)
+
+    if callback:
+        args = [entry] if accepts("entry", callback) else []
+        call_with_gs(gs, callback, *args)
 
 
 def check_auto_start(definition: ActivityDefinition) -> bool:
@@ -154,9 +184,8 @@ def create_activity_entry(definition: ActivityDefinition, param=None) -> Activit
     # пройдет инициализация, и в этом словаре окажутся значения по умолчанию.
     # Иначе явно показываем, что state активности не нужен.
     # Чтобы понять, нужен ли активности state, смотрим, есть ли среди аргументов функции аргумент с именем `state`
-    sig = signature(definition)
     state = None
-    if "state" in sig.parameters:
+    if accepts("state", definition):
         state = {}
 
     return {
@@ -178,7 +207,7 @@ def configure_activity(
     Если `param` в entry равен `None`, то в definition ничего не передается, и будет использован параметр,
     указанный в definition по умолчанию. Поэтому не используйте `None` в качестве значения параметра!
     """
-    log(f"Activity entry: {entry}", log_type="config")
+    # log(f"Activity entry: {entry}", log_type="config")
 
     # Собираем данные из entry
     definition = definitions[entry["activity_name"]]
@@ -187,20 +216,19 @@ def configure_activity(
 
     # Даем определению аргументы только в том случае, если они ему нужны.
     # Чтобы понять, нужны ли аргументы, смотрим сигнатуру функции
-    sig = signature(definition)
     kwargs = {}
 
     # Если в качестве параметра при создании entry передано None,
     # мы считаем это отсутствием параметра и, следовательно,
     # definition будет использовать параметр по умолчанию
-    if "param" in sig.parameters and param is not None:
+    if accepts("param", definition) and param is not None:
         kwargs["param"] = param
     # Передаем state из entry, если он нужен definition
-    if "state" in sig.parameters:
+    if accepts("state", definition):
         kwargs["state"] = state
     # Definition могут быть нужны определения, если оно внутри себя вызывает другие активности.
     # Например, это нужно композитным активностям
-    if "definitions" in sig.parameters:
+    if accepts("definitions", definition):
         kwargs["definitions"] = definitions
 
     return definition(**kwargs)
@@ -215,9 +243,8 @@ def get_allowed_activity_entries(
     # Проходим по всем определениям
     for definition in definitions.values():
         # Если активности нужны definitions (например, если это композитная активность), передадим их
-        sig = signature(definition)
         kwargs = {}
-        if "definitions" in sig.parameters:
+        if accepts("definitions", definition):
             kwargs["definitions"] = definitions
 
         # Смотрим, есть ли у активности параметр
@@ -257,16 +284,30 @@ def start_activity(
     """
     # Создаем активность, чтобы понять, стакается ли она
     activity = configure_activity(definitions, entry)
+    # Удаляем из списка запущенных все не стакающиеся
     if not check_is_stackable(activity):
-        gs["system"]["activity_entries"] = [
-            entry
-            for entry in gs["system"]["activity_entries"]
-            if check_is_stackable(configure_activity(definitions, entry))
-        ]
+        new_entries = []
+        for active_entry in gs_core.get_activity_entries(gs):
+            if check_is_stackable(configure_activity(definitions, active_entry)):
+                new_entries.append(active_entry)
+            else:
+                gs_core.add_finished_entry(gs, active_entry)
+        gs_core.set_activity_entries(gs, new_entries)
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему.
     # До добавления в gs такой необходимости нет
     entry_with_id = gs_api.with_id(gs, entry)
-    gs["system"]["activity_entries"].append(entry_with_id)
+    gs_core.add_activity_entry(gs, entry_with_id)
+
+
+def start_activity_by_definition(
+    gs: GameState,
+    definitions: ActivityDefinitions,
+    definition: ActivityDefinition,
+    param=None,
+):
+    """Создать entry активности из определения и параметра и запустить эту активность."""
+    entry = create_activity_entry(definition, param)
+    start_activity(gs, definitions, entry)
 
 
 def composite_activity(
@@ -315,7 +356,7 @@ def composite_activity(
     def get_next():
         return configure_activity(definitions, state["queue"][state["next_index"]])
 
-    def tick_effect(gs):
+    async def tick_effect(gs):
         # 0. На всякий случай повторная проверка: мы могли запустить активность, не выполняя can_continue
         if state["next_index"] is None:
             state["next_index"] = 0
@@ -325,7 +366,7 @@ def composite_activity(
 
         # 2. Выполняем эффект текущей подактивности
         current = get_current()
-        apply_tick_effect(gs, current)
+        await apply_tick_effect(gs, current)
 
     def can_continue(gs):
         # 0. Защита от пустой очереди

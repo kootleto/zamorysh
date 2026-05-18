@@ -5,9 +5,9 @@ def timed_activity(activity, state=None, duration=30):
     """Создать активность, которая принудительно завершается после duration тиков (но может и раньше!)."""
     state = state_api.init_defaults(state, timed={"elapsed": 0})
 
-    def wrapped_tick_effect(gs):
+    async def wrapped_tick_effect(gs):
         state["timed"]["elapsed"] += 1
-        activities_api.apply_tick_effect(gs, activity)
+        await activities_api.apply_tick_effect(gs, activity)
 
     def wrapped_can_continue(gs):
         return state["timed"][

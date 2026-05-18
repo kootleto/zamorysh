@@ -1,5 +1,6 @@
 from engine import activities_api, state_api
 from gameplay.api import vitals, stats
+from interface import ui
 
 
 # Параметрами активности может быть что угодно.
@@ -9,11 +10,11 @@ from gameplay.api import vitals, stats
 # потому что их легко можно переопределить с помощью override_activity
 def work(fatigue_cost=1, earn_money=1):
     def tick_effect(gs):
-        vitals.mod(gs, vitals.fatigue, +fatigue_cost)
-        stats.mod(gs, stats.money, +earn_money)
+        vitals.mod(gs, vitals.FATIGUE, +fatigue_cost)
+        stats.mod(gs, stats.MONEY, +earn_money)
 
     def can_continue(gs):
-        return vitals.get(gs, vitals.fatigue) < 10
+        return vitals.get(gs, vitals.FATIGUE) < 10
 
     return activities_api.base_activity(tick_effect, can_continue, False, name="work")
 
@@ -23,7 +24,7 @@ def work(fatigue_cost=1, earn_money=1):
 # Если операций больше одной, выносите в отдельную функцию внутри определения, как в примере выше
 def rest():
     return activities_api.base_activity(
-        lambda gs: vitals.mod(gs, vitals.fatigue, -1),
+        lambda gs: vitals.mod(gs, vitals.FATIGUE, -1),
         True,
         True,
         name="rest",
@@ -56,6 +57,38 @@ def work_and_rest(definitions, state=None):
     )
 
 
+# Пример активности с параметром
+# Сначала мы указываем область параметра - по этой области будет проходить
+# get_allowed_activity_entries и проверять для каждого параметра из этой области, можно ли начать такую активность.
+# Область параметра мы указываем в обертке для декоратора with_param_space. Эта обертка возвращает уже сам декоратор,
+# который в качестве аргумента принимает определение (в данном случае waste_money), присваивает ему указанную
+# область параметра в качестве атрибута и возвращает обратно
+@activities_api.with_param_space(
+    lambda gs: [
+        # list comprehension: из 5, 10 и 15 выбираем то, что не больше, чем у нас есть денег
+        amount
+        for amount in [5, 10, 15]
+        if amount <= stats.get(gs, stats.MONEY)
+    ]
+)
+def waste_money(param, state=None):
+    state = state_api.init_defaults(state, wasted=0)
+
+    def tick_effect(gs):
+        stats.mod(gs, stats.MONEY, -1)
+        state["wasted"] += 1
+
+    def can_continue(gs):
+        return state["wasted"] < param and stats.get(gs, stats.MONEY) > 0
+
+    return activities_api.base_activity(
+        tick_effect, can_continue, name=f"waste {param} money"
+    )
+
+
+# Пример использования on_finish. В скобках надо указать, что мы хотим вызвать после тика, в котором
+# активность завершится. Эта функция может принимать gs и entry завершившейся активности, а может и не принимать
+@activities_api.on_finish(lambda: ui.display("Слезами горю не поможешь..."))
 # Пример использования state
 # По умолчанию state, если он есть, должен быть None. Не забывайте прописывать это!
 # Это значит, что, если мы не передадим в определение никакой словарь, определение не сломается,
@@ -68,7 +101,7 @@ def cry(state=None):
     state = state_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
-        vitals.mod(gs, vitals.fatigue, +1)
+        vitals.mod(gs, vitals.FATIGUE, +1)
         state["counter"] -= 1
 
     # Если функции не нужен gs, его можно не передавать как параметр
@@ -79,46 +112,17 @@ def cry(state=None):
     return activities_api.base_activity(tick_effect, can_continue, True, name="cry")
 
 
-# Пример активности с параметром
-# Сначала мы указываем область параметра - по этой области будет проходить
-# get_allowed_activity_entries и проверять для каждого параметра из этой области, можно ли начать такую активность.
-# Область параметра мы указываем в обертке для декоратора with_param_space. Эта обертка возвращает уже сам декоратор,
-# который в качестве аргумента принимает определение (в данном случае waste_money), присваивает ему указанную
-# область параметра в качестве атрибута и возвращает обратно
-@activities_api.with_param_space(
-    lambda gs: [
-        # list comprehension: из 5, 10 и 15 выбираем то, что не больше, чем у нас есть денег
-        amount
-        for amount in [5, 10, 15]
-        if amount <= stats.get(gs, stats.money)
-    ]
-)
-def waste_money(param, state=None):
-    state = state_api.init_defaults(state, wasted=0)
-
-    def tick_effect(gs):
-        stats.mod(gs, stats.money, -1)
-        state["wasted"] += 1
-
-    def can_continue(gs):
-        return state["wasted"] < param and stats.get(gs, stats.money) > 0
-
-    return activities_api.base_activity(
-        tick_effect, can_continue, name=f"waste {param} money"
-    )
-
-
 @activities_api.with_auto_start
 def get_tired():
     def tick_effect(gs):
-        vitals.mod(gs, vitals.sleepiness, 1)
+        vitals.mod(gs, vitals.SLEEPINESS, 1)
 
     return activities_api.base_activity(
         tick_effect, True, is_stackable=True, is_background=True
     )
 
 
-activities = [
+ACTIVITIES = [
     work,
     rest,
     rest_hard,

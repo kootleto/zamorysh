@@ -1,9 +1,8 @@
 from inspect import signature
 from typing import Any, Callable
 
-from tools.logger import log
-from tools.utils import call_with_gs, ensure_callable
-from . import gs_api
+from tools.utils import call_with_gs, ensure_callable, call_with_gs_async
+from . import gs_api, gs_core
 from .schema import (
     GameState,
     Transition,
@@ -12,6 +11,7 @@ from .schema import (
     ScenarioEntry,
     ActivityDefinitions,
     ScenarioDefinitions,
+    EffectResult,
 )
 
 
@@ -19,7 +19,7 @@ def base_transition(
     node_from: Any,
     node_to: Any,
     trigger: Callable[[GameState], bool] | Callable[[], bool] | bool,
-    effect: Callable[[GameState], None] | Callable[[], None],
+    effect: Callable[[GameState], EffectResult] | Callable[[], EffectResult] | None,
 ) -> Transition:
     """
     Создать переход из одного node сценария в другой.
@@ -37,7 +37,7 @@ def base_transition(
         "from": node_from,
         "to": node_to,
         "trigger": ensure_callable(trigger),
-        "effect": effect,
+        "effect": ensure_callable(effect),
     }
 
 
@@ -53,8 +53,8 @@ def check_trigger(gs: GameState, transition: Transition) -> bool:
     return call_with_gs(gs, transition["trigger"])
 
 
-def apply_effect(gs: GameState, transition: Transition):
-    call_with_gs(gs, transition["effect"])
+async def apply_effect(gs: GameState, transition: Transition):
+    return await call_with_gs_async(gs, transition["effect"])
 
 
 def base_scenario(transitions: list[Transition], start_node: Any = 0) -> Scenario:
@@ -132,7 +132,7 @@ def configure_scenario(
     Definition — логика сценария, entry — данные о нем. Совместив их, мы получаем сценарий, то есть
     объект, у которого есть список переходов и начальное состояние.
     """
-    log(f"Scenario entry: {entry}", log_type="config")
+    # log(f"Scenario entry: {entry}", log_type="config")
 
     # Собираем данные из entry
     definition = scenario_definitions[entry["scenario_name"]]
@@ -163,7 +163,7 @@ def start_scenario(
     set_node(scenario_entry, get_start_node(scenario))
     # При добавлении в gs любому объекту нужен ID, чтобы мы могли запомнить его или обратиться к нему
     entry_with_id = gs_api.with_id(gs, scenario_entry)
-    gs["system"]["scenario_entries"].append(entry_with_id)
+    gs_core.add_scenario_entry(gs, entry_with_id)
 
 
 # В начале игры движок запускает все сценарии

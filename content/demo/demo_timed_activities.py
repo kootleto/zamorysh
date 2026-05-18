@@ -6,13 +6,19 @@ from interface import ui
 
 # Пример активности с ограничением по времени
 # Эта активность будет длиться всего пять тиков. Теперь не надо вручную прописывать счетчик!
+@activities_api.on_finish(
+    lambda gs, entry: ui.display(
+        f"Следующим числом было бы {entry["state"]["number"]}, но нам надоело считать, "
+        f"ведь у нас всего {stats.get(gs, stats.KNOWLEDGE)} knowledge..."
+    )
+)
 def display_numbers_for_10_ticks(state=None):
     state = state_api.init_defaults(state, number=2)
 
     def tick_effect(gs):
         ui.display(state["number"])
         state["number"] *= 2
-        stats.mod(gs, stats.knowledge, 1)
+        stats.mod(gs, stats.KNOWLEDGE, 1)
 
     # Обратите внимание: мы передаем в обертку уже готовую активность,
     # а не ее кусочки вроде tick_effect или can_continue
@@ -35,4 +41,4 @@ def display_hello_world(state=None):
     )
 
 
-activities = [display_numbers_for_10_ticks, display_hello_world]
+ACTIVITIES = [display_numbers_for_10_ticks, display_hello_world]
