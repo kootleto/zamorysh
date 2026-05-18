@@ -1,6 +1,7 @@
 from engine.activities_api import base_activity
 from gameplay.activity_wrappers import single_tick_activity
 from gameplay.api import location, floors
+from gameplay.api.location import Place
 from interface import ui
 
 
@@ -10,7 +11,8 @@ def move_up():
 
     def can_continue(gs):
         return (
-            floors.get(gs, floors.FLOOR) < 5 and location.get_place(gs) == "university"
+            floors.get(gs, floors.FLOOR) < 5
+            and location.get_place(gs) == Place.UNIVERSITY
         )
 
     return base_activity(
@@ -24,7 +26,8 @@ def move_down():
 
     def can_continue(gs):
         return (
-            floors.get(gs, floors.FLOOR) > 0 and location.get_place(gs) == "university"
+            floors.get(gs, floors.FLOOR) > 0
+            and location.get_place(gs) == Place.UNIVERSITY
         )
 
     return base_activity(
@@ -40,7 +43,7 @@ def go_to_classroom(state=None):
 
     def can_continue(gs):
         return (
-            location.get_place(gs) == "university"
+            location.get_place(gs) == Place.UNIVERSITY
             and floors.get(gs, floors.FLOOR) != 1
             and floors.get(gs, floors.CLASSROOM) == 0
         )
