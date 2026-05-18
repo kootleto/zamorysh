@@ -13,3 +13,11 @@ __pycache__/
 .venv/
 # Environment variables
 .env
+# Builder
+.build_cache/
+.build_output/
+
+# Config files for deploy
+main.spec
+buildozer.spec
+setup.iss
