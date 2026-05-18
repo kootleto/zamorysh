@@ -6,7 +6,9 @@ from gameplay.api import vitals, stats, location
 from interface import ui
 
 
-@activities_api.on_finish(lambda: "Кофе из термоса не такой вкусный, зато это недорого.")
+@activities_api.on_finish(
+    lambda: "Кофе из термоса не такой вкусный, зато это недорого."
+)
 def drink_coffee(hold_required=False, earn_sleepiness=-1, state=None):
 
     def tick_effect(gs):
@@ -69,6 +71,22 @@ def walk(state=None, hold_required=True):
     )
 
 
+@activities_api.on_finish(lambda: ui.display("От музыки на душе всегда лучше!"))
+def listen_to_music(state=None, hold_required=True):
+    def tick_effect(gs):
+        vitals.mod(gs, vitals.MENTAL, +2)
+
+    return timed_activity(
+        activities_api.base_activity(
+            tick_effect,
+            hold_required=hold_required,
+            name="послушать музыку",
+        ),
+        state,
+        duration=10,
+    )
+
+
 @activities_api.on_finish(lambda: ui.display("Это было не очень продуктивно..."))
 def scroll(state=None, hold_required=True):
 
@@ -89,16 +107,22 @@ def scroll(state=None, hold_required=True):
         duration=10,
     )
 
+
 @activities_api.on_finish(lambda: ui.display("Слезами горю не поможешь..."))
 def cry(state=None):
     state = state_api.init_defaults(state, counter=10)
+
     def tick_effect(gs):
         vitals.mod(gs, vitals.FATIGUE, +1)
         state["counter"] -= 1
+
     def can_continue():
         return state["counter"] > 0
 
-    return activities_api.base_activity(tick_effect, can_continue, True, name="поплакать")
+    return activities_api.base_activity(
+        tick_effect, can_continue, True, name="поплакать"
+    )
+
 
 @activities_api.on_finish(lambda: ui.display("Хорошо, что вы заботитесь о себе!"))
 def eat_lunch(hold_required=True):
@@ -141,4 +165,13 @@ def study(state=None, hold_required=True):
     )
 
 
-ACTIVITIES = [drink_coffee, socialize, walk, scroll, eat_lunch, study, cry]
+ACTIVITIES = [
+    drink_coffee,
+    socialize,
+    walk,
+    scroll,
+    eat_lunch,
+    study,
+    cry,
+    listen_to_music,
+]
