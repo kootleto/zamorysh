@@ -1,4 +1,3 @@
-from content import auto_start_manager
 from engine import scenarios_api
 from gameplay.api import vitals
 from interface import ui
@@ -15,7 +14,7 @@ def falling_asleep(activity_definitions):
         return vitals.get(gs, vitals.SLEEPINESS) == 100
 
     def auto_sleep():
-        auto_start_manager.auto_start_manager(activity_definitions)
+        start_activity_by_definition()
 
     return scenarios_api.base_scenario(
         [

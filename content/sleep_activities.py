@@ -11,13 +11,10 @@ def sleep():
         gs_api.multiply_next_tick_interval(gs, 0.01)
 
     def can_continue(gs):
-        if timers.get(gs, "alarm") < gs_api.get_time(gs):
-            return vitals.get(gs, vitals.SLEEPINESS) > 0
-        else:
-            return (
-                gs_api.get_time(gs) < timers.get(gs, "alarm")
-                and vitals.get(gs, vitals.SLEEPINESS) > 0
-            )
+        return (
+            gs_api.get_time(gs) != timers.get(gs, "alarm")
+            and vitals.get(gs, vitals.SLEEPINESS) > 0
+        )
 
     return activities_api.base_activity(tick_effect, can_continue, name="лечь спать")
 
