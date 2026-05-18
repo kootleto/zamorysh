@@ -1,16 +1,16 @@
-from engine import scenarios_api, state_api
-from gameplay.api import location, time, vitals
-from interface import ui
 import random
 
+from engine import scenarios_api
+from gameplay.api import location, time, vitals
+from gameplay.api.location import Place
+from interface import ui
 
-def earlybird_scenario(
-    state=None,
-):
+
+def earlybird_scenario():
 
     def tr(gs):
         return (
-            location.get_place(gs) == "Surf coffee"
+            location.get_place(gs) == Place.SURF_COFFEE
             and time.get_hour(gs) == 7
             and time.get_minute(gs) == 0
         )

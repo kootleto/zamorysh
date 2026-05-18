@@ -1,4 +1,5 @@
 from collections import defaultdict
+from enum import StrEnum
 
 from engine import gs_api, resolver_api
 
@@ -43,14 +44,25 @@ def get_directions(gs):
     return directions
 
 
+class Place(StrEnum):
+    HOME = "home"
+    METRO = "metro"
+    PARK = "park"
+    SURF_COFFEE = "surf_coffee"
+    ANOTHER_COFFEE = "another_coffee"
+    CLUB = "club"
+    UNIVERSITY = "university"
+    OUTSIDE = "outside"
+
+
 places = {
-    "home": lambda gs: get(gs, Y) == 0 and get(gs, X) == 0,
-    "metro": lambda gs: 10 < get(gs, X) < 40,
-    "park": lambda gs: get(gs, Y) == 5 and get(gs, X) == 0,
-    "Surf coffee": lambda gs: get(gs, Y) == 5 and get(gs, X) == 10,
-    "Другая кофейня": lambda gs: get(gs, Y) == 5 and get(gs, X) == 60,
-    "club": lambda gs: get(gs, Y) == 5 and get(gs, X) == 40,
-    "university": lambda gs: get(gs, Y) == 0 and get(gs, X) == 60,
+    Place.HOME: lambda gs: get(gs, Y) == 0 and get(gs, X) == 0,
+    Place.METRO: lambda gs: 10 < get(gs, X) < 40,
+    Place.PARK: lambda gs: get(gs, Y) == 5 and get(gs, X) == 0,
+    Place.SURF_COFFEE: lambda gs: get(gs, Y) == 5 and get(gs, X) == 10,
+    Place.ANOTHER_COFFEE: lambda gs: get(gs, Y) == 5 and get(gs, X) == 60,
+    Place.CLUB: lambda gs: get(gs, Y) == 5 and get(gs, X) == 40,
+    Place.UNIVERSITY: lambda gs: get(gs, Y) == 0 and get(gs, X) == 60,
 }
 
 
@@ -58,7 +70,7 @@ def get_place(gs):
     for place, check_coordinate in places.items():
         if check_coordinate(gs):
             return place
-    return "outside"
+    return Place.OUTSIDE
 
 
 def _resolve(gs, intents):
