@@ -22,12 +22,10 @@ def falling_asleep(activity_definitions):
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, check_sleepy, go_to_sleep),
-            scenarios_api.base_transition(
-                1, 0, lambda gs: not check_sleepy(gs), lambda: None
-            ),
+            scenarios_api.base_transition(1, 0, lambda gs: not check_sleepy(gs), None),
             scenarios_api.base_transition(1, 2, check_very_sleepy, auto_sleep),
             scenarios_api.base_transition(
-                2, 1, lambda gs: not check_very_sleepy(gs), lambda: None
+                2, 1, lambda gs: not check_very_sleepy(gs), None
             ),
         ]
     )
