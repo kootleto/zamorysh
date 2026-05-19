@@ -3,6 +3,7 @@ import random
 from engine import scenarios_api, gs_api, state_api
 from engine.state_api import init_fn
 from gameplay.api import stats, vitals, location, time
+from gameplay.api.location import Place
 from interface import ui
 
 
@@ -80,7 +81,7 @@ def random_university_day_scenario(state=None):
             "Вы искали что-то в Википедии и случайно перешли по ссылке на статью языка тигринья. Вы чувствуете себя умнее."
         )
 
-    def f5(gs):
+    def f5():
         ui.display("ВЫ ПРОИГРАЛИ")
 
     def f6(gs):
@@ -104,7 +105,7 @@ def random_university_day_scenario(state=None):
 
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     events = [f1, f2, f3, f4, f5, f6, f7, f8]
-    place = "university"
+    place = Place.UNIVERSITY
     cooldown = 30
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
@@ -118,7 +119,7 @@ def random_home_day_scenario(state=None):
         stats.mod(gs, stats.MONEY, +2)
         ui.display("Вы нашли 2$ под подушкой.")
 
-    def f3(gs):
+    def f3():
         ui.display("Ничего не произошло")
 
     def f4(gs):
@@ -145,7 +146,7 @@ def random_home_day_scenario(state=None):
         )
         stats.mod(gs, stats.KNOWLEDGE, +5)
 
-    def f8(gs):
+    def f8():
         ui.display("Never gonna give you up...")
 
     def f9(gs):
@@ -161,7 +162,7 @@ def random_home_day_scenario(state=None):
 
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
-    place = "home"
+    place = Place.HOME
     cooldown = 25
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
@@ -223,7 +224,7 @@ def random_park_day_scenario(state=None):
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     cooldown = 30
-    place = "park"
+    place = Place.PARK
 
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
@@ -289,7 +290,7 @@ def random_park_night_scenario(state=None):
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     hours = [0, 1, 2, 3, 4, 5, 6, 22, 23]
     cooldown = 20
-    place = "park"
+    place = Place.PARK
 
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
@@ -349,7 +350,7 @@ def random_metro_day_scenario(state=None):
 
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
-    place = "metro"
+    place = Place.METRO
     cooldown = 25
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
@@ -383,7 +384,7 @@ def random_Surf_coffee_scenario(state=None):
 
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     events = [f1, f2, f3, f4, f5]
-    place = "Surf coffee"
+    place = Place.SURF_COFFEE
     cooldown = 40
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 

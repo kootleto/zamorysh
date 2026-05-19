@@ -1,5 +1,6 @@
 from engine import scenarios_api
 from gameplay.api import location
+from gameplay.api.location import Place
 from interface import ui
 
 
@@ -26,31 +27,31 @@ def move_scenario(place):
 
 
 def home_scenario():
-    return move_scenario("home")
+    return move_scenario(Place.HOME)
 
 
 def metro_scenario():
-    return move_scenario("metro")
+    return move_scenario(Place.METRO)
 
 
 def surfcoffee_scenario():
-    return move_scenario("Surf coffee")
+    return move_scenario(Place.SURF_COFFEE)
 
 
 def anothercoffee_scenario():
-    return move_scenario("Другая кофейня")
+    return move_scenario(Place.ANOTHER_COFFEE)
 
 
 def club_scenario():
-    return move_scenario("club")
+    return move_scenario(Place.CLUB)
 
 
 def park_scenario():
-    return move_scenario("park")
+    return move_scenario(Place.PARK)
 
 
 def university_scenario():
-    return move_scenario("university")
+    return move_scenario(Place.UNIVERSITY)
 
 
 SCENARIOS = [
