@@ -299,6 +299,17 @@ def start_activity(
     gs_core.add_activity_entry(gs, entry_with_id)
 
 
+def start_activity_by_definition(
+    gs: GameState,
+    definitions: ActivityDefinitions,
+    definition: ActivityDefinition,
+    param=None,
+):
+    """Создать entry активности из определения и параметра и запустить эту активность."""
+    entry = create_activity_entry(definition, param)
+    start_activity(gs, definitions, entry)
+
+
 def composite_activity(
     definitions: ActivityDefinitions,
     init_queue: Callable[[], list[ActivityEntry]],

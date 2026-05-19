@@ -4,6 +4,7 @@ from engine import activities_api
 from gameplay.activity_wrappers import single_tick_activity
 from gameplay.api import location, time
 from gameplay.api import vitals, stats
+from gameplay.api.location import Place
 from interface import ui
 
 
@@ -28,8 +29,8 @@ def buy_drink1(hold_required=False, state=None):
     def can_continue(gs):
         return stats.get(gs, stats.MONEY) > 9 and (
             (
-                location.get_place(gs) == "Surf coffee"
-                or location.get_place(gs) == "Другая кофейня"
+                location.get_place(gs) == Place.SURF_COFFEE
+                or location.get_place(gs) == Place.ANOTHER_COFFEE
             )
             and 6 < time.get_hour(gs) < 23
         )
@@ -46,7 +47,7 @@ def buy_drink1(hold_required=False, state=None):
 
 
 def read_menu(state=None):
-    def tick_effect(gs):
+    def tick_effect():
         ui.display("Добро пожаловать в Surf Coffee!")
         ui.display("На данный момент в меню доступны следующие позиции:")
         ui.display("a. Латте  9$ | 15$")
@@ -58,7 +59,9 @@ def read_menu(state=None):
             )
 
     def can_continue(gs):
-        return 6 < time.get_hour(gs) < 23 and location.get_place(gs) == "Surf coffee"
+        return (
+            6 < time.get_hour(gs) < 23 and location.get_place(gs) == Place.SURF_COFFEE
+        )
 
     return single_tick_activity(
         activities_api.base_activity(
