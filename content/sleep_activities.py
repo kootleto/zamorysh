@@ -30,6 +30,7 @@ def set_alarm(state=None):
     )
 
 
+@activities_api.with_auto_start
 def get_sleepy():
     def tick_effect(gs):
         vitals.mod(gs, vitals.SLEEPINESS, 0.085)
