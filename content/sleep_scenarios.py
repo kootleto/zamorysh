@@ -1,4 +1,5 @@
-from engine import scenarios_api
+from content import sleep_activities
+from engine import scenarios_api, activities_api
 from gameplay.api import vitals
 from interface import ui
 
@@ -13,8 +14,8 @@ def falling_asleep(activity_definitions):
     def check_very_sleepy(gs):
         return vitals.get(gs, vitals.SLEEPINESS) == 100
 
-    def auto_sleep():
-        start_activity_by_definition()
+    def auto_sleep(gs):
+        activities_api.start_activity_by_definition(gs, activity_definitions, sleep_activities.sleep)
 
     return scenarios_api.base_scenario(
         [
