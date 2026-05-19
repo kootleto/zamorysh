@@ -81,7 +81,7 @@ def random_university_day_scenario(state=None):
             "Вы искали что-то в Википедии и случайно перешли по ссылке на статью языка тигринья. Вы чувствуете себя умнее."
         )
 
-    def f5():
+    def f5(_gs):
         ui.display("ВЫ ПРОИГРАЛИ")
 
     def f6(gs):
@@ -119,7 +119,7 @@ def random_home_day_scenario(state=None):
         stats.mod(gs, stats.MONEY, +2)
         ui.display("Вы нашли 2$ под подушкой.")
 
-    def f3():
+    def f3(_gs):
         ui.display("Ничего не произошло")
 
     def f4(gs):
@@ -146,7 +146,7 @@ def random_home_day_scenario(state=None):
         )
         stats.mod(gs, stats.KNOWLEDGE, +5)
 
-    def f8():
+    def f8(_gs):
         ui.display("Never gonna give you up...")
 
     def f9(gs):
