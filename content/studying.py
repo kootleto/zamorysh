@@ -1,9 +1,9 @@
-from gameplay.api import stats, schedule
+from gameplay.api import stats, productivity
 
 
 def study():
     def tick_effect(gs):
-        stats.mod(gs, schedule.get_current_lesson(gs), 1)
+        stats.mod(gs, stats.KNOWLEDGE, productivity.get(gs))
 
     def can_continue(gs):
         return
