@@ -1,6 +1,82 @@
 import random
 
 
+def anagram():
+    my_list = ["морфология", "фонетика", "синтаксис", "прагматика", "семантика"]
+    slovo = random.choice(my_list)
+    slovo_list = list(slovo)
+    abrakadabra = random.sample(slovo_list, len(slovo_list))
+    print(abrakadabra)
+    guess = input("Введите расшифровку анаграммы: ").lower()
+    if guess in my_list:
+        print("Правильно!")
+    else:
+        print("Неверно!")
+
+
+def hangman():
+    words = ["синтаксис", "морфология", "лингвистика", "семантика", "прагматика"]
+    word = random.choice(words)
+    guessed_letters = []
+    attempts = 6
+
+    print("Угадай слово: ")
+
+    while attempts > 0:
+        display_word = [letter if letter in guessed_letters else "_" for letter in word]
+        print(" ".join(display_word))
+
+        if "_" not in display_word:
+            print("Поздравляем! Вы выиграли")
+            break
+
+        guess = input("Введите букву: ").lower()
+
+        if guess in guessed_letters:
+            print("Вы уже вводили эту букву.")
+        elif guess in word:
+            guessed_letters.append(guess)
+            print("Верно!")
+        else:
+            attempts -= 1
+            guessed_letters.append(guess)
+            print(f"Неверно! Осталось попыток: {attempts}")
+
+    if attempts == 0:
+        print(f"Игра окончена! Слово было: {word}")
+
+
+def bulls_and_cows():
+    secret = random.sample("123456789", 4)
+    attempts = 0
+    print(
+        "Угадай число! Я даю тебе подсказки в виде «быков» (цифра угадана и стоит на месте) и «коров» (цифра угадана, но стоит не на месте)."
+    )
+
+    while True:
+        if attempts > 10:
+            print("Попытки закончились, вы проиграли.")
+            break
+        guess = list(input("Введите 4-значное число: "))
+        if len(guess) != 4:
+            continue
+        attempts += 1
+        bulls = 0
+        cows = 0
+
+        for i in range(4):
+            if guess[i] == secret[i]:
+                bulls += 1
+            elif guess[i] in secret:
+                cows += 1
+
+        print(f"Быков: {bulls}, Коров: {cows}")
+
+        if bulls == 4:
+            print(f"Победа за {attempts} попыток!")
+            break
+
+
 def ugaiday_chislo():
     print("Игра «Угадай число»!")
     print("Я загадал число от 1 до 100. Попробуй угадать.")
@@ -161,6 +237,12 @@ def main():
             kamen_nozhnitsy_bumaga()
         elif choice == "3":
             yazyki_i_semi()
+        elif choice == "4":
+            anagram()
+        elif choice == "5":
+            hangman()
+        elif choice == "6":
+            bulls_and_cows()
 
 
 # Запуск меню
