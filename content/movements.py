@@ -1,5 +1,6 @@
 from engine import activities_api
-from gameplay.api import location
+from gameplay.api import location, floors
+from gameplay.api.location import Place
 
 DIRECTIONS = {"north": (0, 1), "south": (0, -1), "east": (1, 0), "west": (-1, 0)}
 
@@ -19,6 +20,10 @@ def move(param=None):
             and location.SOUTH_BORDER
             <= location.get(gs, location.Y) + DIRECTIONS[param][1]
             <= location.NORTH_BORDER
+            and not (
+                location.get_place(gs) == Place.UNIVERSITY
+                and floors.get(gs, floors.FLOOR) != 1
+            )
         )
 
     return activities_api.base_activity(
