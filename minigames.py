@@ -1,17 +1,21 @@
 import random
 
+from interface import ui
 
-def anagram():
+
+async def anagram():
     my_list = ["морфология", "фонетика", "синтаксис", "прагматика", "семантика"]
     slovo = random.choice(my_list)
     slovo_list = list(slovo)
     abrakadabra = random.sample(slovo_list, len(slovo_list))
-    print(abrakadabra)
-    guess = input("Введите расшифровку анаграммы: ").lower()
+    ui.display(abrakadabra)
+    guess = (await ui.prompt("Введите расшифровку анаграммы: ")).lower()
     if guess in my_list:
-        print("Правильно!")
+        ui.display("Правильно!")
+        return True
     else:
-        print("Неверно!")
+        ui.display("Неверно!")
+        return False
 
 
 def hangman():
