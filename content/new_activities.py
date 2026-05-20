@@ -133,9 +133,9 @@ def eat_lunch(hold_required=True):
 
     def can_continue(gs):
         return stats.get(gs, stats.MONEY) > 9 and (
-            location.get_place(gs) == "Surf coffee"
-            or location.get_place(gs) == "Другая кофейня"
-            or location.get_place(gs) == "University"
+            location.get_place(gs) == "surf_coffee"
+            or location.get_place(gs) == "another_coffee"
+            or location.get_place(gs) == "university"
         )
 
     return activities_api.base_activity(
@@ -146,6 +146,27 @@ def eat_lunch(hold_required=True):
     )
 
 
+@activities_api.on_finish(lambda: ui.display("Приятно ни о чем не думать!"))
+def dance(state=None, hold_required=True):
+    def tick_effect(gs):
+        vitals.mod(gs, vitals.FATIGUE, +2)
+        vitals.mod(gs, vitals.MENTAL, +7)
+
+    def can_continue(gs):
+        return location.get_place(gs) == "club"
+
+    return timed_activity(
+        activities_api.base_activity(
+            tick_effect,
+            can_continue,
+            hold_required=hold_required,
+            name="потанцевать",
+        ),
+        state,
+        duration=10,
+    )
+
+
 @activities_api.on_finish(lambda: ui.display("Ботать-ботать."))
 def study(state=None, hold_required=True):
 
@@ -153,7 +174,6 @@ def study(state=None, hold_required=True):
         vitals.mod(gs, vitals.FATIGUE, +5)
         vitals.mod(gs, vitals.MENTAL, -5)
         stats.mod(gs, stats.KNOWLEDGE, +5)
-        stats.mod(gs, stats.MONEY, +5)
 
     return timed_activity(
         activities_api.base_activity(
@@ -175,4 +195,5 @@ ACTIVITIES = [
     study,
     cry,
     listen_to_music,
+    dance,
 ]
