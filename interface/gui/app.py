@@ -22,6 +22,7 @@ class GameApp(App):
             "social": 0,
             "mental": 0,
             "knowledge": 0,
+            "location": None,
         }
     )
     track_title = StringProperty(None)
@@ -59,7 +60,7 @@ class GameApp(App):
         self.root.ids.info.text = (
             f"time: {value['time']}\n"
             f"fatigue: {value['fatigue']}   money: {value['money']}   social: {value['social']}   "
-            f"mental: {value['mental']}   knowledge: {value['knowledge']}"
+            f"mental: {value['mental']}   knowledge: {value['knowledge']}   location: {value["location"]}"
         )
 
     def on_track_title(self, _, value):
