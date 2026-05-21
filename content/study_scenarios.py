@@ -14,12 +14,10 @@ def auto_study():
 
 def study_scenario(activity_definitions):
     def check(gs):
-        return (
-            floors.get(gs, floors.CLASSROOM) == schedule.get_current_lesson(gs)["room"]
-        )
+        return floors.get(gs, floors.CLASSROOM) == schedule.get_current_room(gs)
 
     async def study(gs):
-        if schedule.get_current_lesson(gs)["type"] == "лекция":
+        if schedule.get_current_type(gs) == "лекция":
             activities_api.start_activity_by_definition(
                 gs, activity_definitions, auto_study
             )
