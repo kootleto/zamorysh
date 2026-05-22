@@ -1,3 +1,4 @@
+import itertools
 from typing import Callable, Iterable
 
 from tools.utils import (
@@ -6,8 +7,8 @@ from tools.utils import (
     call_with_gs_async,
     accepts,
 )
+from . import data_api
 from . import gs_api, gs_core
-from . import state_api
 from .schema import (
     Activity,
     ActivityDefinition,
@@ -16,10 +17,12 @@ from .schema import (
     GameState,
     Effect,
     FinishCallback,
+    ParamsSpace,
+    Params,
 )
 
 
-# Все параметры активности, кроме имени и param_space,
+# Все параметры активности, кроме имени и params_space,
 # хранятся как callable, чтобы их можно было изменять динамически
 # Например, в композитных активностях hold_required и is_stackable совпадают с соответствующими свойствами
 # текущей подактивности
@@ -33,6 +36,7 @@ def base_activity(
     hold_required: bool | Callable[[], bool] = False,
     is_stackable: bool | Callable[[], bool] = False,
     is_background: bool | Callable[[], bool] = False,
+    is_visible: bool | Callable[[], bool] = True,
     name: str = "default",
 ) -> Activity:
     """
@@ -48,6 +52,7 @@ def base_activity(
             из него удаляются все остальные не-stackable.
         is_background: Фоновая активность не предлагается игроку при выборе, и, если запущены только фоновые активности,
             игрок должен выбрать любую не фоновую (из возможных), чтобы игра продолжилась.
+        is_visible: Невидимая активность не предлагается игроку при выборе.
         name: Название активности для отображения в UI.
 
     Returns:
@@ -62,6 +67,7 @@ def base_activity(
         "hold_required": ensure_callable(hold_required),
         "is_stackable": ensure_callable(is_stackable),
         "is_background": ensure_callable(is_background),
+        "is_visible": ensure_callable(is_visible),
         "name": name,
     }
 
@@ -86,13 +92,17 @@ def check_is_background(activity: Activity) -> bool:
     return activity["is_background"]()
 
 
+def check_is_visible(activity: Activity) -> bool:
+    return activity["is_visible"]()
+
+
 def get_activity_name(activity: Activity) -> str:
     return activity["name"]
 
 
-# Это обертка над декоратором: у нее есть параметр param_space, и его может использовать сам декоратор.
+# Это обертка над декоратором: у нее есть параметр params_space, и его может использовать сам декоратор.
 # Она возвращает декоратор
-def with_param_space(param_space: Iterable | Callable[[dict], Iterable]):
+def with_params_space(**params_space: Iterable | Callable[[dict], Iterable]):
     # Это декоратор, то есть обертка над definition. Он принимает definition,
     # присваивает ему указанную область параметра в качестве атрибута
     # и возвращает definition
@@ -100,25 +110,25 @@ def with_param_space(param_space: Iterable | Callable[[dict], Iterable]):
         # Функции в Python - это объекты, и им можно присваивать атрибуты. Мы используем это,
         # чтобы узнать область параметра можно было из определения активности, не создавая саму активность
         # (ведь для создания активности уже нужно будет указать параметр)
-        definition.param_space = param_space
+        definition.params_space = params_space
         return definition
 
     return wrapper
 
 
-def get_param_space(gs: GameState, definition: ActivityDefinition) -> Iterable:
+def get_params_space(gs: GameState, definition: ActivityDefinition) -> ParamsSpace:
     # Атрибут функции можно узнать, не вызывая ее, чем мы и пользуемся
-    param_space = getattr(definition, "param_space", None)
+    params_space = getattr(definition, "params_space", dict()).copy()
 
-    # param_space может быть как функцией, которая принимает gs и возвращает Iterable, так и просто Iterable
+    # space может быть как функцией, которая принимает gs и возвращает Iterable, так и просто Iterable
     # (то есть чем-то, по чему можно пройтись в цикле for)
-    if callable(param_space):
-        return call_with_gs(gs, param_space)
-    else:
-        return param_space
+    for param, space in params_space.items():
+        if callable(space):
+            params_space[param] = call_with_gs(gs, space)
+    return params_space
 
 
-# Это декоратор. Он делает то же, что и with_param_space: присваивает объекту атрибут
+# Это декоратор. Он делает то же, что и with_params_space: присваивает объекту атрибут
 def with_auto_start(definition: ActivityDefinition):
     """Запустить активность в начале игры."""
     definition.auto_start = True
@@ -158,7 +168,7 @@ def check_auto_start(definition: ActivityDefinition) -> bool:
 def override_activity(activity: Activity, **overrides) -> Activity:
     """
     Заменить любые элементы словаря активности: `tick_effect`, `can_continue`, `hold_required`,
-    `is_stackable`, `param_space`, `name`.
+    `is_stackable`, `is_background`, `is_visible`, `name`.
 
     Это позволяет заменять отдельные элементы определений, создавая на их основе новое определение,
     и не хранить все свойства и методы активности в аргументах.
@@ -169,11 +179,13 @@ def override_activity(activity: Activity, **overrides) -> Activity:
     return base_activity(**new_data)
 
 
-def create_activity_entry(definition: ActivityDefinition, param=None) -> ActivityEntry:
+def create_activity_entry(
+    definition: ActivityDefinition, params: Params | None = None
+) -> ActivityEntry:
     """
     Создать запись активности (entry).
 
-    Это словарь, в котором хранятся определение (definition) активности, параметр (если есть) и
+    Это словарь, в котором хранятся определение (definition) активности, параметры (если есть) и
     локальное состояние активности (если есть).
     """
 
@@ -185,12 +197,15 @@ def create_activity_entry(definition: ActivityDefinition, param=None) -> Activit
     # Иначе явно показываем, что state активности не нужен.
     # Чтобы понять, нужен ли активности state, смотрим, есть ли среди аргументов функции аргумент с именем `state`
     state = None
+    entry_params = None
     if accepts("state", definition):
         state = {}
+    if accepts("params", definition):
+        entry_params = params if params is not None else {}
 
     return {
         "activity_name": activity_name,
-        "param": param,
+        "params": entry_params,
         "state": state,
     }
 
@@ -203,26 +218,23 @@ def configure_activity(
 
     Definition — логика активности, entry — данные о ней. Совместив их, мы получаем активность, то есть
     объект в виде словаря, у которого есть методы и свойства. Их можно вызывать или читать через API.
-
-    Если `param` в entry равен `None`, то в definition ничего не передается, и будет использован параметр,
-    указанный в definition по умолчанию. Поэтому не используйте `None` в качестве значения параметра!
     """
     # log(f"Activity entry: {entry}", log_type="config")
 
     # Собираем данные из entry
     definition = definitions[entry["activity_name"]]
-    param = entry["param"]
+    params = entry["params"]
     state = entry["state"]
 
     # Даем определению аргументы только в том случае, если они ему нужны.
     # Чтобы понять, нужны ли аргументы, смотрим сигнатуру функции
     kwargs = {}
 
-    # Если в качестве параметра при создании entry передано None,
-    # мы считаем это отсутствием параметра и, следовательно,
-    # definition будет использовать параметр по умолчанию
-    if accepts("param", definition) and param is not None:
-        kwargs["param"] = param
+    # Если в качестве параметров при создании entry передано None,
+    # мы считаем это отсутствием параметров и, следовательно,
+    # definition будет использовать параметры по умолчанию
+    if accepts("params", definition):
+        kwargs["params"] = params
     # Передаем state из entry, если он нужен definition
     if accepts("state", definition):
         kwargs["state"] = state
@@ -232,6 +244,17 @@ def configure_activity(
         kwargs["definitions"] = definitions
 
     return definition(**kwargs)
+
+
+def _generate_param_combinations(params_space: ParamsSpace) -> list[Params]:
+    params_names = params_space.keys()
+    spaces = params_space.values()
+
+    combinations = []
+    for combination in itertools.product(*spaces):
+        combinations.append(dict(zip(params_names, combination)))
+
+    return combinations
 
 
 # Используется движком в pick_activity, чтобы предложить игроку все доступные активности
@@ -247,24 +270,26 @@ def get_allowed_activity_entries(
         if accepts("definitions", definition):
             kwargs["definitions"] = definitions
 
-        # Смотрим, есть ли у активности параметр
-        # Если параметра нет, просто проверяем, можем ли мы выполнить активность в следующем тике
-        # Если параметр есть, создаем по варианту активности на каждый параметр и проверяем каждый из вариантов
-        # Чтобы не дублировать логику, представляем отсутствие параметра как параметр с одним вариантом None
-        param_space = get_param_space(gs, definition)
-        params_to_check = [None] if param_space is None else param_space
-        # None не может быть значением параметра, поэтому мы можем использовать это как флаг
-        # и передавать параметр только если он не None
-        for param in params_to_check:
-            activity = (
-                definition(**kwargs)
-                if param is None
-                else definition(**kwargs, param=param)
-            )
-            if not check_is_background(activity) and check_can_continue(gs, activity):
-                # В create_activity_entry param=None по умолчанию, так что мы спокойно можем
-                # передать туда None без риска получить исключение
-                entry = create_activity_entry(definition, param)
+        # Смотрим, есть ли у активности параметры
+        # Если параметров нет, просто проверяем, можем ли мы выполнить активность в следующем тике
+        # Если параметры есть, создаем по варианту активности на каждую комбинацию и проверяем каждый из вариантов
+        params_space = get_params_space(gs, definition)
+        if not params_space:
+            combinations = [None]
+        else:
+            combinations = _generate_param_combinations(params_space)
+
+        for combination in combinations:
+            if combination is None:
+                activity = definition(**kwargs)
+            else:
+                activity = definition(**kwargs, params=combination)
+            if (
+                not check_is_background(activity)
+                and check_is_visible(activity)
+                and check_can_continue(gs, activity)
+            ):
+                entry = create_activity_entry(definition, combination)
                 allowed_entries.append(entry)
 
     # Возвращаем все доступные варианты в виде списка entries.
@@ -303,10 +328,10 @@ def start_activity_by_definition(
     gs: GameState,
     definitions: ActivityDefinitions,
     definition: ActivityDefinition,
-    param=None,
+    params=None,
 ):
     """Создать entry активности из определения и параметра и запустить эту активность."""
-    entry = create_activity_entry(definition, param)
+    entry = create_activity_entry(definition, params)
     start_activity(gs, definitions, entry)
 
 
@@ -344,7 +369,7 @@ def composite_activity(
     def init():
         return {"queue": init_queue(), "current_index": 0, "next_index": None}
 
-    state = state_api.init_fn(state, init)
+    state = data_api.init_fn(state, init)
 
     # В очереди хранятся не activities (это логика),
     # а entries, поэтому в качестве аргумента нам нужны definitions.
@@ -410,6 +435,16 @@ def composite_activity(
         current = get_current()
         return check_is_background(current)
 
+    def is_visible():
+        current = get_current()
+        return check_is_visible(current)
+
     return base_activity(
-        tick_effect, can_continue, hold_required, is_stackable, is_background, name=name
+        tick_effect,
+        can_continue,
+        hold_required,
+        is_stackable,
+        is_background,
+        is_visible,
+        name=name,
     )

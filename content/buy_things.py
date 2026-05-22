@@ -11,7 +11,7 @@ from interface import ui
 def buy_drink1(hold_required=False, state=None):
     # def can_continue(gs):
     # return stats.get(gs, stats.money) < 0
-    # state = state_api.init_defaults(state, counter=1)
+    # state = data_api.init_defaults(state, counter=1)
 
     async def tick_effect(gs):
         ui.display("Купить латте? (Press a + Enter)")
