@@ -30,7 +30,6 @@ class GameApp(App):
             "social": 0,
             "mental": 0,
             "knowledge": 0,
-            "location": None,
         }
     )
     track_title = StringProperty(None)
@@ -64,7 +63,7 @@ class GameApp(App):
     def on_stats(self, _, value):
         self.root.ids.stats_label.text = (
             f"fatigue: {value['fatigue']}   money: {value['money']}   social: {value['social']}   "
-            f"mental: {value['mental']}   knowledge: {value['knowledge']}   location: {value["location"]}"
+            f"mental: {value['mental']}   knowledge: {value['knowledge']}"
         )
         self.root.ids.time_label.text = formatters.get_formatted_time(value["datetime"])
         self.root.ids.date_label.text = formatters.get_formatted_date(value["datetime"])

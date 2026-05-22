@@ -87,7 +87,6 @@ def refresh_ui(gs: GameState, options: ActivityOptions):
         "social": stats.get(gs, stats.SOCIAL),
         "mental": vitals.get(gs, vitals.MENTAL),
         "knowledge": stats.get(gs, stats.KNOWLEDGE),
-        "location": str(location.get_place(gs)),
     }
 
     app.track_title = music.get_current_track(gs)
