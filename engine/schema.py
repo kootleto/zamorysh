@@ -1,10 +1,19 @@
-from typing import Callable, TypedDict, Any, Literal, Protocol, Awaitable, Union
+from typing import (
+    Callable,
+    TypedDict,
+    Any,
+    Literal,
+    Protocol,
+    Awaitable,
+    Union,
+    Iterable,
+)
 
 
 # Сущности внутри gs
 class ActivityEntry(TypedDict):
     activity_name: str
-    param: Any
+    params: dict[str, Any] | None
     state: dict[str, Any] | None
 
 
@@ -81,6 +90,7 @@ class Activity(TypedDict):
     hold_required: Callable[[], bool]
     is_stackable: Callable[[], bool]
     is_background: Callable[[], bool]
+    is_visible: Callable[[], bool]
     name: str
 
 
@@ -95,6 +105,10 @@ class ActivityDefinition(Protocol):
     __name__: str
     __module__: str
     __call__: Callable[..., Activity]
+
+
+ParamsSpace = dict[str, Iterable]
+Params = dict[str, Any]
 
 
 ActivityDefinitions = dict[str, ActivityDefinition]

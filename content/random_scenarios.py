@@ -1,7 +1,7 @@
 import random
 
-from engine import scenarios_api, gs_api, state_api
-from engine.state_api import init_fn
+from engine import scenarios_api, gs_api, data_api
+from engine.data_api import init_fn
 from gameplay.api import stats, vitals, location, time
 from gameplay.api.location import Place
 from interface import ui
@@ -43,7 +43,7 @@ def random_scenario(state=None):
     def check_tick():
         return {"tick": random.randint(1, 3)}
 
-    state = state_api.init_fn(state, check_tick)
+    state = data_api.init_fn(state, check_tick)
 
     def ti(gs):
         return gs_api.get_time(gs) == state["tick"]

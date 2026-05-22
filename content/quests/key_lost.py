@@ -1,6 +1,6 @@
 import random
 
-from engine import state_api, scenarios_api
+from engine import data_api, scenarios_api
 from gameplay.api import time, location
 from gameplay.api.location import Place
 from interface import ui
@@ -22,7 +22,7 @@ def generate_outside_coords():
 
 
 def key_lost_quest(state=None):
-    state = state_api.init_defaults(state, key_x=None, key_y=None)
+    state = data_api.init_defaults(state, key_x=None, key_y=None)
 
     def warning_trigger(gs):
         return (
