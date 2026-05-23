@@ -1,7 +1,7 @@
 import random
 
 from engine import scenarios_api
-from engine.data_api import init_fn
+from engine.data_api import init_defaults
 from gameplay.api import location, time, vitals
 from gameplay.api.location import Place
 from interface import ui
@@ -11,7 +11,7 @@ def earlybird_notice():
     def tr(gs):
         return location.get_place(gs) == Place.SURF_COFFEE
 
-    def eff(gs):
+    def eff():
         ui.display(
             "В этой кофейне действует акция: первый покупатель с утра получает бесплатный кофе. Было бы здорово получить его несколько раз."
         )
@@ -20,10 +20,8 @@ def earlybird_notice():
 
 
 def earlybird_scenario(state=None):
-    def init():
-        return {"counter": 0}
 
-    state = init_fn(state, init)
+    state = init_defaults(state, counter=0)
 
     def tr(gs):
         return (

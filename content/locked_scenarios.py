@@ -89,7 +89,7 @@ def display_club():
 
 
 def display_university():
-    return display_locked(Place.UNIVERSITY, "Сейчас в университет не попасть")
+    return display_locked(Place.UNIVERSITY, "Сейчас в университет не попасть.")
 
 
 SCENARIOS = [
