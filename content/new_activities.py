@@ -171,7 +171,7 @@ def dance(state=None, hold_required=True):
 def study(state=None, hold_required=True):
 
     def tick_effect(gs):
-        vitals.mod(gs, vitals.FATIGUE, +0.25)
+        vitals.mod(gs, vitals.FATIGUE, +0.5)
         vitals.mod(gs, vitals.MENTAL, -0.5)
         stats.mod(gs, stats.KNOWLEDGE, +0.25)
 

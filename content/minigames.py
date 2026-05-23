@@ -89,7 +89,7 @@ async def bulls_and_cows():
 
 async def ugaiday_chislo():
     ui.display("Игра «Угадай число»!")
-    ui.display("Я загадал число от 1 до 100. Попробуй угадать.")
+    ui.display("Загадано число от 1 до 100. Попробуйте угадать.")
 
     secret_number = random.randint(1, 100)
     attempts = 0
@@ -131,11 +131,11 @@ async def kamen_nozhnitsy_bumaga():
 
     while player_wins < 3 and computer_wins < 3:
         ui.display("Раунд", round_num)
-        ui.display("Счёт: Вы", player_wins, "-", computer_wins, "Я")
+        ui.display("Счёт:", player_wins, "-", computer_wins)
 
         # Ввод пользователя
         player_choice = (
-            (await ui.prompt("Выбери предмет (камень, ножницы, бумага): "))
+            (await ui.prompt("Выберите предмет (камень, ножницы, бумага): "))
             .lower()
             .strip()
         )
@@ -150,7 +150,7 @@ async def kamen_nozhnitsy_bumaga():
         computer_choice = random.choice(["камень", "ножницы", "бумага"])
 
         ui.display("Ваш выбор:", player_choice)
-        ui.display("Мой выбор:", computer_choice)
+        ui.display("Выбор противника:", computer_choice)
 
         # Определение победителя раунда
         if player_choice == computer_choice:
@@ -159,19 +159,19 @@ async def kamen_nozhnitsy_bumaga():
             ui.display("Вы выиграли раунд")
             player_wins += 1
         else:
-            ui.display("Я выиграл раунд")
+            ui.display("Вы проиграли раунд")
             computer_wins += 1
 
         ui.display()
         round_num += 1
 
     ui.display("Игра окончена")
-    ui.display("Финальный счёт: Вы", player_wins, "-", computer_wins, "Я")
+    ui.display("Финальный счёт: ", player_wins, "-", computer_wins)
     if player_wins == 3:
-        ui.display("Вы выиграли игру")
+        ui.display("Вы выиграли")
         return True
     else:
-        ui.display("Я выиграл игру")
+        ui.display("Вы проиграли")
         return False
 
 
@@ -237,7 +237,7 @@ async def yazyki_i_semi():
         ui.display("Правильно")
         return True
     else:
-        await ui.display("Правильно")
+        await ui.display("Неправильно")
         return False
 
 
