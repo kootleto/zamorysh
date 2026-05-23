@@ -117,7 +117,7 @@ def random_home_day_scenario(state=None):
 
     def f2(gs):
         stats.mod(gs, stats.MONEY, +2)
-        ui.display("Вы нашли 2$ под подушкой.")
+        ui.display("Вы нашли 2 кредита под подушкой.")
 
     def f3(_gs):
         ui.display("Ничего не произошло")

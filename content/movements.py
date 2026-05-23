@@ -29,7 +29,7 @@ def move(params):
         )
 
     return activities_api.base_activity(
-        tick_effect, can_continue, True, name=f"move to {direction}"
+        tick_effect, can_continue, True, name=f"пойти на {direction}"
     )
 
 
