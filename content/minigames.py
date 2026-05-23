@@ -97,7 +97,7 @@ async def ugaiday_chislo():
     while True:
         try:
 
-            guess = int(await ui.prompt("\nВведите ваше число: "))
+            guess = int(await ui.prompt("Введите ваше число: "))
             attempts += 1
 
             if guess < 1 or guess > 100:
@@ -110,7 +110,7 @@ async def ugaiday_chislo():
                 ui.display("Меньше!")
             else:
                 ui.display(
-                    f"\nПоздравляю! Вы угадали число {secret_number} за {attempts} попыток!"
+                    f"Поздравляю! Вы угадали число {secret_number} за {attempts} попыток!"
                 )
                 return True
 
@@ -206,12 +206,12 @@ async def yazyki_i_semi():
 
     random.shuffle(families)
 
-    ui.display("\nСемьи:")
+    ui.display("Семьи:")
     ui.display("а.", families[0])
     ui.display("б.", families[1])
     ui.display("в.", families[2])
 
-    answer = await ui.prompt("\nВаш ответ (пример: 1а,2б,3в): ")
+    answer = await ui.prompt("Ваш ответ (пример: 1а,2б,3в): ")
 
     correct = 0
     pairs = answer.replace(" ", "").split(",")

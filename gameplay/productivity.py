@@ -9,5 +9,5 @@ def get(gs):
             + vitals.get(gs, vitals.FATIGUE)
             - vitals.get(gs, vitals.MENTAL)
         )
-        / 200
+        / 300
     )

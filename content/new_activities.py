@@ -175,9 +175,13 @@ def study(state=None, hold_required=True):
         vitals.mod(gs, vitals.MENTAL, -0.5)
         stats.mod(gs, stats.KNOWLEDGE, +0.25)
 
+    def can_continue(gs):
+        return location.get_place(gs) != location.Place.OUTSIDE
+
     return timed_activity(
         activities_api.base_activity(
             tick_effect,
+            can_continue,
             hold_required=hold_required,
             name="делать домашку",
         ),
