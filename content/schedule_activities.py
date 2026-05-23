@@ -60,7 +60,7 @@ def check_current_lesson(state=None):
     def tick_effect(gs):
         if schedule.get_current_lesson(gs)["subject"] is not None:
             ui.display(
-                f"{schedule.get_current_subject(gs)} ({schedule.get_current_type(gs)} в аудитории {schedule.get_current_room(gs)}"
+                f"{schedule.get_current_subject(gs)} ({schedule.get_current_type(gs)}) в аудитории {schedule.get_current_room(gs)}"
             )
         else:
             ui.display("Сейчас нет пар")
