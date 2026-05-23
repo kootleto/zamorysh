@@ -90,7 +90,6 @@ class Activity(TypedDict):
     hold_required: Callable[[], bool]
     is_stackable: Callable[[], bool]
     is_background: Callable[[], bool]
-    is_visible: Callable[[], bool]
     name: str
 
 

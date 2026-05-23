@@ -36,7 +36,6 @@ def base_activity(
     hold_required: bool | Callable[[], bool] = False,
     is_stackable: bool | Callable[[], bool] = False,
     is_background: bool | Callable[[], bool] = False,
-    is_visible: bool | Callable[[], bool] = True,
     name: str = "default",
 ) -> Activity:
     """
@@ -52,7 +51,6 @@ def base_activity(
             из него удаляются все остальные не-stackable.
         is_background: Фоновая активность не предлагается игроку при выборе, и, если запущены только фоновые активности,
             игрок должен выбрать любую не фоновую (из возможных), чтобы игра продолжилась.
-        is_visible: Невидимая активность не предлагается игроку при выборе.
         name: Название активности для отображения в UI.
 
     Returns:
@@ -67,7 +65,6 @@ def base_activity(
         "hold_required": ensure_callable(hold_required),
         "is_stackable": ensure_callable(is_stackable),
         "is_background": ensure_callable(is_background),
-        "is_visible": ensure_callable(is_visible),
         "name": name,
     }
 
@@ -90,10 +87,6 @@ def check_is_stackable(activity: Activity) -> bool:
 
 def check_is_background(activity: Activity) -> bool:
     return activity["is_background"]()
-
-
-def check_is_visible(activity: Activity) -> bool:
-    return activity["is_visible"]()
 
 
 def get_activity_name(activity: Activity) -> str:
@@ -135,6 +128,20 @@ def with_auto_start(definition: ActivityDefinition):
     return definition
 
 
+def check_auto_start(definition: ActivityDefinition) -> bool:
+    # Если такого атрибута присвоено не было, то автозапуск нам не нужен
+    return getattr(definition, "auto_start", False)
+
+
+def system_only(definition: ActivityDefinition):
+    definition.system_only = True
+    return definition
+
+
+def check_system_only(definition: ActivityDefinition) -> bool:
+    return getattr(definition, "system_only", False)
+
+
 def on_finish(callback: FinishCallback):
     """Сделать что-то после того, как активность завершится. То, что внутри, будет вызвано после окончания тика.
     Функция может принимать в качестве аргументов `gs` и `entry` (оба аргумента опциональны,
@@ -160,15 +167,10 @@ def call_on_finish(
         call_with_gs(gs, callback, *args)
 
 
-def check_auto_start(definition: ActivityDefinition) -> bool:
-    # Если такого атрибута присвоено не было, то автозапуск нам не нужен
-    return getattr(definition, "auto_start", False)
-
-
 def override_activity(activity: Activity, **overrides) -> Activity:
     """
     Заменить любые элементы словаря активности: `tick_effect`, `can_continue`, `hold_required`,
-    `is_stackable`, `is_background`, `is_visible`, `name`.
+    `is_stackable`, `is_background`, `name`.
 
     Это позволяет заменять отдельные элементы определений, создавая на их основе новое определение,
     и не хранить все свойства и методы активности в аргументах.
@@ -265,6 +267,9 @@ def get_allowed_activity_entries(
     allowed_entries = []
     # Проходим по всем определениям
     for definition in definitions.values():
+        if check_system_only(definition):
+            continue
+
         # Если активности нужны definitions (например, если это композитная активность), передадим их
         kwargs = {}
         if accepts("definitions", definition):
@@ -284,11 +289,7 @@ def get_allowed_activity_entries(
                 activity = definition(**kwargs)
             else:
                 activity = definition(**kwargs, params=combination)
-            if (
-                not check_is_background(activity)
-                and check_is_visible(activity)
-                and check_can_continue(gs, activity)
-            ):
+            if not check_is_background(activity) and check_can_continue(gs, activity):
                 entry = create_activity_entry(definition, combination)
                 allowed_entries.append(entry)
 
@@ -435,16 +436,11 @@ def composite_activity(
         current = get_current()
         return check_is_background(current)
 
-    def is_visible():
-        current = get_current()
-        return check_is_visible(current)
-
     return base_activity(
         tick_effect,
         can_continue,
         hold_required,
         is_stackable,
         is_background,
-        is_visible,
         name=name,
     )
