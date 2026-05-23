@@ -21,9 +21,9 @@ def init_defaults(data: dict | None, **defaults) -> dict:
     return data
 
 
-def extract_params(params: dict | None, **defaults):
+def get_params(params: dict | None, *keys, **defaults):
     params_set = init_defaults(params, **defaults)
-    result = tuple(params_set[param] for param in defaults.keys())
+    result = tuple(params_set[param] for param in keys)
     return result[0] if len(result) == 1 else result
 
 
