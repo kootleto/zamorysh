@@ -15,7 +15,7 @@ async def anagram():
         ui.display("Правильно!")
         return True
     else:
-        ui.display("Неверно!")
+        ui.display("Неправильно!")
         return False
 
 
