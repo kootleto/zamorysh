@@ -8,7 +8,7 @@ DIRECTIONS = {"north": (0, 1), "south": (0, -1), "east": (1, 0), "west": (-1, 0)
 @activities_api.with_params_space(direction=location.get_directions)
 def move(params):
 
-    direction = data_api.extract_params(params, direction=None)
+    direction = data_api.get_params(params, "direction")
 
     def tick_effect(gs):
         location.mod(gs, location.X, DIRECTIONS[direction][0])

@@ -73,7 +73,7 @@ def work_and_rest(definitions, state=None):
 )
 def waste_money(params, state=None):
     state = data_api.init_defaults(state, wasted=0)
-    amount = data_api.extract_params(params, amount=10)
+    amount = data_api.get_params(params, "amount")
 
     def tick_effect(gs):
         stats.mod(gs, stats.MONEY, -1)
