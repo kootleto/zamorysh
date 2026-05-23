@@ -28,6 +28,7 @@ def move_down():
         return (
             floors.get(gs, floors.FLOOR) > 0
             and location.get_place(gs) == Place.UNIVERSITY
+            and floors.get(gs, floors.CLASSROOM) == 0
         )
 
     return base_activity(

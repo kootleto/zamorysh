@@ -1,63 +1,73 @@
 import random
 
+from interface import ui
 
-def anagram():
+
+async def anagram():
+    ui.display("Игра «Анаграммы»!")
     my_list = ["морфология", "фонетика", "синтаксис", "прагматика", "семантика"]
     slovo = random.choice(my_list)
     slovo_list = list(slovo)
     abrakadabra = random.sample(slovo_list, len(slovo_list))
-    print(abrakadabra)
-    guess = input("Введите расшифровку анаграммы: ").lower()
+    ui.display(abrakadabra)
+    guess = (await ui.prompt("Введите расшифровку анаграммы: ")).lower()
     if guess in my_list:
-        print("Правильно!")
+        ui.display("Правильно!")
+        return True
     else:
-        print("Неверно!")
+        ui.display("Неправильно!")
+        return False
 
 
-def hangman():
+async def hangman():
+    ui.display("Игра «Виселица»!")
     words = ["синтаксис", "морфология", "лингвистика", "семантика", "прагматика"]
     word = random.choice(words)
     guessed_letters = []
     attempts = 6
 
-    print("Угадай слово: ")
+    ui.display("Угадайте слово: ")
 
     while attempts > 0:
         display_word = [letter if letter in guessed_letters else "_" for letter in word]
-        print(" ".join(display_word))
+        ui.display(" ".join(display_word))
 
         if "_" not in display_word:
-            print("Поздравляем! Вы выиграли")
-            break
+            ui.display("Поздравляем! Вы выиграли")
+            return True
 
-        guess = input("Введите букву: ").lower()
+        guess = (await ui.prompt("Введите букву: ")).lower()
 
         if guess in guessed_letters:
-            print("Вы уже вводили эту букву.")
+            ui.display("Вы уже вводили эту букву.")
         elif guess in word:
             guessed_letters.append(guess)
-            print("Верно!")
+            ui.display("Верно!")
         else:
             attempts -= 1
             guessed_letters.append(guess)
-            print(f"Неверно! Осталось попыток: {attempts}")
+            ui.display(f"Неверно! Осталось попыток: {attempts}")
 
     if attempts == 0:
-        print(f"Игра окончена! Слово было: {word}")
+        ui.display(f"Игра окончена! Слово было: {word}")
+        return False
 
 
-def bulls_and_cows():
+async def bulls_and_cows():
+    ui.display("Игра «Быки и коровы»!")
     secret = random.sample("123456789", 4)
     attempts = 0
-    print(
+    ui.display(
         "Угадай число! Я даю тебе подсказки в виде «быков» (цифра угадана и стоит на месте) и «коров» (цифра угадана, но стоит не на месте)."
     )
 
     while True:
         if attempts > 10:
-            print("Попытки закончились, вы проиграли.")
-            break
-        guess = list(input("Введите 4-значное число: "))
+            ui.display("Попытки закончились, вы проиграли.")
+            return False
+        guess = await ui.prompt("Введите 4-значное число: ")
+        ui.display(f"Ваше предположение: {guess}")
+        guess = list(guess)
         if len(guess) != 4:
             continue
         attempts += 1
@@ -70,16 +80,16 @@ def bulls_and_cows():
             elif guess[i] in secret:
                 cows += 1
 
-        print(f"Быков: {bulls}, Коров: {cows}")
+        ui.display(f"Быков: {bulls}, Коров: {cows}")
 
         if bulls == 4:
-            print(f"Победа за {attempts} попыток!")
-            break
+            ui.display(f"Победа за {attempts} попыток!")
+            return True
 
 
-def ugaiday_chislo():
-    print("Игра «Угадай число»!")
-    print("Я загадал число от 1 до 100. Попробуй угадать.")
+async def ugaiday_chislo():
+    ui.display("Игра «Угадай число»!")
+    ui.display("Загадано число от 1 до 100. Попробуйте угадать.")
 
     secret_number = random.randint(1, 100)
     attempts = 0
@@ -87,31 +97,31 @@ def ugaiday_chislo():
     while True:
         try:
 
-            guess = int(input("\nВведите ваше число: "))
+            guess = int(await ui.prompt("Введите ваше число: "))
             attempts += 1
 
             if guess < 1 or guess > 100:
-                print("Пожалуйста, введите число от 1 до 100.")
+                ui.display("Пожалуйста, введите число от 1 до 100.")
                 continue
 
             if guess < secret_number:
-                print("Больше!")
+                ui.display("Больше!")
             elif guess > secret_number:
-                print("Меньше!")
+                ui.display("Меньше!")
             else:
-                print(
-                    f"\nПоздравляю! Вы угадали число {secret_number} за {attempts} попыток!"
+                ui.display(
+                    f"Поздравляю! Вы угадали число {secret_number} за {attempts} попыток!"
                 )
-                break
+                return True
 
         except ValueError:
-            print("Ошибка: пожалуйста, введите целое число.")
+            ui.display("Ошибка: пожалуйста, введите целое число.")
 
 
-def kamen_nozhnitsy_bumaga():
-    print("Игра Камень-Ножницы-Бумага")
-    print("Побеждает тот, кто первым выиграет 3 раунда.")
-    print()
+async def kamen_nozhnitsy_bumaga():
+    ui.display("Игра «Камень-Ножницы-Бумага»!")
+    ui.display("Побеждает тот, кто первым выиграет 3 раунда.")
+    ui.display()
 
     player_wins = 0
     computer_wins = 0
@@ -120,48 +130,53 @@ def kamen_nozhnitsy_bumaga():
     win_rules = {"камень": "ножницы", "ножницы": "бумага", "бумага": "камень"}
 
     while player_wins < 3 and computer_wins < 3:
-        print("Раунд", round_num)
-        print("Счёт: Вы", player_wins, "-", computer_wins, "Я")
+        ui.display("Раунд", round_num)
+        ui.display("Счёт:", player_wins, "-", computer_wins)
 
         # Ввод пользователя
         player_choice = (
-            input("Выбери предмет (камень, ножницы, бумага): ").lower().strip()
+            (await ui.prompt("Выберите предмет (камень, ножницы, бумага): "))
+            .lower()
+            .strip()
         )
 
         # Проверка корректности ввода
         if player_choice not in ["камень", "ножницы", "бумага"]:
-            print("Ошибка: введи камень, ножницы или бумага")
-            print()
+            ui.display("Ошибка: введите камень, ножницы или бумага")
+            ui.display()
             continue
 
         # Выбор компьютера
         computer_choice = random.choice(["камень", "ножницы", "бумага"])
 
-        print("Твой выбор:", player_choice)
-        print("Мой выбор:", computer_choice)
+        ui.display("Ваш выбор:", player_choice)
+        ui.display("Выбор противника:", computer_choice)
 
         # Определение победителя раунда
         if player_choice == computer_choice:
-            print("Ничья")
+            ui.display("Ничья")
         elif win_rules[player_choice] == computer_choice:
-            print("Ты выиграл раунд")
+            ui.display("Вы выиграли раунд")
             player_wins += 1
         else:
-            print("Я выиграл раунд")
+            ui.display("Вы проиграли раунд")
             computer_wins += 1
 
-        print()
+        ui.display()
         round_num += 1
 
-    print("Игра окончена")
-    print("Финальный счёт: Вы", player_wins, "-", computer_wins, "Я")
+    ui.display("Игра окончена")
+    ui.display("Финальный счёт: ", player_wins, "-", computer_wins)
     if player_wins == 3:
-        print("Ты выиграл игру")
+        ui.display("Вы выиграли")
+        return True
     else:
-        print("Я выиграл игру")
+        ui.display("Вы проиграли")
+        return False
 
 
-def yazyki_i_semi():
+async def yazyki_i_semi():
+    ui.display("Игра «Языки и семьи»!")
     languages = {
         "русский": "индоевропейская",
         "английский": "индоевропейская",
@@ -174,9 +189,9 @@ def yazyki_i_semi():
 
     selected = random.sample(list(languages.items()), 3)
 
-    print("Языки:")
+    ui.display("Языки:")
     for i, (lang, _) in enumerate(selected, 1):
-        print(f"{i}. {lang}")
+        ui.display(f"{i}. {lang}")
 
     families = []
     for _, fam in selected:
@@ -191,12 +206,12 @@ def yazyki_i_semi():
 
     random.shuffle(families)
 
-    print("\nСемьи:")
-    print("а.", families[0])
-    print("б.", families[1])
-    print("в.", families[2])
+    ui.display("Семьи:")
+    ui.display("а.", families[0])
+    ui.display("б.", families[1])
+    ui.display("в.", families[2])
 
-    answer = input("\nТвой ответ (пример: 1а,2б,3в): ")
+    answer = await ui.prompt("Ваш ответ (пример: 1а,2б,3в): ")
 
     correct = 0
     pairs = answer.replace(" ", "").split(",")
@@ -218,7 +233,12 @@ def yazyki_i_semi():
             if selected[num][1] == family_by_letter:
                 correct += 1
 
-    print("\nПравильно" if correct == 3 else "Неправильно")
+    if correct == 3:
+        ui.display("Правильно")
+        return True
+    else:
+        await ui.display("Неправильно")
+        return False
 
 
 def main():
