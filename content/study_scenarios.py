@@ -22,10 +22,14 @@ def study_scenario(activity_definitions):
                 gs, activity_definitions, auto_study
             )
             if choice([True, False]):
-                ui.display("Ура, тема интересная!")
+                ui.display(
+                    "Ура, вам очень понравилась тема, и лекция пролетела незаметно!"
+                )
                 vitals.mod(gs, vitals.MENTAL, 5)
             else:
-                ui.display("Эх, тема скучная...")
+                ui.display(
+                    "Эх, тема показалась вам скучной, и вы с трудом дослушали её до конца..."
+                )
                 vitals.mod(gs, vitals.MENTAL, -5)
 
         else:
@@ -56,3 +60,6 @@ def study_scenario(activity_definitions):
             scenarios_api.base_transition(1, 0, lambda gs: not check(gs), None),
         ]
     )
+
+
+# SCENARIOS = [study_scenario]
