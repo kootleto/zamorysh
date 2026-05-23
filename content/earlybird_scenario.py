@@ -7,6 +7,18 @@ from gameplay.api.location import Place
 from interface import ui
 
 
+def earlybird_notice():
+    def tr(gs):
+        return location.get_place(gs) == Place.SURF_COFFEE
+
+    def eff(gs):
+        ui.display(
+            "В этой кофейне действует акция: первый покупатель с утра получает бесплатный кофе. Было бы здорово получить его несколько раз."
+        )
+
+    return scenarios_api.base_scenario([scenarios_api.base_transition(0, 1, tr, eff)])
+
+
 def earlybird_scenario(state=None):
     def init():
         return {"counter": 0}
@@ -36,36 +48,18 @@ def earlybird_scenario(state=None):
                 "Не повезло! Кто-то забрал ваш бесплатный кофе. (Зато вы не опоздаете в университет...)"
             )
 
-    def tr1(gs):
-        return time.get_minute(gs) != 0
+        if state["counter"] == 1:
+            ui.display("Первый есть!")
+        if state["counter"] == 2:
+            ui.display("Еще немного...")
 
-    def tr_1(gs):
-        return location.get_place(gs) == Place.SURF_COFFEE
-
-    def eff_1():
-        ui.display(
-            "В этой кофейне действует акция: первый покупатель с утра получает бесплатный кофе. Было бы здорово получить его несколько раз."
-        )
-
-    def tr_2():
-        return state["counter"] == 1
-
-    def eff_2():
-        ui.display("Первый есть!")
-
-    def tr_3():
-        return state["counter"] == 3
-
-    def eff_3():
-        ui.display("Ранняя пташка хватает кофейка!")
+        if state["counter"] == 3:
+            ui.display("Вы настоящая ранняя пташка!")
+            vitals.set(gs, vitals.SLEEPINESS, 0)
 
     return scenarios_api.base_scenario(
         [
-            scenarios_api.base_transition(0, 1, tr, eff),
-            scenarios_api.base_transition(1, 0, tr1, None),
-            # scenarios_api.base_transition(0, 3, tr_1, eff_1),
-            # scenarios_api.base_transition(1, 2, tr_2, eff_2),
-            scenarios_api.base_transition(1, 2, tr_3, eff_3),
+            scenarios_api.base_transition(0, 0, tr, eff),
         ]
     )
 

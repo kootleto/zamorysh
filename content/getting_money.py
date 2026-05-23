@@ -3,15 +3,16 @@ from gameplay.api import time, stats
 
 
 def money_getting():
-    def weekday_check(gs):
-        weekday = time.get_weekday(gs)
-        return weekday == time.Weekday.MONDAY
+    def check(gs):
+        hour = time.get_hour(gs)
+        minute = time.get_minute(gs)
+        return hour == 6 and minute == 0
 
     def great_day(gs):
-        stats.mod(gs, stats.MONEY, +50)
+        stats.mod(gs, stats.MONEY, +5)
 
     return scenarios_api.base_scenario(
-        [scenarios_api.base_transition(0, 0, weekday_check, great_day)]
+        [scenarios_api.base_transition(0, 0, check, great_day)]
     )
 
 
