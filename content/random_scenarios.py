@@ -62,11 +62,11 @@ def random_scenario(state=None):
 def random_university_day_scenario(state=None):
 
     def f1(gs):
-        stats.mod(gs, stats.MONEY, -5)
-        ui.display("")
+        stats.mod(gs, stats.MONEY, +5)
+        ui.display("Вы радуетесь тому, что нашли 5 кредитов под лестницей.")
 
     def f2(gs):
-        vitals.mod(gs, vitals.SLEEPINESS, +20)
+        vitals.mod(gs, vitals.SLEEPINESS, +1)
         ui.display(
             "Одногруппник, сидящий рядом с вами, зевнул. Вы тоже зевнули и захотели спать."
         )
