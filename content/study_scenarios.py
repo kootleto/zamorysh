@@ -1,15 +1,9 @@
 from random import choice
 
-import minigames
-from content import studying
+from content import studying, wait, minigames
 from engine import activities_api, scenarios_api
-from engine.activities_api import override_activity
 from gameplay.api import schedule, vitals, floors, stats
 from interface import ui
-
-
-def auto_study():
-    return override_activity(studying.study(), hold_required=False)
 
 
 def study_scenario(activity_definitions):
@@ -18,21 +12,21 @@ def study_scenario(activity_definitions):
 
     async def study(gs):
         if schedule.get_current_type(gs) == "лекция":
-            activities_api.start_activity_by_definition(
-                gs, activity_definitions, auto_study
-            )
+
             if choice([True, False]):
-                ui.display(
-                    "Ура, вам очень понравилась тема, и лекция пролетела незаметно!"
-                )
+                ui.display("Вам очень понравилась тема лекции! Вы в предвкушении!")
                 vitals.mod(gs, vitals.MENTAL, 5)
+                activities_api.start_activity_by_definition(
+                    gs, activity_definitions, studying.auto_study
+                )
             else:
                 ui.display(
-                    "Эх, тема показалась вам скучной, и вы с трудом дослушали её до конца..."
+                    "Тема лекции показалась вам скучной, и вам придётся слушать её с трудом..."
                 )
                 vitals.mod(gs, vitals.MENTAL, -5)
 
         else:
+            ui.display("Семинар начинается...")
             if choice([True, False]):
                 minigame = choice(
                     [
@@ -52,7 +46,33 @@ def study_scenario(activity_definitions):
                     vitals.mod(gs, vitals.MENTAL, -5)
                     stats.mod(gs, stats.KNOWLEDGE, 15)
                 vitals.mod(gs, vitals.FATIGUE, 10)
-                # TODO: сделать скип времени до конца пары
+                print(
+                    schedule.get_end_of_lesson(
+                        schedule.get_current_lesson(gs)["hour"],
+                        schedule.get_current_lesson(gs)["minute"],
+                    )
+                )
+                # скип времени до конца пары
+                activities_api.start_activity_by_definition(
+                    gs,
+                    activity_definitions,
+                    wait.wait_until(
+                        {
+                            "hour": schedule.get_end_of_lesson(
+                                schedule.get_current_lesson(gs)["hour"],
+                                schedule.get_current_lesson(gs)["minute"],
+                            )["hour"],
+                            "minute": schedule.get_end_of_lesson(
+                                schedule.get_current_lesson(gs)["hour"],
+                                schedule.get_current_lesson(gs)["minute"],
+                            )["minute"],
+                        }
+                    ),
+                )
+            else:
+                activities_api.start_activity_by_definition(
+                    gs, activity_definitions, studying.auto_study
+                )
 
     return scenarios_api.base_scenario(
         [
@@ -62,4 +82,4 @@ def study_scenario(activity_definitions):
     )
 
 
-# SCENARIOS = [study_scenario]
+SCENARIOS = [study_scenario]

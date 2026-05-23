@@ -67,8 +67,10 @@ def get_current_lesson(gs):
             + time.get_minute(gs)
             - int(lesson_time[:2]) * 60
             - int(lesson_time[3:5])
-            <= 120
+            <= 80
         ):
+            current_lesson["hour"] = int(lesson_time[:2])
+            current_lesson["minute"] = int(lesson_time[3:5])
             current_lesson["subject"] = lesson["subject"]
             current_lesson["room"] = lesson["room"]
             current_lesson["type"] = lesson["type"]
@@ -86,3 +88,9 @@ def get_current_type(gs):
 
 def get_current_room(gs):
     return get_current_lesson(gs)["room"]
+
+
+def get_end_of_lesson(start_hour, start_minute):
+    end_hour = (start_hour * 60 + start_minute + 80) // 60
+    end_minute = (start_hour * 60 + start_minute + 80) % 60
+    return {"hour": end_hour, "minute": end_minute}
