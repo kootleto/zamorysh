@@ -1,6 +1,6 @@
 import random
 
-from engine import activities_api, state_api
+from engine import activities_api, data_api
 from gameplay.activity_wrappers import single_tick_activity, timed_activity
 from gameplay.api import vitals, stats, location
 from interface import ui
@@ -110,7 +110,7 @@ def scroll(state=None, hold_required=True):
 
 @activities_api.on_finish(lambda: ui.display("Слезами горю не поможешь..."))
 def cry(state=None):
-    state = state_api.init_defaults(state, counter=10)
+    state = data_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
         vitals.mod(gs, vitals.FATIGUE, +1)
