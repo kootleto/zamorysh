@@ -1,9 +1,9 @@
-from engine import state_api, activities_api
+from engine import data_api, activities_api
 
 
 def timed_activity(activity, state=None, duration=30):
     """Создать активность, которая принудительно завершается после duration тиков (но может и раньше!)."""
-    state = state_api.init_defaults(state, timed={"elapsed": 0})
+    state = data_api.init_defaults(state, timed={"elapsed": 0})
 
     async def wrapped_tick_effect(gs):
         state["timed"]["elapsed"] += 1

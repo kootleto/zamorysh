@@ -9,10 +9,10 @@ def move_scenario(place):
         return location.get_place(gs) == place
 
     def enter():
-        ui.display(f"You are entering {place}!")
+        ui.display(f"Вы входите в {place}!")
 
     def exit():
-        ui.display(f"You are exiting {place}!")
+        ui.display(f"Вы выходите из {place}!")
 
     return scenarios_api.base_scenario(
         [

@@ -1,4 +1,4 @@
-from engine import state_api, activities_api
+from engine import data_api, activities_api
 from gameplay.activity_wrappers import timed_activity, single_tick_activity
 from gameplay.api import stats
 from interface import ui
@@ -13,7 +13,7 @@ from interface import ui
     )
 )
 def display_numbers_for_10_ticks(state=None):
-    state = state_api.init_defaults(state, number=2)
+    state = data_api.init_defaults(state, number=2)
 
     def tick_effect(gs):
         ui.display(state["number"])

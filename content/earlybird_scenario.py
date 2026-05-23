@@ -7,7 +7,6 @@ from interface import ui
 
 
 def earlybird_scenario():
-
     def tr(gs):
         return (
             location.get_place(gs) == Place.SURF_COFFEE
@@ -22,6 +21,7 @@ def earlybird_scenario():
             ui.display(
                 "Поздравляю! Вы - первый покупатель. Наслаждайтесь своим бесплатным кофе!"
             )
+
         else:
             vitals.mod(gs, vitals.FATIGUE, +2)
             ui.display(
