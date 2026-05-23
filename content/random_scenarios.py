@@ -1,7 +1,7 @@
 import random
 
-from engine import scenarios_api, gs_api, state_api
-from engine.state_api import init_fn
+from engine import scenarios_api, gs_api, data_api
+from engine.data_api import init_fn
 from gameplay.api import stats, vitals, location, time
 from gameplay.api.location import Place
 from interface import ui
@@ -43,7 +43,7 @@ def random_scenario(state=None):
     def check_tick():
         return {"tick": random.randint(1, 3)}
 
-    state = state_api.init_fn(state, check_tick)
+    state = data_api.init_fn(state, check_tick)
 
     def ti(gs):
         return gs_api.get_time(gs) == state["tick"]
@@ -62,11 +62,11 @@ def random_scenario(state=None):
 def random_university_day_scenario(state=None):
 
     def f1(gs):
-        stats.mod(gs, stats.MONEY, -5)
-        ui.display("")
+        stats.mod(gs, stats.MONEY, +5)
+        ui.display("Вы радуетесь тому, что нашли 5 кредитов под лестницей.")
 
     def f2(gs):
-        vitals.mod(gs, vitals.SLEEPINESS, +20)
+        vitals.mod(gs, vitals.SLEEPINESS, +1)
         ui.display(
             "Одногруппник, сидящий рядом с вами, зевнул. Вы тоже зевнули и захотели спать."
         )
@@ -117,7 +117,7 @@ def random_home_day_scenario(state=None):
 
     def f2(gs):
         stats.mod(gs, stats.MONEY, +2)
-        ui.display("Вы нашли 2$ под подушкой.")
+        ui.display("Вы нашли 2 кредита под подушкой.")
 
     def f3(_gs):
         ui.display("Ничего не произошло")

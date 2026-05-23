@@ -5,20 +5,26 @@
 from typing import Callable
 
 
-def init_defaults(state: dict | None, **defaults) -> dict:
+def init_defaults(data: dict | None, **defaults) -> dict:
     """
-    Если state — словарь, заполнить отсутствующие элементы значениями по умолчанию и вернуть.
+    Если data — словарь, заполнить отсутствующие элементы значениями по умолчанию и вернуть.
 
-    Если state — None, вернуть значения по умолчанию.
+    Если data — None, вернуть значения по умолчанию.
 
     Этот метод инициализации подходит, если изначальный state всегда одинаковый,
     так как он принимает уже готовый словарь, а не логику инициализации.
     """
-    if state is None:
+    if data is None:
         return defaults
     for key, val in defaults.items():
-        state.setdefault(key, val)
-    return state
+        data.setdefault(key, val)
+    return data
+
+
+def extract_params(params: dict | None, **defaults):
+    params_set = init_defaults(params, **defaults)
+    result = tuple(params_set[param] for param in defaults.keys())
+    return result[0] if len(result) == 1 else result
 
 
 def init_fn(state: dict | None, fn: Callable[[], dict]) -> dict:
