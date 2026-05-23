@@ -171,15 +171,15 @@ def dance(state=None, hold_required=True):
 def study(state=None, hold_required=True):
 
     def tick_effect(gs):
-        vitals.mod(gs, vitals.FATIGUE, +5)
-        vitals.mod(gs, vitals.MENTAL, -5)
-        stats.mod(gs, stats.KNOWLEDGE, +5)
+        vitals.mod(gs, vitals.FATIGUE, +0.25)
+        vitals.mod(gs, vitals.MENTAL, -0.5)
+        stats.mod(gs, stats.KNOWLEDGE, +0.25)
 
     return timed_activity(
         activities_api.base_activity(
             tick_effect,
             hold_required=hold_required,
-            name="учиться",
+            name="делать домашку",
         ),
         state,
         duration=10,

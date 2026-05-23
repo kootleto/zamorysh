@@ -46,29 +46,23 @@ def study_scenario(activity_definitions):
                     vitals.mod(gs, vitals.MENTAL, -5)
                     stats.mod(gs, stats.KNOWLEDGE, 15)
                 vitals.mod(gs, vitals.FATIGUE, 10)
-                print(
-                    schedule.get_end_of_lesson(
-                        schedule.get_current_lesson(gs)["hour"],
-                        schedule.get_current_lesson(gs)["minute"],
-                    )
-                )
                 # скип времени до конца пары
                 activities_api.start_activity_by_definition(
                     gs,
                     activity_definitions,
-                    wait.wait_until(
-                        {
-                            "hour": schedule.get_end_of_lesson(
-                                schedule.get_current_lesson(gs)["hour"],
-                                schedule.get_current_lesson(gs)["minute"],
-                            )["hour"],
-                            "minute": schedule.get_end_of_lesson(
-                                schedule.get_current_lesson(gs)["hour"],
-                                schedule.get_current_lesson(gs)["minute"],
-                            )["minute"],
-                        }
-                    ),
-                )
+                    wait.wait_until,
+                    params={
+                        "hour": schedule.get_end_of_lesson(
+                            schedule.get_current_lesson(gs)["hour"],
+                            schedule.get_current_lesson(gs)["minute"],
+                        )["hour"],
+                        "minute": schedule.get_end_of_lesson(
+                            schedule.get_current_lesson(gs)["hour"],
+                            schedule.get_current_lesson(gs)["minute"],
+                        )["minute"],
+                    },
+                ),
+
             else:
                 activities_api.start_activity_by_definition(
                     gs, activity_definitions, studying.auto_study

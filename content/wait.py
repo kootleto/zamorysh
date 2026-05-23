@@ -13,6 +13,7 @@ def wait():
     )
 
 
+@activities_api.system_only
 def wait_until(params):
     until_hour = data_api.get_params(params, "hour")
     until_minute = data_api.get_params(params, "minute")
