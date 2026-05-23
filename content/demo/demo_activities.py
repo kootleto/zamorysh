@@ -1,4 +1,4 @@
-from engine import activities_api, state_api
+from engine import activities_api, data_api
 from gameplay.api import vitals, stats
 from interface import ui
 
@@ -60,29 +60,30 @@ def work_and_rest(definitions, state=None):
 # Пример активности с параметром
 # Сначала мы указываем область параметра - по этой области будет проходить
 # get_allowed_activity_entries и проверять для каждого параметра из этой области, можно ли начать такую активность.
-# Область параметра мы указываем в обертке для декоратора with_param_space. Эта обертка возвращает уже сам декоратор,
+# Область параметра мы указываем в обертке для декоратора with_params_space. Эта обертка возвращает уже сам декоратор,
 # который в качестве аргумента принимает определение (в данном случае waste_money), присваивает ему указанную
 # область параметра в качестве атрибута и возвращает обратно
-@activities_api.with_param_space(
-    lambda gs: [
+@activities_api.with_params_space(
+    amount=lambda gs: [
         # list comprehension: из 5, 10 и 15 выбираем то, что не больше, чем у нас есть денег
         amount
         for amount in [5, 10, 15]
         if amount <= stats.get(gs, stats.MONEY)
     ]
 )
-def waste_money(param, state=None):
-    state = state_api.init_defaults(state, wasted=0)
+def waste_money(params, state=None):
+    state = data_api.init_defaults(state, wasted=0)
+    amount = data_api.extract_params(params, amount=10)
 
     def tick_effect(gs):
         stats.mod(gs, stats.MONEY, -1)
         state["wasted"] += 1
 
     def can_continue(gs):
-        return state["wasted"] < param and stats.get(gs, stats.MONEY) > 0
+        return state["wasted"] < amount and stats.get(gs, stats.MONEY) > 0
 
     return activities_api.base_activity(
-        tick_effect, can_continue, name=f"waste {param} money"
+        tick_effect, can_continue, name=f"waste {amount} money"
     )
 
 
@@ -98,7 +99,7 @@ def cry(state=None):
     # Присваивание (state =) имеет смысл только в том случае, если state=None
     # Python хранит словари как ссылки, а init_defaults мутирует словарь, так что в остальных случаях
     # достаточно вызова функции. Но переприсваивание не повредит, а код так становится короче
-    state = state_api.init_defaults(state, counter=10)
+    state = data_api.init_defaults(state, counter=10)
 
     def tick_effect(gs):
         vitals.mod(gs, vitals.FATIGUE, +1)
