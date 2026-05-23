@@ -1,7 +1,7 @@
 import random
 
 from engine import scenarios_api
-from engine.state_api import init_fn
+from engine.data_api import init_fn
 from gameplay.api import location, time, vitals
 from gameplay.api.location import Place
 from interface import ui

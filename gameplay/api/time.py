@@ -3,7 +3,7 @@ from enum import IntEnum
 
 from engine import gs_api
 
-START_DATETIME = datetime(2026, 9, 1, 6, 30, 0, 0)
+START_DATETIME = datetime(2026, 9, 1, 7, 30, 0, 0)
 
 
 class Weekday(IntEnum):
