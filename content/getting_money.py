@@ -9,7 +9,7 @@ def money_getting():
         return hour == 6 and minute == 0
 
     def great_day(gs):
-        stats.mod(gs, stats.MONEY, +5)
+        stats.mod(gs, stats.MONEY, +8)
 
     return scenarios_api.base_scenario(
         [scenarios_api.base_transition(0, 0, check, great_day)]
