@@ -26,7 +26,7 @@ async def hangman():
     guessed_letters = []
     attempts = 6
 
-    ui.display("Угадай слово: ")
+    ui.display("Угадайте слово: ")
 
     while attempts > 0:
         display_word = [letter if letter in guessed_letters else "_" for letter in word]
@@ -140,21 +140,21 @@ async def kamen_nozhnitsy_bumaga():
 
         # Проверка корректности ввода
         if player_choice not in ["камень", "ножницы", "бумага"]:
-            ui.display("Ошибка: введи камень, ножницы или бумага")
+            ui.display("Ошибка: введите камень, ножницы или бумага")
             ui.display()
             continue
 
         # Выбор компьютера
         computer_choice = random.choice(["камень", "ножницы", "бумага"])
 
-        ui.display("Твой выбор:", player_choice)
+        ui.display("Ваш выбор:", player_choice)
         ui.display("Мой выбор:", computer_choice)
 
         # Определение победителя раунда
         if player_choice == computer_choice:
             ui.display("Ничья")
         elif win_rules[player_choice] == computer_choice:
-            ui.display("Ты выиграл раунд")
+            ui.display("Вы выиграли раунд")
             player_wins += 1
         else:
             ui.display("Я выиграл раунд")
@@ -166,7 +166,7 @@ async def kamen_nozhnitsy_bumaga():
     ui.display("Игра окончена")
     ui.display("Финальный счёт: Вы", player_wins, "-", computer_wins, "Я")
     if player_wins == 3:
-        ui.display("Ты выиграл игру")
+        ui.display("Вы выиграли игру")
         return True
     else:
         ui.display("Я выиграл игру")
@@ -209,7 +209,7 @@ async def yazyki_i_semi():
     ui.display("б.", families[1])
     ui.display("в.", families[2])
 
-    answer = await ui.prompt("\nТвой ответ (пример: 1а,2б,3в): ")
+    answer = await ui.prompt("\nВаш ответ (пример: 1а,2б,3в): ")
 
     correct = 0
     pairs = answer.replace(" ", "").split(",")
