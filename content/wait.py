@@ -14,8 +14,8 @@ def wait():
 
 
 def wait_until(params):
-    until_hour = data_api.extract_params(params, hour=0)
-    until_minute = data_api.extract_params(params, minute=0)
+    until_hour = data_api.get_params(params, "hour")
+    until_minute = data_api.get_params(params, "minute")
 
     def tick_effect(gs):
         gs_api.multiply_next_tick_interval(gs, 0.01)
@@ -30,9 +30,7 @@ def wait_until(params):
         )
         return gs_api.get_time(gs) < time.datetime_to_tick(until_time)
 
-    return activities_api.base_activity(
-        tick_effect, can_continue, hold_required=False, is_visible=False
-    )
+    return activities_api.base_activity(tick_effect, can_continue, hold_required=False)
 
 
-ACTIVITIES = [wait]
+ACTIVITIES = [wait, wait_until]

@@ -65,7 +65,9 @@ async def bulls_and_cows():
         if attempts > 10:
             ui.display("Попытки закончились, вы проиграли.")
             return False
-        guess = list(await ui.prompt("Введите 4-значное число: "))
+        guess = await ui.prompt("Введите 4-значное число: ")
+        ui.display(f"Ваше предположение: {guess}")
+        guess = list(guess)
         if len(guess) != 4:
             continue
         attempts += 1
