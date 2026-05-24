@@ -13,6 +13,8 @@ _INITIAL = {QUESTS: {}}
 class Status(StrEnum):
     INACTIVE = "INACTIVE"
     FINISHED = "FINISHED"
+    ACTIVE = "ACTIVE"
+    ABORTED = "ABORTED"
 
 
 def _get_quests(gs):
@@ -29,7 +31,7 @@ def finish(gs, quest):
 
 def get_status(gs, quest):
     quests = _get_quests(gs)
-    if not quest in quests:
+    if quest not in quests:
         return Status.INACTIVE
     return quests[quest]
 
