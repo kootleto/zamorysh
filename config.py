@@ -1,9 +1,12 @@
 import argparse
 import os
+import sys
 
 from dotenv import load_dotenv
 
-load_dotenv()
+root_dir = os.path.dirname(os.path.abspath(__file__))
+dotenv_path = os.path.join(root_dir, ".env")
+load_dotenv(dotenv_path=dotenv_path)
 
 
 def _add_bool_setting(parser, env_name, cmd_name, short_cmd_name, attr, help_text):
@@ -35,4 +38,17 @@ def _parse_args():
     return parser.parse_args()
 
 
-SETTINGS = _parse_args()
+if (
+    "ANDROID_ARGUMENT" in os.environ
+    or hasattr(sys, "frozen")
+    or any("pyinstaller" in arg.lower() for arg in sys.argv)
+):
+    # хардкодим, чтобы не мучаться с .env
+    class BuildSettings:
+        include_demo = False
+        log_enabled = False
+        gui = True
+
+    SETTINGS = BuildSettings()
+else:
+    SETTINGS = _parse_args()

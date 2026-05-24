@@ -9,7 +9,7 @@ def wait():
         gs_api.multiply_next_tick_interval(gs, 0.01)
 
     return activities_api.base_activity(
-        tick_effect, hold_required=True, name="подождать"
+        tick_effect, hold_required=True, is_stackable=True, name="подождать"
     )
 
 
