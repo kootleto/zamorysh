@@ -6,7 +6,7 @@ from gameplay.api import stats, vitals, location, time
 from interface import ui
 
 
-def work(activity_definitions):
+def work():
 
     def tick_effect(gs):
         gs_api.multiply_next_tick_interval(gs, 0.01)
@@ -25,7 +25,7 @@ def work(activity_definitions):
     )
 
 
-def coffee_quest():
+def coffee_quest(activity_definitions):
     def proposal_trigger(gs):
         return (
             time.get_day(gs) == time.START_DATETIME.day + 2
