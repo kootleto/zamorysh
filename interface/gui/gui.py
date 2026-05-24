@@ -5,7 +5,7 @@ from typing import TypedDict
 from kivy.app import App
 
 from engine.schema import ActivityOptions, GameState
-from gameplay.api import vitals, stats, time, music, location
+from gameplay.api import vitals, stats, time, music, location, scene
 
 
 class AppProxy:
@@ -90,6 +90,8 @@ def refresh_ui(gs: GameState, options: ActivityOptions):
     }
 
     app.track_title = music.get_current_track(gs)
+    app.scene_name = scene.get_current_scene(gs)
+    app.sprite_name = scene.get_current_sprite(gs)
     new_labels = [option["label"] for option in options]
 
     if app.root.ids.activity_list.items != new_labels:

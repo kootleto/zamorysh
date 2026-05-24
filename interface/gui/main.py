@@ -1,9 +1,17 @@
 import asyncio
 
+from kivy.core.text import LabelBase, Label
+
 from engine import runner, controller
 from engine.schema import Definitions, GameState
 from interface.gui.app import GameApp
 from interface.gui.gui import KivyState
+
+LabelBase.register(
+    name="UMTypewriter",
+    fn_regular="assets/fonts/UMTypewriter-Regular.ttf",
+)
+Label.font_name = "UMTypewriter"
 
 
 async def start(gs: GameState, definitions: Definitions, vs: KivyState):

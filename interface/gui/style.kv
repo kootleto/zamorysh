@@ -5,6 +5,17 @@
 #:set accent_color utils.get_color_from_hex('#8e8e8e')
 #:set text_color utils.get_color_from_hex('#000000')
 
+# --- Fonts ---
+
+<Label>:
+    font_name: "UMTypewriter"
+
+<Button>:
+    font_name: "UMTypewriter"
+
+<TextInput>:
+    font_name: "UMTypewriter"
+
 # --- Mixins ---
 
 <ColoredWidget>:
@@ -92,19 +103,52 @@
     value: app.volume
     on_value: app.volume = self.value
 
+<SceneView>:
+    bg: ""
+    sprite: ""
+
+    padding: dp(6)
+    bg_color: accent_color
+
+    FloatLayout:
+
+        Image:
+            source: root.bg
+            fit_mode: "cover"
+            size_hint: (1, 1)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+        Image:
+            source: root.sprite
+            fit_mode: "contain"
+            size_hint: (0.5, 0.5)
+            pos_hint: {'center_x': 0.6, 'center_y': 0.3}
+
+
+
 MainScreen:
     source: "assets/images/app_bg.png"
     orientation: "horizontal"
+    padding: dp(10)
     BoxLayout:
         orientation: "vertical"
+        size_hint_x: 0.3
+        padding: dp(10)
         VolumeSlider:
             size_hint_x: 0.7
-        BoxLayout
-        BoxLayout
+        SceneView:
+            id: scene
+            size_hint_x: 1
+            size_hint_y: None
+            height: self.width
+            padding: dp(5)
         StyledLabel:
             id: stats_label
+            padding: dp(5)
     BoxLayout:
         orientation: "vertical"
+        size_hint_x: 0.5
+        padding: dp(10)
         LogView:
             id: logger
             size_hint_y: 0.6
@@ -117,6 +161,8 @@ MainScreen:
             id: button
     BoxLayout:
         orientation: "vertical"
+        size_hint_x: 0.2
+        padding: dp(10)
         StyledLabel:
             id: date_label
             size_hint_y: 0.1

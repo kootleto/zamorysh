@@ -33,6 +33,9 @@ class GameApp(App):
         }
     )
     track_title = StringProperty(None)
+    scene_name = StringProperty(None)
+    sprite_name = StringProperty(None)
+
     volume = NumericProperty(100)
 
     key_enter_pressed = BooleanProperty(False)
@@ -72,6 +75,13 @@ class GameApp(App):
             f"Y: {value["location"]["y"]}"
         )
 
+    @staticmethod
+    def _resolve_assets_path(filename, folder):
+        path = folder + filename
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"File '{path}' not found")
+        return path
+
     def on_track_title(self, _, value):
         if self.current_track:
             self.current_track.stop()
@@ -81,15 +91,21 @@ class GameApp(App):
         if not value:
             return
 
-        path = f"assets/music/{value}"
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"File '{path}' not found")
+        path = self._resolve_assets_path(value, "assets/music/")
 
         self.current_track = SoundLoader.load(path)
         if self.current_track:
             self.current_track.loop = True
             self.current_track.volume = self.volume / 100
             self.current_track.play()
+
+    def on_scene_name(self, _, value):
+        path = self._resolve_assets_path(value, "assets/images/scenes/")
+        self.root.ids.scene.bg = path
+
+    def on_sprite_name(self, _, value):
+        path = self._resolve_assets_path(value, "assets/images/sprites/")
+        self.root.ids.scene.sprite = path
 
     def on_volume(self, _, value):
         if self.current_track:

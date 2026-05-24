@@ -87,3 +87,7 @@ class LogEntry(Label, ColoredWidget):
 
 class VolumeSlider(Slider):
     pass
+
+
+class SceneView(BoxLayout, ColoredWidget):
+    pass
