@@ -1,24 +1,66 @@
 #:import components interface.gui.components
+#:import utils kivy.utils
 
-<SelectableList>:
+#:set main_color utils.get_color_from_hex('#d8d8d8')
+#:set accent_color utils.get_color_from_hex('#8e8e8e')
+#:set text_color utils.get_color_from_hex('#000000')
+
+# --- Fonts ---
+
+<Label>:
+    font_name: "UMTypewriter"
+
+<Button>:
+    font_name: "UMTypewriter"
+
+<TextInput>:
+    font_name: "UMTypewriter"
+
+# --- Mixins ---
+
+<ColoredWidget>:
+    bg_color: main_color
+    canvas.before:
+        Color:
+            rgba: self.bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<CoverImage>:
+    fit_mode: "cover"
+
+# --- Reusable ---
+
+<StyledLabel>:
+    halign: "center"
+    valign: "center"
+    text_size: self.size
+    color: text_color
+
+# --- Smart ---
+
+<ChoiceSelector>:
+    bg_color: accent_color
     do_scroll_x: False
-
     BoxLayout:
         id: container
         orientation: 'vertical'
         size_hint_y: None
         height: self.minimum_height
 
-<ListButton>:
+<ChoiceItem>:
     size_hint_y: None
     height: 40
-    background_color: 0.4, 0.4, 0.4, 1
+    background_normal: ''
+    background_color: accent_color
+    color: text_color
 
 <LogView>:
     do_scroll_x: False
     canvas.before:
         Color:
-            rgba: 0.2, 0.2, 0.2, 1
+            rgba: main_color
         Rectangle:
             pos: self.pos
             size: self.size
@@ -27,51 +69,107 @@
         orientation: 'vertical'
         size_hint_y: None
         height: self.minimum_height
-        canvas.before:
-            Color:
-                rgba: 0.3, 0.3, 0.3, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
 
-<LogLabel>:
+<LogEntry>:
     size_hint_y: None
     height: 30
+    canvas.before:
+        Color:
+            rgba: accent_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    color: text_color
 
-<MainButton@Button>:
+<GameButton>:
     size_hint_y: None
     height: 50
+    background_normal: ''
+    background_color: accent_color
+    color: text_color
     text: "Action button"
 
-<MyInput@TextInput>:
+<CommandInput>:
     size_hint_y: None
     height: 50
     hint_text: ""
     disabled: True
     multiline: False
 
-<InfoPanel@Label>:
-    size_hint_y: None
-    height: 50
-    halign: "left"
-    valign: "center"
-    text_size: self.size
+<VolumeSlider>:
+    min: 0
+    max: 100
+    step: 1
+    value: app.volume
+    on_value: app.volume = self.value
 
-BoxLayout:
-    orientation: "vertical"
-    InfoPanel:
-        id: info
-        text: ""
+<SceneView>:
+    bg: ""
+    sprite: ""
+
+    padding: dp(6)
+    bg_color: accent_color
+
+    FloatLayout:
+
+        Image:
+            source: root.bg
+            fit_mode: "cover"
+            size_hint: (1, 1)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+        Image:
+            source: root.sprite
+            fit_mode: "contain"
+            size_hint: (0.5, 0.5)
+            pos_hint: {'center_x': 0.6, 'center_y': 0.3}
+
+
+
+MainScreen:
+    source: "assets/images/app_bg.png"
+    orientation: "horizontal"
+    padding: dp(10)
     BoxLayout:
-        BoxLayout:
-            orientation: "vertical"
-            size_hint_x: 0.3
-            SelectableList:
-                id: activity_list
-            MyInput:
-                id: input
+        orientation: "vertical"
+        size_hint_x: 0.3
+        padding: dp(10)
+        VolumeSlider:
+            size_hint_x: 0.7
+        SceneView:
+            id: scene
+            size_hint_x: 1
+            size_hint_y: None
+            height: self.width
+            padding: dp(5)
+        StyledLabel:
+            id: stats_label
+            padding: dp(5)
+    BoxLayout:
+        orientation: "vertical"
+        size_hint_x: 0.5
+        padding: dp(10)
         LogView:
             id: logger
-            size_hint_x: 0.7
-    MainButton:
-        id: button
+            size_hint_y: 0.6
+        ChoiceSelector:
+            id: activity_list
+            size_hint_y: 0.4
+        CommandInput:
+            id: input
+        GameButton:
+            id: button
+    BoxLayout:
+        orientation: "vertical"
+        size_hint_x: 0.2
+        padding: dp(10)
+        StyledLabel:
+            id: date_label
+            size_hint_y: 0.1
+        StyledLabel:
+            id: time_label
+            size_hint_y: 0.1
+        StyledLabel:
+            id: map_label
+            size_hint_y: 0.8
+

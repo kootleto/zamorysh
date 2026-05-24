@@ -103,6 +103,7 @@ def refresh_ui(gs: GameState, _options):
 
 def check_button_pressed():
     """Проверить, нажата ли клавиша Space."""
+
     return keyboard.is_pressed("space")
 
 
