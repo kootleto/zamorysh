@@ -26,8 +26,10 @@ async def run(
             options = controller.get_activity_options(gs, definitions)
             index = await ui.prompt_activity(options)
             controller.start_selected_activity(gs, definitions, index)
-
-        next_tick_at += ui.pop_wait_time()
+            ui.pop_wait_time()
+            next_tick_at = time.perf_counter() + controller.get_tick_interval(gs)
+        else:
+            next_tick_at += ui.pop_wait_time()
 
         now = time.perf_counter()
         delay = next_tick_at - now
