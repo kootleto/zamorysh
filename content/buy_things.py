@@ -9,8 +9,6 @@ from interface import ui
 def buy_drink_surf(hold_required=False, state=None):
 
     async def tick_effect(gs):
-        # ui.display("Купить латте? (Нажмите a + Enter)")
-        # ui.display("Купить американо?  (Нажмите b + Enter)")
         ui.display("Введите букву позиции в меню + Enter")
         vv = await ui.prompt("Выбирайте: ")
         if vv == "a" and stats.get(gs, stats.MONEY) > 9:
@@ -20,18 +18,18 @@ def buy_drink_surf(hold_required=False, state=None):
             ui.display(
                 "Вы купили латте. Сахар в нем делает вас довольнее, но вам все еще хочется спать!"
             )
-        if vv == "b" and stats.get(gs, stats.MONEY) > 7:
+        elif vv == "b" and stats.get(gs, stats.MONEY) > 7:
             stats.mod(gs, stats.MONEY, -8)
             vitals.mod(gs, vitals.SLEEPINESS, -15)
             ui.display(
                 "Вы знаете, как хорошо бодрит американо... Но он такой горький! Вас это совсем не радует."
             )
-        if vv == "c" and stats.get(gs, stats.MONEY) > 10:
+        elif vv == "c" and stats.get(gs, stats.MONEY) > 10:
             vitals.mod(gs, vitals.FATIGUE, -15)
             vitals.mod(gs, vitals.SLEEPINESS, -2)
             stats.mod(gs, stats.MONEY, -11)
             ui.display("Капучино всегда помогает вам от усталости!")
-        if vv == "d" and stats.get(gs, stats.MONEY) > 18:
+        elif vv == "d" and stats.get(gs, stats.MONEY) > 18:
             vitals.mod(gs, vitals.FATIGUE, -10)
             vitals.mod(gs, vitals.SLEEPINESS, -10)
             vitals.mod(gs, vitals.MENTAL, +10)
@@ -122,18 +120,18 @@ def buy_drink_another(hold_required=False, state=None):
             ui.display(
                 "Вы купили латте. Сахар в нем делает вас довольнее, но вам все еще хочется спать!"
             )
-        if vv == "b" and stats.get(gs, stats.MONEY) > 8:
+        elif vv == "b" and stats.get(gs, stats.MONEY) > 8:
             stats.mod(gs, stats.MONEY, -8)
             vitals.mod(gs, vitals.SLEEPINESS, -15)
             ui.display(
                 "Вы знаете, как хорошо бодрит американо... Но он такой горький! Вас это совсем не радует."
             )
-        if vv == "c" and stats.get(gs, stats.MONEY) > 11:
+        elif vv == "c" and stats.get(gs, stats.MONEY) > 11:
             vitals.mod(gs, vitals.FATIGUE, -15)
             vitals.mod(gs, vitals.SLEEPINESS, -2)
             stats.mod(gs, stats.MONEY, -11)
             ui.display("Капучино всегда помогает вам от усталости!")
-        if vv == "d" and stats.get(gs, stats.MONEY) > 19:
+        elif vv == "d" and stats.get(gs, stats.MONEY) > 19:
             vitals.mod(gs, vitals.FATIGUE, -10)
             vitals.mod(gs, vitals.SLEEPINESS, -10)
             vitals.mod(gs, vitals.MENTAL, +10)
@@ -172,12 +170,12 @@ def buy_drink_club(hold_required=False, state=None):
             ui.display(
                 "От этого коктейля вы всегда расслабляетесь и начинаете клевать носом... Но он ужасно вкусный."
             )
-        if vv == "b" and stats.get(gs, stats.MONEY) > 20:
+        elif vv == "b" and stats.get(gs, stats.MONEY) > 20:
             stats.mod(gs, stats.MONEY, -21)
             vitals.mod(gs, vitals.MENTAL, +5)
             stats.mod(gs, stats.SOCIAL, +15)
             ui.display("От этого напитка вас так и тянет общаться с людьми!")
-        if vv == "c" and stats.get(gs, stats.MONEY) > 19:
+        elif vv == "c" and stats.get(gs, stats.MONEY) > 19:
             vitals.mod(gs, vitals.MENTAL, +2)
             vitals.mod(gs, vitals.SLEEPINESS, +2)
             stats.mod(gs, stats.MONEY, -20)
@@ -185,7 +183,7 @@ def buy_drink_club(hold_required=False, state=None):
             ui.display(
                 "Виски напоминает вам о чувстве долга, и вы снова открываете конспекты и учитесь..."
             )
-        if vv == "d" and stats.get(gs, stats.MONEY) > 29:
+        elif vv == "d" and stats.get(gs, stats.MONEY) > 29:
             vitals.mod(gs, vitals.FATIGUE, +10)
             vitals.mod(gs, vitals.SLEEPINESS, +50)
             vitals.mod(gs, vitals.MENTAL, +10)
