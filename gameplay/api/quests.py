@@ -29,6 +29,10 @@ def finish(gs, quest):
     gs_api.set_value(gs, _DOMAIN, quest, Status.FINISHED)
 
 
+def abort(gs, quest):
+    gs_api.set_value(gs, _DOMAIN, quest, Status.ABORTED)
+
+
 def get_status(gs, quest):
     quests = _get_quests(gs)
     if quest not in quests:
