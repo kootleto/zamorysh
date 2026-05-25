@@ -4,9 +4,8 @@ import sys
 import keyboard
 
 from config import SETTINGS
-from engine import gs_api
 from engine.schema import GameState, ActivityOptions
-from gameplay.api import vitals, stats
+from gameplay.api import vitals, stats, time, formatters
 from tools.logger import log
 
 
@@ -27,6 +26,13 @@ def display(*message, sep: str = " "):
         print(message)
 
 
+def display_at(gs, *message, sep: str = " "):
+    time_str = formatters.get_formatted_time(time.get_datetime(gs))
+    message = sep.join(map(str, message))
+    display(f"[{time_str}]", message)
+
+
+# DEPRECATED
 async def prompt(*message, sep: str = " ") -> str:
     """
     Вывести в консоль сообщение с разделителем sep и вернуть ответ игрока.
@@ -61,6 +67,17 @@ def _clear_input_buffer():
         termios.tcflush(sys.stdin, termios.TCIFLUSH)
 
 
+async def ask_option(options, message, _submit_required, _submit_message, cols):
+    display(message)
+    choice = ""
+    for i, option in enumerate(options):
+        choice += f"{i} {option}\t"
+        if (i + 1) % cols == 0:
+            choice += "\n"
+    display(choice)
+    return options[int(await prompt())]
+
+
 async def prompt_activity(options: ActivityOptions) -> int:
     """
     Запросить у игрока выбор активности. Если он выберет активность, для которой требуется зажать клавишу,
@@ -93,12 +110,10 @@ async def prompt_activity(options: ActivityOptions) -> int:
 
 def refresh_ui(gs: GameState, _options):
     display(
-        f"Time: {gs_api.get_time(gs)}, Fatigue: {vitals.get(gs, vitals.FATIGUE)}, Money: {stats.get(gs, stats.MONEY)}"
+        f"Time: {formatters.get_formatted_time(time.get_datetime(gs))}, Fatigue: {vitals.get(gs, vitals.FATIGUE)}, Money: {stats.get(gs, stats.MONEY)}, "
+        f"Social: {stats.get(gs, stats.SOCIAL)}, Mental: {vitals.get(gs, vitals.MENTAL)}, "
+        f"Knowledge: {stats.get(gs, stats.KNOWLEDGE)}"
     )
-    display(
-        f"Social: {stats.get(gs, stats.SOCIAL)}, Mental: {vitals.get(gs, vitals.MENTAL)}"
-    )
-    display(f"Knowledge: {stats.get(gs, stats.KNOWLEDGE)}")
 
 
 def check_button_pressed():

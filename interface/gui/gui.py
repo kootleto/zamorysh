@@ -1,11 +1,12 @@
 import asyncio
 from copy import deepcopy
-from typing import TypedDict
+from typing import TypedDict, Callable
 
 from kivy.app import App
 
 from engine.schema import ActivityOptions, GameState
 from gameplay.api import vitals, stats, time, music, location, scene
+from tools.utils import ensure_callable
 
 
 class AppProxy:
@@ -38,6 +39,13 @@ def display(*message, sep: str = " "):
     app.root.ids.logger.add_line(message)
 
 
+def display_at(gs, *message, sep: str = " "):
+    dt = time.get_datetime(gs)
+    message = sep.join(map(str, message))
+    app.root.ids.logger.add_line(message, dt=dt)
+
+
+# DEPRECATED
 async def prompt(*message, sep: str = " ") -> str:
     app_input = app.root.ids.input
 
@@ -55,23 +63,70 @@ async def prompt(*message, sep: str = " ") -> str:
     return response
 
 
-async def prompt_activity(options: ActivityOptions) -> int:
-    activity_list = app.root.ids.activity_list
+async def ask_option(
+    options,
+    message,
+    submit_required=False,
+    submit_message: str | Callable[[int], str] | None = None,
+    cols=3,
+):
+    menu = app.root.ids.menu
     button = app.root.ids.button
 
-    activity_list.selected_index = -1
-    button.text = "Выберите активность"
-    activity_list.items = [option["label"] for option in options]
+    button.text = message
+    menu.awaits_selection = True
+    menu.reset_selection()
+    menu.items = [str(option) for option in options]
+    menu.cols = cols
 
-    await _wait_for_event(button, "on_press")
-    while activity_list.selected_index == -1:
-        button.text = "Сначала нужно выбрать активность!"
-        await _wait_for_event(button, "on_press")
+    selected = await menu.wait_selection()
+    if submit_required:
+        while True:
+            if selected != -1:
+                button.text = ensure_callable(submit_message)(selected)
+            else:
+                button.text = message
 
+            task_change = asyncio.create_task(menu.wait_selection())
+            task_submit = asyncio.create_task(_wait_for_event(button, "on_press"))
+
+            done, pending = await asyncio.wait(
+                [task_change, task_submit], return_when=asyncio.FIRST_COMPLETED
+            )
+            for task in pending:
+                task.cancel()
+
+            if task_submit in done and selected != -1:
+                break
+
+            if task_change in done:
+                selected = task_change.result()
+
+    menu.reset_selection()
     button.text = "Игра запущена"
-    index = activity_list.selected_index
-    activity_list.selected_index = -1
-    return index
+    menu.awaits_selection = False
+    return options[selected]
+
+
+async def prompt_activity(options: ActivityOptions) -> int:
+    def get_submit_message(idx):
+        if options[idx]["hold_required"]:
+            return "Нажмите и удерживайте"
+        else:
+            return "Нажмите на кнопку"
+
+    labels = [option["label"] for option in options]
+    selected = labels.index(
+        await ask_option(
+            labels,
+            "Выберите активность",
+            submit_required=True,
+            submit_message=get_submit_message,
+            cols=2,
+        )
+    )
+
+    return selected
 
 
 def refresh_ui(gs: GameState, options: ActivityOptions):
@@ -94,8 +149,8 @@ def refresh_ui(gs: GameState, options: ActivityOptions):
     app.sprite_name = scene.get_current_sprite(gs)
     new_labels = [option["label"] for option in options]
 
-    if app.root.ids.activity_list.items != new_labels:
-        app.root.ids.activity_list.items = new_labels
+    if not app.root.ids.menu.awaits_selection and app.root.ids.menu.items != new_labels:
+        app.root.ids.menu.items = new_labels
 
 
 def check_button_pressed():

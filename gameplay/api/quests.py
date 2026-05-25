@@ -42,7 +42,11 @@ def get_status(gs, quest):
 
 def is_active(gs, quest):
     quests = _get_quests(gs)
-    return quest in quests and quests[quest] != Status.FINISHED
+    return (
+        quest in quests
+        and quests[quest] != Status.FINISHED
+        and quests[quest] != Status.ABORTED
+    )
 
 
 def _resolve(gs, intents):

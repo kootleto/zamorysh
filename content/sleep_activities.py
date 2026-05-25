@@ -21,9 +21,15 @@ def sleep():
     return activities_api.base_activity(tick_effect, can_continue, name="лечь спать")
 
 
+async def ask_time():
+    hour = await ui.ask_option(range(0, 24), "Выберите час", cols=10)
+    minute = await ui.ask_option(range(0, 60), "Выберите минуту", cols=10)
+    return hour, minute
+
+
 def set_alarm(state=None):
     async def tick_effect(gs):
-        input_time = list(map(int, (await ui.prompt("Установите время")).split(":")))
+        input_time = await ask_time()
         dt = datetime(
             year=time.get_year(gs),
             month=time.get_month(gs),

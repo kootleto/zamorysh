@@ -1,5 +1,6 @@
 import functools
 import time
+from typing import Callable
 
 from config import SETTINGS
 from engine.schema import GameState, ActivityOptions
@@ -48,16 +49,28 @@ def display(*message, sep: str = " "):
     interface.display(*message, sep=sep)
 
 
-@_record_wait_time
-async def prompt(*message, sep: str = " ") -> str:
-    response = await interface.prompt(*message, sep=sep)
-    return response
+def display_at(gs, *message, sep: str = " "):
+    interface.display_at(gs, *message, sep=sep)
 
 
 @_record_wait_time
 async def prompt_activity(options: ActivityOptions) -> int:
     index = await interface.prompt_activity(options)
     return index
+
+
+@_record_wait_time
+async def ask_option(
+    options,
+    message,
+    submit_required=False,
+    submit_message: str | Callable[[int], str] | None = None,
+    cols=3,
+):
+    option = await interface.ask_option(
+        options, message, submit_required, submit_message, cols
+    )
+    return option
 
 
 def refresh_ui(gs: GameState, options: ActivityOptions):

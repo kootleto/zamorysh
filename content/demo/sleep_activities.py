@@ -4,6 +4,7 @@ from gameplay.api import timers, vitals
 from interface import ui
 
 
+# DEPRECATED: ui.prompt is no longer supported
 def set_alarm(state=None):  # игрок должен ввести время будильника
 
     async def tick_effect(gs):
@@ -31,4 +32,4 @@ def sleep():
     return activities_api.base_activity(tick_effect, can_continue, name="sleep")
 
 
-ACTIVITIES = [set_alarm, sleep]
+ACTIVITIES = [sleep]

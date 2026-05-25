@@ -20,6 +20,7 @@ from interface.gui.gui import KivyState
 
 
 class GameApp(App):
+    title = "Zamorysh"
     stats = DictProperty(
         {
             "time": "undefined",
@@ -64,10 +65,9 @@ class GameApp(App):
         Clock.schedule_interval(update, 1 / 60)
 
     def on_stats(self, _, value):
-        self.root.ids.stats_label.text = (
-            f"fatigue: {value['fatigue']}   money: {value['money']}   social: {value['social']}   "
-            f"mental: {value['mental']}   knowledge: {value['knowledge']}"
-        )
+        self.root.ids.money_stat_label.value = round(value["money"], 2)
+        self.root.ids.knowledge_stat_label.value = round(value["knowledge"], 2)
+        self.root.ids.social_stat_label.value = round(value["social"], 2)
         self.root.ids.time_label.text = formatters.get_formatted_time(value["datetime"])
         self.root.ids.date_label.text = formatters.get_formatted_date(value["datetime"])
         self.root.ids.map_label.text = (
@@ -83,6 +83,7 @@ class GameApp(App):
         return path
 
     def on_track_title(self, _, value):
+        print("")
         if self.current_track:
             self.current_track.stop()
             self.current_track.unload()
