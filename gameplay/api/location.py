@@ -90,7 +90,7 @@ def get_locked_places(gs):
 
 
 def check_locked(gs, place: Place):
-    return get_locked_places(gs)[place]
+    return len(get_locked_places(gs)[place]) > 0
 
 
 def get_place_by_coords(x, y):
@@ -128,7 +128,7 @@ def _resolve(gs, intents):
     locked = get_locked_places(gs)
     for place in Place:
         grouped_intents = defaultdict(list)
-        for intent in [i for i in intents if i["value"] == place]:
+        for intent in [i for i in intents if i["target"] == place]:
             grouped_intents[intent["op"]].append(intent)
 
         for intent in grouped_intents["set"]:
