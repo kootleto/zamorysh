@@ -29,14 +29,14 @@ _INITIAL = {
     X: 0,
     Y: 0,
     "locked": {
-        Place.HOME: False,
-        Place.METRO: False,
-        Place.PARK: False,
-        Place.SURF_COFFEE: False,
-        Place.ANOTHER_COFFEE: False,
-        Place.CLUB: False,
-        Place.UNIVERSITY: False,
-        Place.OUTSIDE: False,
+        Place.HOME: set(),
+        Place.METRO: set(),
+        Place.PARK: set(),
+        Place.SURF_COFFEE: set(),
+        Place.ANOTHER_COFFEE: set(),
+        Place.CLUB: set(),
+        Place.UNIVERSITY: set(),
+        Place.OUTSIDE: set(),
     },
 }
 
@@ -77,12 +77,12 @@ places = {
 }
 
 
-def lock(gs, place: Place):
-    gs_api.set_value(gs, _DOMAIN, place, True)
+def lock(gs, place: Place, source: str):
+    gs_api.set_value(gs, _DOMAIN, place, source)
 
 
-def unlock(gs, place: Place):
-    gs_api.set_value(gs, _DOMAIN, place, False)
+def unlock(gs, place: Place, source: str):
+    gs_api.push_intent(gs, _DOMAIN, place, source, "del")
 
 
 def get_locked_places(gs):
@@ -125,15 +125,13 @@ def _resolve(gs, intents):
         clamp_fn=lambda v: max(SOUTH_BORDER, min(NORTH_BORDER, v)),
     )
 
-    def apply_fn(gs, _domain, target, value):
-        get_locked_places(gs)[target] = value
-
+    locked = get_locked_places(gs)
     for place in Place:
-        resolver_api.resolve_generic(
-            gs,
-            grouped_intents[place],
-            _DOMAIN,
-            get_fn=lambda gs, _domain, target: check_locked(gs, Place(target)),
-            apply_fn=apply_fn,
-            set_fn=any,
-        )
+        grouped_intents = defaultdict(list)
+        for intent in [i for i in intents if i["value"] == place]:
+            grouped_intents[intent["op"]].append(intent)
+
+        for intent in grouped_intents["set"]:
+            locked[place].add(intent["value"])
+        for intent in grouped_intents["del"]:
+            locked[place].discard(intent["value"])

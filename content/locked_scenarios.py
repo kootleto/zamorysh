@@ -19,13 +19,13 @@ def lock_unlock(place, hours):
             return hours[0] <= time.get_hour(gs) < 24 or time.get_hour(gs) < hours[1]
 
     def eff_unlock(gs):
-        location.unlock(gs, place)
+        location.unlock(gs, place, "schedule")
 
     def tr_lock(gs):
         return not tr_unlock(gs)
 
     def eff_lock(gs):
-        location.lock(gs, place)
+        location.lock(gs, place, "schedule")
 
     return scenarios_api.base_scenario(
         [

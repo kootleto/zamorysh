@@ -33,7 +33,7 @@ def key_lost_quest(state=None):
 
     def start(gs):
         ui.display("Почему-то у вас плохое предчувствие...")
-        location.lock(gs, Place.HOME)
+        location.lock(gs, Place.HOME, "key_lost")
 
     def activate_loss(gs):
         return location.get(gs, location.X) == 0 and location.get(gs, location.Y) == 0
@@ -63,7 +63,7 @@ def key_lost_quest(state=None):
             )
 
         ui.display(key_msg + " Вы нашли свои ключи.")
-        location.unlock(gs, Place.HOME)
+        location.unlock(gs, Place.HOME, "key_lost")
 
     return scenarios_api.base_scenario(
         [
