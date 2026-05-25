@@ -23,7 +23,7 @@ class ScenarioEntry(TypedDict):
     state: dict[str, Any] | None
 
 
-Operation = Literal["set", "mod"]
+Operation = Literal["set", "mod", "del"]
 
 
 class Intent(TypedDict):
