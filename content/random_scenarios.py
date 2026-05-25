@@ -402,7 +402,7 @@ def random_surf_coffee_scenario(state=None):
         stats.mod(gs, stats.SOCIAL, +4)
 
     def f3(gs):
-        ui.display_at(gs, "Запах кофе приятно подрит...")
+        ui.display_at(gs, "Запах кофе приятно бодрит...")
         vitals.mod(gs, vitals.FATIGUE, -2)
         vitals.mod(gs, vitals.MENTAL, +4)
 
