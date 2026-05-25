@@ -28,20 +28,23 @@ def check_today_schedule(state=None):
 
 def check_tomorrow_schedule(state=None):
     def tick_effect(gs):
+        items = []
         if time.get_weekday(gs) != time.Weekday.SUNDAY:
             for lesson_time, lesson in schedule.get_day_schedule(
                 time.get_weekday(gs) + 1
             ).items():
-                ui.display(
+                items.append(
                     f"{lesson_time} {lesson["subject"]} ({lesson["type"]}) в аудитории {lesson["room"]}"
                 )
+
         else:
             for lesson_time, lesson in schedule.get_day_schedule(
                 time.Weekday.MONDAY
             ).items():
-                ui.display(
+                items.append(
                     f"{lesson_time} {lesson["subject"]} ({lesson["type"]}) в аудитории {lesson["room"]}"
                 )
+        ui.display("\n".join(items))
 
     def can_continue(gs):
         return time.get_weekday(gs) != time.Weekday.SATURDAY

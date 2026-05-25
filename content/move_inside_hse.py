@@ -39,8 +39,8 @@ def move_down():
 def go_to_classroom(state=None):
     async def tick_effect(gs):
         classrooms = floors.CLASSROOMS[floors.get(gs, floors.FLOOR)]
-        ui.display(f"Выберите аудиторию: {", ".join(map(str, classrooms))}")
-        floors.set(gs, floors.CLASSROOM, int(await ui.prompt()))
+        classroom = await ui.ask_option(classrooms, "Выберите аудиторию")
+        floors.set(gs, floors.CLASSROOM, classroom)
 
     def can_continue(gs):
         return (

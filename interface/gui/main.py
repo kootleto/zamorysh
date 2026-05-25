@@ -1,5 +1,6 @@
 import asyncio
 
+from kivy.config import Config
 from kivy.core.text import LabelBase, Label
 
 from engine import runner, controller
@@ -12,6 +13,10 @@ LabelBase.register(
     fn_regular="assets/fonts/UMTypewriter-Regular.ttf",
 )
 Label.font_name = "UMTypewriter"
+
+Config.set("input", "wm_pen", "")
+Config.set("input", "wm_touch", "")
+Config.write()
 
 
 async def start(gs: GameState, definitions: Definitions, vs: KivyState):
