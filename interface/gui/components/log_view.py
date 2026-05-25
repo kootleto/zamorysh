@@ -117,7 +117,7 @@ class LogView(RecycleView, ColoredWidget):
         height = self._get_height(text, self.width)
         self.data.append({"text": text, "dt": dt, "size": (self.width, height)})
 
-        if self.ids.container.height > self.height:
+        if self.ids.container.height + dp(50) > self.height:
             self.scroll_y = 0
 
 
