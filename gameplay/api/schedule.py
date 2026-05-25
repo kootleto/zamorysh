@@ -55,7 +55,10 @@ def get_week_schedule():
 
 
 def get_day_schedule(weekday):
-    return WEEK_SCHEDULE[weekday]
+    if weekday == time.Weekday.SUNDAY:
+        return {}
+    else:
+        return WEEK_SCHEDULE[weekday]
 
 
 def get_current_lesson(gs):
