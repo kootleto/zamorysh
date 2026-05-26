@@ -1,5 +1,7 @@
+import datetime
+
 from engine import scenarios_api
-from gameplay.api import location, floors, quests, time, vitals
+from gameplay.api import location, floors, quests, time
 from interface import ui
 
 
@@ -66,15 +68,28 @@ def pass_quest():
 
 def incomplete_pass():
     def check_incomplete(gs):
-        return time.get_day(gs) > time.START_DATETIME.day
+        return (
+            time.get_time(gs) == datetime.time(23, 59)
+            and quests.get_status(gs, "pass") != quests.Status.FINISHED
+        )
 
-    def reminder(gs):
-        ui.display("Вам очень надо сделать пропуск!")
-        vitals.mod(gs, vitals.MENTAL, -5)
+    def locking(gs):
+        location.lock(gs, location.Place.UNIVERSITY, "incomplete_pass")
+        ui.display("Вы вспомнили, что не сделали пропуск...")
+
+    def next_day(gs):
+        return time.get_time(gs) == datetime.time(23, 59)
+
+    def restart(gs):
+        quests.set_status(gs, "pass", quests.Status.INACTIVE)
+        location.unlock(gs, location.Place.UNIVERSITY, "incomplete_pass")
 
     return scenarios_api.base_scenario(
-        [scenarios_api.base_transition(0, 1, check_incomplete, reminder)]
+        [
+            scenarios_api.base_transition(0, 1, check_incomplete, locking),
+            scenarios_api.base_transition(1, 0, next_day, restart),
+        ]
     )
 
 
-SCENARIOS = [pass_quest]
+SCENARIOS = [pass_quest, incomplete_pass]
