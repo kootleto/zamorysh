@@ -100,6 +100,21 @@ def sociable_scenario():
     )
 
 
+def clever_scenario():
+    def check_clever(gs):
+        return stats.get(gs, stats.MONEY) >= 500
+
+    def game_over(gs):
+        ui.display("-- Игра окончена: вы накопили очень много знаний и получили автомат за экзамен! Ура! --")
+        gs_api.stop(gs)
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, 1, check_clever, game_over),
+        ]
+    )
+
+
 def win_scenario():
 
     def check_time(gs):

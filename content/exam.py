@@ -1,7 +1,9 @@
+import datetime
 import random
 
-from gameplay.api import stats, vitals
-from tools.logger import log
+from engine import scenarios_api, gs_api
+from gameplay.api import stats, vitals, time
+from interface import ui
 
 
 def exam(gs):
@@ -50,28 +52,56 @@ def exam(gs):
             total += w * norm_val
         total += luck_weight * luck_normalized
 
-        exam_score = total * 10
-        passed = exam_score >= 4
+        result = {"exam_score": total * 10, "passed": total * 10 >= 4}
 
-        results.append(
-            {
-                "exam": i,
-                "used_parameters": triplet,
-                "parameter_values": values,
-                "luck_score": luck_score,
-                "total_fraction": total,
-                "score_0_to_10": round(exam_score, 2),
-                "passed": passed,
-            }
-        )
+        return result
 
-    log("=== EXAM RESULTS ===\n")
-    for res in results:
-        log(f"Exam {res['exam']}:")
-        log(f"  Parameters: {res['used_parameters']} = {res['parameter_values']}")
-        log(f"  Luck: {res['luck_score']} points")
-        log(f"  Total fraction: {res['total_fraction']:.3f}")
-        log(f"  Score (0-10): {res['score_0_to_10']}")
-        log(f"  Result: {'PASSED' if res['passed'] else 'FAILED'}\n")
+    #     results.append(
+    #         {
+    #             "exam": i,
+    #             "used_parameters": triplet,
+    #             "parameter_values": values,
+    #             "luck_score": luck_score,
+    #             "total_fraction": total,
+    #             "score_0_to_10": round(exam_score, 2),
+    #             "passed": passed,
+    #         }
+    #     )
+    #
+    # log("=== EXAM RESULTS ===\n")
+    # for res in results:
+    #     log(f"Exam {res['exam']}:")
+    #     log(f"  Parameters: {res['used_parameters']} = {res['parameter_values']}")
+    #     log(f"  Luck: {res['luck_score']} points")
+    #     log(f"  Total fraction: {res['total_fraction']:.3f}")
+    #     log(f"  Score (0-10): {res['score_0_to_10']}")
+    #     log(f"  Result: {'PASSED' if res['passed'] else 'FAILED'}\n")
+    #
+    # return results
+    return
 
-    return results
+
+def exam_scenario():
+    def check_exam(gs):
+        return time.get_day(gs) == 8 and time.get_time(gs) == datetime.time(17, 00)
+
+    def start_exam(gs):
+        ui.display(f"Ваша оценка за экзамен: {exam(gs)["exam_score"]}")
+
+    def check_passed(gs):
+        if exam(gs)["passed"]:
+            ui.display(
+                "Ура, у вас получилось сдать экзамен! Вы успешно прожили первую неделю на ФиКЛ!"
+            )
+        else:
+            ui.display(
+                "К сожалению, вам не удалось сдать экзамен... Наверное, учёба на ФиКЛе вам не подходит :("
+            )
+        gs_api.stop(gs)
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, 1, check_exam, start_exam),
+            scenarios_api.base_transition(1, 2, True, check_passed),
+        ]
+    )
