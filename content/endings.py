@@ -1,6 +1,6 @@
 from engine import gs_api, scenarios_api
 from engine.data_api import init_defaults
-from gameplay.api import time, vitals, stats
+from gameplay.api import vitals, stats
 from interface import ui
 
 
@@ -105,7 +105,9 @@ def clever_scenario():
         return stats.get(gs, stats.MONEY) >= 500
 
     def game_over(gs):
-        ui.display("-- Игра окончена: вы накопили очень много знаний и получили автомат за экзамен! Ура! --")
+        ui.display(
+            "-- Игра окончена: вы накопили очень много знаний и получили автомат за экзамен! Ура! --"
+        )
         gs_api.stop(gs)
 
     return scenarios_api.base_scenario(
@@ -115,25 +117,25 @@ def clever_scenario():
     )
 
 
-def win_scenario():
-
-    def check_time(gs):
-        return time.get_day(gs) >= 8
-
-    def successfully_survived(gs):
-        ui.display(
-            "-- Хорошая концовка: вы героически пережили неделю! Удачи пережить ещё много недель... -- "
-        )
-        gs_api.stop(gs)
-
-    return scenarios_api.base_scenario(
-        [scenarios_api.base_transition(0, 1, check_time, successfully_survived)]
-    )
+# def win_scenario():
+#
+#     def check_time(gs):
+#         return time.get_day(gs) >= 8
+#
+#     def successfully_survived(gs):
+#         ui.display(
+#             "-- Хорошая концовка: вы героически пережили неделю! Удачи пережить ещё много недель... -- "
+#         )
+#         gs_api.stop(gs)
+#
+#     return scenarios_api.base_scenario(
+#         [scenarios_api.base_transition(0, 1, check_time, successfully_survived)]
+#     )
 
 
 SCENARIOS = [
     rich_scenario,
     breakdown_scenario,
     verytired_scenario,
-    win_scenario,
+    sociable_scenario,
 ]
