@@ -28,7 +28,8 @@ def breakdown_scenario(state=None):
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, tr1, eff1),
-            scenarios_api.base_transition(1, 2, tr2, eff2),
+            scenarios_api.base_transition(1, 2, tr1, eff1),
+            scenarios_api.base_transition(2, 3, tr2, eff2),
         ]
     )
 
