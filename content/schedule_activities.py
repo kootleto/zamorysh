@@ -69,7 +69,7 @@ def check_current_lesson(state=None):
                 f"в аудитории {schedule.get_current_room(gs)}"
             )
         else:
-            ui.display_at(gs, "Сейчас нет пар")
+            ui.display_at(gs, "Сейчас нет пар.")
 
     def can_continue(gs):
         return time.get_weekday(gs) != time.Weekday.SUNDAY

@@ -49,7 +49,7 @@ def socialize(state=None, hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda gs: ui.display(gs, "Эх, благодать!"))
+@activities_api.on_finish(lambda gs: ui.display_at(gs, "Эх, благодать!"))
 def walk(state=None, hold_required=True):
 
     def can_continue(gs):
