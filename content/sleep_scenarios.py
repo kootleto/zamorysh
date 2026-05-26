@@ -16,7 +16,7 @@ def falling_asleep(activity_definitions):
 
     def auto_sleep(gs):
         activities_api.start_activity_by_definition(
-            gs, activity_definitions, sleep_activities.sleep
+            gs, activity_definitions, sleep_activities.auto_sleep
         )
 
     return scenarios_api.base_scenario(

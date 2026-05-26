@@ -2,11 +2,32 @@ from datetime import datetime, timedelta
 
 from engine import gs_api, activities_api
 from gameplay.activity_wrappers import single_tick_activity
-from gameplay.api import vitals, timers, time
+from gameplay.api import vitals, timers, time, location
 from interface import ui
 
 
+@activities_api.on_finish(
+    lambda gs: ui.display_at(gs, "Как прекрасен мир, являющийся во снах...")
+)
 def sleep():
+
+    def tick_effect(gs):
+        vitals.mod(gs, vitals.SLEEPINESS, -0.255)
+        gs_api.multiply_next_tick_interval(gs, 0.01)
+
+    def can_continue(gs):
+        return (
+            gs_api.get_time(gs) != timers.get(gs, "alarm")
+            and vitals.get(gs, vitals.SLEEPINESS) > 0
+            and location.get_place(gs) != location.Place.OUTSIDE
+            and location.get_place(gs) != location.Place.PARK
+        )
+
+    return activities_api.base_activity(tick_effect, can_continue, name="лечь спать")
+
+
+@activities_api.system_only
+def auto_sleep():
 
     def tick_effect(gs):
         vitals.mod(gs, vitals.SLEEPINESS, -0.255)
@@ -18,7 +39,7 @@ def sleep():
             and vitals.get(gs, vitals.SLEEPINESS) > 0
         )
 
-    return activities_api.base_activity(tick_effect, can_continue, name="лечь спать")
+    return activities_api.base_activity(tick_effect, can_continue, name="заснуть")
 
 
 async def ask_time():
@@ -59,4 +80,4 @@ def get_sleepy():
     )
 
 
-ACTIVITIES = [sleep, set_alarm, get_sleepy]
+ACTIVITIES = [sleep, auto_sleep, set_alarm, get_sleepy]

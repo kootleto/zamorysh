@@ -84,7 +84,7 @@ def display_another_coffee():
 def display_club():
     return display_locked(
         Place.CLUB,
-        "Приходите в рабочие часы <<Nightlife>>.",
+        "Приходите в рабочие часы «Nightlife».",
     )
 
 

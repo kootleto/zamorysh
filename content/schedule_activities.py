@@ -6,12 +6,14 @@ from interface import ui
 
 def check_today_schedule(state=None):
     def tick_effect(gs):
+        display = []
         for lesson_time, lesson in schedule.get_day_schedule(
             time.get_weekday(gs)
         ).items():
-            ui.display(
+            display.append(
                 f"{lesson_time} {lesson["subject"]} ({lesson["type"]}) в аудитории {lesson["room"]}"
             )
+        ui.display('\n'.join(display))
 
     def can_continue(gs):
         return time.get_weekday(gs) != time.Weekday.SUNDAY
@@ -66,7 +68,7 @@ def check_current_lesson(state=None):
                 f"{schedule.get_current_subject(gs)} ({schedule.get_current_type(gs)}) в аудитории {schedule.get_current_room(gs)}"
             )
         else:
-            ui.display("Сейчас нет пар")
+            ui.display_at(gs, "Сейчас нет пар")
 
     def can_continue(gs):
         return time.get_weekday(gs) != time.Weekday.SUNDAY
