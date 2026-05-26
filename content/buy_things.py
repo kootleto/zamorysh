@@ -85,7 +85,7 @@ def buy_drink_surf(hold_required=False, state=None):
             vitals.mod(gs, vitals.MENTAL, +15)
             stats.mod(gs, stats.MONEY, -9)
             ui.display(
-                "Вы купили латте. Сахар в нем делает вас довольнее, но вам всё ещё хочется спать!"
+                "Вы купили латте. Сахар в нём делает вас довольнее, но вам всё ещё хочется спать!"
             )
         elif index == 1 and stats.get(gs, stats.MONEY) > 7:
             stats.mod(gs, stats.MONEY, -8)
@@ -169,7 +169,7 @@ def buy_drink_another(hold_required=False, state=None):
             vitals.mod(gs, vitals.MENTAL, +15)
             stats.mod(gs, stats.MONEY, -9)
             ui.display(
-                "Вы купили латте. Сахар в нем делает вас довольнее, но вам всё ещё хочется спать!"
+                "Вы купили латте. Сахар в нём делает вас довольнее, но вам всё ещё хочется спать!"
             )
         elif index == 1 and stats.get(gs, stats.MONEY) > 8:
             stats.mod(gs, stats.MONEY, -8)

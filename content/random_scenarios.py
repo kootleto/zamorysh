@@ -232,7 +232,7 @@ def random_park_day_scenario(state=None):
     def f9(gs):
         ui.display_at(
             gs,
-            "Вы увидели уведомление от тгк «На старой басманной все спокойно» и обрадовались!",
+            "Вы увидели уведомление от тгк «На старой басманной всё спокойно» и обрадовались!",
         )
         vitals.mod(gs, vitals.MENTAL, +5)
 
@@ -374,7 +374,7 @@ def random_metro_day_scenario(state=None):
         vitals.mod(gs, vitals.SLEEPINESS, -3)
 
     def f9(gs):
-        ui.display_at(gs, "Кофе в термосе протек... Сил вам.")
+        ui.display_at(gs, "Кофе в термосе протёк... Сил вам.")
         vitals.mod(gs, vitals.MENTAL, -8)
         vitals.mod(gs, vitals.FATIGUE, +5)
 
