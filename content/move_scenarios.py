@@ -1,6 +1,6 @@
 from engine import scenarios_api
 from gameplay.api import location
-from gameplay.api.location import Place
+from gameplay.api.location import Place, PLACES_FORMS
 from interface import ui
 
 
@@ -9,10 +9,10 @@ def move_scenario(place):
         return location.get_place(gs) == place
 
     def enter(gs):
-        ui.display_at(gs, f"Вы входите в {place}!")
+        ui.display_at(gs, f"Вы входите в {place["in"]}!")
 
     def exit(gs):
-        ui.display_at(gs, f"Вы выходите из {place}!")
+        ui.display_at(gs, f"Вы выходите из {place["out"]}!")
 
     return scenarios_api.base_scenario(
         [
@@ -27,7 +27,7 @@ def move_scenario(place):
 
 
 def home_scenario():
-    return move_scenario(Place.HOME)
+    return move_scenario(PLACES_FORMS[Place.HOME])
 
 
 def metro_scenario():

@@ -25,6 +25,17 @@ class Place(StrEnum):
     OUTSIDE = "outside"
 
 
+PLACES_FORMS = {
+    Place.HOME: {"out": "дома", "in": "дом"},
+    Place.PARK: {"out": "парка", "in": "парк"},
+    Place.UNIVERSITY: {"out": "университета", "in": "университет"},
+    Place.CLUB: {"out": "клуба Nightlife", "in": "клуб Nightlife"},
+    Place.SURF_COFFEE: {"out": "Surf coffee", "in": "Surf coffee"},
+    Place.ANOTHER_COFFEE: {"out": "Другой кофейни", "in": "Другую кофейню"},
+    Place.METRO: {"out": "метро", "in": "метро"},
+}
+
+
 _INITIAL = {
     X: 0,
     Y: 0,
