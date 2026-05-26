@@ -72,7 +72,7 @@ async def hangman():
         ui.display(" ".join(display_word))
 
         if "_" not in display_word:
-            ui.display("Поздравляем! Вы выиграли")
+            ui.display("Поздравляем! Вы выиграли!")
             return True
 
         guess = (await ui.ask_option(ALPHABET, "Введите букву", cols=10)).lower()
@@ -96,7 +96,8 @@ async def bulls_and_cows():
     secret = random.sample("123456789", 4)
     attempts = 0
     ui.display(
-        "Угадай число! Я даю тебе подсказки в виде «быков» (цифра угадана и стоит на месте) и «коров» (цифра угадана, но стоит не на месте)."
+        "Угадай число! Я даю тебе подсказки в виде «быков» (цифра угадана и стоит на месте) "
+        "и «коров» (цифра угадана, но стоит не на месте)."
     )
 
     while True:
@@ -183,22 +184,22 @@ async def kamen_nozhnitsy_bumaga():
         if player_choice == computer_choice:
             ui.display("Ничья")
         elif win_rules[player_choice] == computer_choice:
-            ui.display("Вы выиграли раунд")
+            ui.display("Вы выиграли раунд.")
             player_wins += 1
         else:
-            ui.display("Вы проиграли раунд")
+            ui.display("Вы проиграли раунд.")
             computer_wins += 1
 
         ui.display()
         round_num += 1
 
-    ui.display("Игра окончена")
+    ui.display("Игра окончена.")
     ui.display("Финальный счёт: ", player_wins, "-", computer_wins)
     if player_wins == 3:
-        ui.display("Вы выиграли")
+        ui.display("Вы выиграли!")
         return True
     else:
-        ui.display("Вы проиграли")
+        ui.display("Вы проиграли.")
         return False
 
 
@@ -243,10 +244,10 @@ async def yazyki_i_semi():
             correct += 1
 
     if correct == 3:
-        ui.display("Правильно")
+        ui.display("Правильно!")
         return True
     else:
-        ui.display("Неправильно")
+        ui.display("Неправильно.")
         return False
 
 

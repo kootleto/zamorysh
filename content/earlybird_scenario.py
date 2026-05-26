@@ -13,7 +13,8 @@ def earlybird_notice():
 
     def eff():
         ui.display(
-            "В этой кофейне действует акция: первый покупатель с утра получает бесплатный кофе. Было бы здорово получить его несколько раз."
+            "В этой кофейне действует акция: первый покупатель с утра получает бесплатный кофе. "
+            "Было бы здорово получить его несколько раз."
         )
 
     return scenarios_api.base_scenario([scenarios_api.base_transition(0, 1, tr, eff)])
@@ -35,7 +36,7 @@ def earlybird_scenario(state=None):
             vitals.mod(gs, vitals.MENTAL, -2)
             vitals.mod(gs, vitals.SLEEPINESS, -2)
             ui.display(
-                "Поздравляю! Вы - первый покупатель. Наслаждайтесь своим бесплатным кофе!"
+                "Поздравляю! Вы первый покупатель. Наслаждайтесь своим бесплатным кофе!"
             )
 
             state["counter"] += 1
@@ -49,7 +50,7 @@ def earlybird_scenario(state=None):
         if state["counter"] == 1:
             ui.display("Первый есть!")
         if state["counter"] == 2:
-            ui.display("Еще немного...")
+            ui.display("Ещё немного...")
 
         if state["counter"] == 3:
             ui.display("Вы настоящая ранняя пташка!")

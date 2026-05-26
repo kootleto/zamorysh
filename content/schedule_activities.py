@@ -13,7 +13,7 @@ def check_today_schedule(state=None):
             display.append(
                 f"{lesson_time} {lesson["subject"]} ({lesson["type"]}) в аудитории {lesson["room"]}"
             )
-        ui.display('\n'.join(display))
+        ui.display("\n".join(display))
 
     def can_continue(gs):
         return time.get_weekday(gs) != time.Weekday.SUNDAY
@@ -65,7 +65,8 @@ def check_current_lesson(state=None):
     def tick_effect(gs):
         if schedule.get_current_lesson(gs)["subject"] is not None:
             ui.display(
-                f"{schedule.get_current_subject(gs)} ({schedule.get_current_type(gs)}) в аудитории {schedule.get_current_room(gs)}"
+                f"{schedule.get_current_subject(gs)} ({schedule.get_current_type(gs)}) "
+                f"в аудитории {schedule.get_current_room(gs)}"
             )
         else:
             ui.display_at(gs, "Сейчас нет пар")

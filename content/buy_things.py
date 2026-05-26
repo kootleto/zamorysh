@@ -85,7 +85,7 @@ def buy_drink_surf(hold_required=False, state=None):
             vitals.mod(gs, vitals.MENTAL, +15)
             stats.mod(gs, stats.MONEY, -9)
             ui.display(
-                "Вы купили латте. Сахар в нем делает вас довольнее, но вам все еще хочется спать!"
+                "Вы купили латте. Сахар в нем делает вас довольнее, но вам всё ещё хочется спать!"
             )
         elif index == 1 and stats.get(gs, stats.MONEY) > 7:
             stats.mod(gs, stats.MONEY, -8)
@@ -106,7 +106,7 @@ def buy_drink_surf(hold_required=False, state=None):
                 "Ваша любимая позиция в сезонном меню... Кажется, что спасает от всего!"
             )
         else:
-            ui.display("Кажется, вы слишком бедны для вашего выбора... Подумайте еще.")
+            ui.display("Кажется, вы слишком бедны для вашего выбора... Подумайте ещё.")
 
     def can_continue(gs):
         return stats.get(gs, stats.MONEY) > 8 and (
@@ -169,7 +169,7 @@ def buy_drink_another(hold_required=False, state=None):
             vitals.mod(gs, vitals.MENTAL, +15)
             stats.mod(gs, stats.MONEY, -9)
             ui.display(
-                "Вы купили латте. Сахар в нем делает вас довольнее, но вам все еще хочется спать!"
+                "Вы купили латте. Сахар в нем делает вас довольнее, но вам всё ещё хочется спать!"
             )
         elif index == 1 and stats.get(gs, stats.MONEY) > 8:
             stats.mod(gs, stats.MONEY, -8)
@@ -190,7 +190,7 @@ def buy_drink_another(hold_required=False, state=None):
                 "Ваша любимая позиция в сезонном меню... Кажется, что спасает от всего!"
             )
         else:
-            ui.display("Похоже, вам не хватает. Выберите что-то еще?")
+            ui.display("Похоже, вам не хватает. Выберите что-то ещё?")
 
     def can_continue(gs):
         return stats.get(gs, stats.MONEY) > 8 and (
