@@ -67,13 +67,13 @@ def mod(gs, coordinate, delta):
 def get_directions(gs):
     directions = []
     if get(gs, X) < EAST_BORDER:
-        directions.append("east")
+        directions.append("восток")
     if get(gs, X) > WEST_BORDER:
-        directions.append("west")
+        directions.append("запад")
     if get(gs, Y) < NORTH_BORDER:
-        directions.append("north")
+        directions.append("север")
     if get(gs, Y) > SOUTH_BORDER:
-        directions.append("south")
+        directions.append("юг")
     return directions
 
 

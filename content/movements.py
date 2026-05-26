@@ -2,7 +2,7 @@ from engine import activities_api, data_api
 from gameplay.api import location, floors
 from gameplay.api.location import Place
 
-DIRECTIONS = {"north": (0, 1), "south": (0, -1), "east": (1, 0), "west": (-1, 0)}
+DIRECTIONS = {"север": (0, 1), "юг": (0, -1), "восток": (1, 0), "запад": (-1, 0)}
 
 
 @activities_api.with_params_space(direction=location.get_directions)
