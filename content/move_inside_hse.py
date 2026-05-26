@@ -13,6 +13,7 @@ def move_up():
         return (
             floors.get(gs, floors.FLOOR) < 5
             and location.get_place(gs) == Place.UNIVERSITY
+            and floors.get(gs, floors.CLASSROOM) == 0
         )
 
     return base_activity(
@@ -45,7 +46,6 @@ def go_to_classroom(state=None):
     def can_continue(gs):
         return (
             location.get_place(gs) == Place.UNIVERSITY
-            and floors.get(gs, floors.FLOOR) != 1
             and floors.get(gs, floors.CLASSROOM) == 0
         )
 
