@@ -9,10 +9,10 @@ def move_scenario(place):
         return location.get_place(gs) == place
 
     def enter(gs):
-        ui.display_at(gs, f"Вы входите в {place["in"]}!")
+        ui.display_at(gs, f"Вы входите в {PLACES_FORMS[place]["in"]}!")
 
     def exit(gs):
-        ui.display_at(gs, f"Вы выходите из {place["out"]}!")
+        ui.display_at(gs, f"Вы выходите из {PLACES_FORMS[place]["out"]}!")
 
     return scenarios_api.base_scenario(
         [
@@ -27,7 +27,7 @@ def move_scenario(place):
 
 
 def home_scenario():
-    return move_scenario(PLACES_FORMS[Place.HOME])
+    return move_scenario(Place.HOME)
 
 
 def metro_scenario():
