@@ -14,10 +14,14 @@ def breakdown_scenario(state=None):
         ui.display(
             "-- Вы в порядке?... Вы выглядите так, как будто вам очень плохо... --"
         )
-        state["counter"] += 1
+        # state["counter"] += 1
+
+    def tr_normal(gs):
+        return vitals.get(gs, vitals.MENTAL) == 25
 
     def tr2(gs):
-        return vitals.get(gs, vitals.MENTAL) == 0 and state["counter"] == 2
+        return vitals.get(gs, vitals.MENTAL) == 0
+        # and state["counter"] == 2
 
     def eff2(gs):
         ui.display(
@@ -28,7 +32,8 @@ def breakdown_scenario(state=None):
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, tr1, eff1),
-            scenarios_api.base_transition(1, 2, tr1, eff1),
+            # scenarios_api.base_transition(1, 2, tr1, eff1),
+            scenarios_api.base_transition(1, 2, tr_normal, None),
             scenarios_api.base_transition(2, 3, tr2, eff2),
         ]
     )
