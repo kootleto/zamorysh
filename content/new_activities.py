@@ -71,7 +71,9 @@ def walk(state=None, hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda gs: ui.display_at(gs, "От музыки на душе всегда лучше!"))
+@activities_api.on_finish(
+    lambda gs: ui.display_at(gs, "От музыки на душе всегда лучше!")
+)
 def listen_to_music(state=None, hold_required=True):
     def tick_effect(gs):
         vitals.mod(gs, vitals.MENTAL, +2)
@@ -87,7 +89,9 @@ def listen_to_music(state=None, hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda gs: ui.display_at(gs, "Это было не очень продуктивно..."))
+@activities_api.on_finish(
+    lambda gs: ui.display_at(gs, "Это было не очень продуктивно...")
+)
 def scroll(state=None, hold_required=True):
 
     def tick_effect(gs):
@@ -124,7 +128,9 @@ def cry(state=None):
     )
 
 
-@activities_api.on_finish(lambda gs: ui.display_at(gs, "Хорошо, что вы заботитесь о себе!"))
+@activities_api.on_finish(
+    lambda gs: ui.display_at(gs, "Хорошо, что вы заботитесь о себе!")
+)
 def eat_lunch(hold_required=True):
 
     def tick_effect(gs):
