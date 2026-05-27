@@ -7,6 +7,9 @@ DIRECTIONS = {"север": (0, 1), "юг": (0, -1), "восток": (1, 0), "з
 
 
 @activities_api.with_params_space(direction=location.get_directions)
+@activities_api.on_finish(
+    lambda gs, entry: ui.display_at(gs, f"Вы пошли на {entry["params"]["direction"]}.")
+)
 def move(params):
 
     direction = data_api.get_params(params, "direction")
@@ -14,7 +17,6 @@ def move(params):
     def tick_effect(gs):
         location.mod(gs, location.X, DIRECTIONS[direction][0])
         location.mod(gs, location.Y, DIRECTIONS[direction][1])
-        ui.display_at(gs, f"Вы пошли на {direction}.")
 
     def can_continue(gs):
         return (
