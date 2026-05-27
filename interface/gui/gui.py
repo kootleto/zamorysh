@@ -5,7 +5,7 @@ from typing import TypedDict, Callable
 from kivy.app import App
 
 from engine.schema import ActivityOptions, GameState
-from gameplay.api import vitals, stats, time, music, location, scene
+from gameplay.api import vitals, stats, time, music, location, scene, formatters
 from tools.utils import ensure_callable
 
 
@@ -113,7 +113,6 @@ async def ask_option(
                 selected = task_change.result()
 
     menu.reset_selection()
-    button.text = "Игра запущена"
     menu.awaits_selection = False
     return options[selected]
 
@@ -159,8 +158,10 @@ def refresh_ui(gs: GameState, options: ActivityOptions):
     app.sprite_name = scene.get_current_sprite(gs)
     new_labels = [option["label"] for option in options]
 
-    if not app.root.ids.menu.awaits_selection and app.root.ids.menu.items != new_labels:
-        app.root.ids.menu.items = new_labels
+    if not app.root.ids.menu.awaits_selection:
+        if app.root.ids.menu.items != new_labels:
+            app.root.ids.menu.items = new_labels
+        app.root.ids.button.text = formatters.get_formatted_time(app.stats["datetime"])
 
 
 def check_button_pressed():
