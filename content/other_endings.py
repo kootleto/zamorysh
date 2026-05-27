@@ -104,7 +104,7 @@ def sociable_scenario():
 
 def clever_scenario():
     def check_clever(gs):
-        return stats.get(gs, stats.MONEY) >= 500
+        return stats.get(gs, stats.KNOWLEDGE) >= 500
 
     def game_over(gs):
         ui.display(
