@@ -44,7 +44,7 @@ def verytired_scenario():
         return vitals.get(gs, vitals.FATIGUE) == 75
 
     def tr2(gs):
-        return vitals.get(gs, vitals.MENTAL) == 0
+        return vitals.get(gs, vitals.FATIGUE) == 100
 
     def eff2(gs):
         ui.display(
@@ -86,7 +86,7 @@ def rich_scenario():
 
 def sociable_scenario():
     def check_sociable(gs):
-        return stats.get(gs, stats.MONEY) >= 500
+        return stats.get(gs, stats.SOCIAL) >= 500
 
     def game_over(gs):
         ui.display(
