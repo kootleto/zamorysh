@@ -324,7 +324,7 @@ def random_park_night_scenario(state=None):
 
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     hours = [0, 1, 2, 3, 4, 5, 6, 22, 23]
-    cooldown = 700
+    cooldown = 70
     place = Place.PARK
 
     return random_scenario_somewhere(events, hours, place, cooldown, state)
