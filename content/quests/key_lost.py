@@ -62,7 +62,7 @@ def key_lost_quest(state=None):
                 "От асфальта отражается тусклый лунный свет. На асфальте что-то лежит."
             )
 
-        ui.display(key_msg + " Вы нашли свои ключи.")
+        ui.display_at(gs, key_msg + " Вы нашли свои ключи.")
         location.unlock(gs, Place.HOME, "key_lost")
 
     return scenarios_api.base_scenario(
