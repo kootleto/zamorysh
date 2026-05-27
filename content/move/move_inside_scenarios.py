@@ -67,17 +67,20 @@ def fifth_floor():
     return floor_scenario(5)
 
 
-def wrong_class():
+def wrong_room():
     def check_wrong(gs):
-        return location.get_place(
-            gs
-        ) == location.Place.UNIVERSITY and schedule.get_current_room(gs) != floors.get(
-            gs, floors.CLASSROOM
+        return (
+            location.get_place(gs) == location.Place.UNIVERSITY
+            and schedule.get_current_room(gs) != floors.get(gs, floors.CLASSROOM)
+            and floors.get(gs, floors.CLASSROOM) != 0
+            and floors.get(gs, floors.CLASSROOM) != 107
+            and floors.get(gs, floors.CLASSROOM) != 405
+            and floors.get(gs, floors.CLASSROOM) != 1
         )
 
     def wrong():
         ui.display(
-            f"У вас сейчас пара в другой аудитории. Здесь {random.choice(["нет пар", "семинар по филологии", "конференция", "пара по китайскому"])}"
+            f"У вас сейчас пара в другой аудитории. Здесь {random.choice(["нет пар", "семинар по филологии", "конференция", "пара по китайскому"])}."
         )
 
     def check_restart(gs):
@@ -91,6 +94,23 @@ def wrong_class():
     )
 
 
+def designers_room():
+    def check_designers(gs):
+        return floors.get(gs, floors.CLASSROOM) == 1
+
+    def desighers():
+        ui.display("Здесь обитают дизайнеры.")
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, 1, check_designers, desighers),
+            scenarios_api.base_transition(
+                1, 0, lambda gs: not check_designers(gs), None
+            ),
+        ]
+    )
+
+
 SCENARIOS = [
     zero_floor,
     first_floor,
@@ -98,4 +118,6 @@ SCENARIOS = [
     third_floor,
     fourth_floor,
     fifth_floor,
+    wrong_room,
+    designers_room,
 ]
