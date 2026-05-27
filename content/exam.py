@@ -30,7 +30,7 @@ def exam(gs):
     parameter_weights = [0.3, 0.3, 0.3]
     luck_weight = 0.1
 
-    results = []
+    results = {"marks": [], "total": 0, "passed": False}
 
     for i, triplet in enumerate(exam_triplets, 1):
         values = [all_parameters[p] for p in triplet]
@@ -52,33 +52,12 @@ def exam(gs):
             total += w * norm_val
         total += luck_weight * luck_normalized
 
-        result = {"exam_score": total * 10, "passed": total * 10 >= 4}
+        results["marks"].append(round(total * 10, 2))
 
-        return result
-
-    #     results.append(
-    #         {
-    #             "exam": i,
-    #             "used_parameters": triplet,
-    #             "parameter_values": values,
-    #             "luck_score": luck_score,
-    #             "total_fraction": total,
-    #             "score_0_to_10": round(exam_score, 2),
-    #             "passed": passed,
-    #         }
-    #     )
-    #
-    # log("=== EXAM RESULTS ===\n")
-    # for res in results:
-    #     log(f"Exam {res['exam']}:")
-    #     log(f"  Parameters: {res['used_parameters']} = {res['parameter_values']}")
-    #     log(f"  Luck: {res['luck_score']} points")
-    #     log(f"  Total fraction: {res['total_fraction']:.3f}")
-    #     log(f"  Score (0-10): {res['score_0_to_10']}")
-    #     log(f"  Result: {'PASSED' if res['passed'] else 'FAILED'}\n")
-    #
-    # return results
-    return
+    results["total"] = round(sum(results["marks"]) / 3, 2)
+    if results["total"] >= 4:
+        results["passed"] = True
+    return results
 
 
 def exam_scenario():
@@ -102,17 +81,17 @@ def exam_scenario():
     def start_exam(gs):
         ui.display_at(gs, "Экзамен начинается...")
 
-    def finish_exam(gs):
-        ui.display(f"Ваша оценка за экзамен: {exam(gs)["exam_score"]}")
+        ui.display(
+            f"Ваш результат\nOценки за каждую часть: {', '.join(map(str, exam(gs)["marks"]))}\nИтоговая оценка: {exam(gs)["total"]}"
+        )
 
-    def check_passed(gs):
         if exam(gs)["passed"]:
             ui.display(
                 "Ура, у вас получилось сдать экзамен! Вы успешно прожили первую неделю на ФиКЛе!"
             )
         else:
             ui.display(
-                "К сожалению, вам не удалось сдать экзамен... Наверное, учёба на ФиКЛе вам не подходит :("
+                "К сожалению, вам не удалось сдать экзамен... Наверное, учёба на ФиКЛе вам не подходит."
             )
         gs_api.stop(gs)
 
@@ -120,8 +99,6 @@ def exam_scenario():
         [
             scenarios_api.base_transition(0, 1, reminder_trigger, reminder),
             scenarios_api.base_transition(1, 2, check_exam, start_exam),
-            scenarios_api.base_transition(2, 3, True, finish_exam),
-            scenarios_api.base_transition(4, 5, True, check_passed),
         ]
     )
 
