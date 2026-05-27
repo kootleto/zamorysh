@@ -60,7 +60,10 @@ def go_out_of_classroom(state=None):
         floors.set(gs, floors.CLASSROOM, 0)
 
     def can_continue(gs):
-        return floors.get(gs, floors.CLASSROOM) != 0 and location.get_place(gs) == Place.UNIVERSITY
+        return (
+            floors.get(gs, floors.CLASSROOM) != 0
+            and location.get_place(gs) == Place.UNIVERSITY
+        )
 
     return single_tick_activity(
         base_activity(tick_effect, can_continue, name="выйти из аудитории"), state
