@@ -28,8 +28,11 @@ def earlybird_scenario(state=None):
         return (
             location.get_place(gs) == Place.SURF_COFFEE
             and time.get_hour(gs) == 7
-            and time.get_minute(gs) == 0
+            and time.get_minute(gs) == 1
         )
+
+    # def tr_1(gs):
+    # return time.get_minute(gs) != 1
 
     def eff(gs):
         if random.choice([True, False]):
