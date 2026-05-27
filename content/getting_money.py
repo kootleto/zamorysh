@@ -12,7 +12,9 @@ def money_getting():
         stats.mod(gs, stats.MONEY, +8)
 
     return scenarios_api.base_scenario(
-        [scenarios_api.base_transition(0, 0, check, great_day)]
+        [
+            scenarios_api.base_transition(0, 0, check, great_day),
+        ]
     )
 
 
