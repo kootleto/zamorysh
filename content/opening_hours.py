@@ -3,7 +3,7 @@ from gameplay.api import time, location
 from gameplay.api.location import Place, X, Y
 from interface import ui
 
-working_hours = {
+WORKING_HOURS = {
     Place.SURF_COFFEE: (7, 22),
     Place.ANOTHER_COFFEE: (8, 22),
     Place.CLUB: (22, 4),
@@ -11,18 +11,24 @@ working_hours = {
 }
 
 
-def lock_unlock(place, hours):
+def is_open(gs, place):
+    hours = WORKING_HOURS[place]
+
+    if hours[0] < hours[1]:
+        return hours[0] <= time.get_hour(gs) < hours[1]
+    else:
+        return hours[0] <= time.get_hour(gs) < 24 or time.get_hour(gs) < hours[1]
+
+
+def lock_unlock(place):
     def tr_unlock(gs):
-        if hours[0] < hours[1]:
-            return hours[0] <= time.get_hour(gs) < hours[1]
-        else:
-            return hours[0] <= time.get_hour(gs) < 24 or time.get_hour(gs) < hours[1]
+        return is_open(gs, place)
 
     def eff_unlock(gs):
         location.unlock(gs, place, "schedule")
 
     def tr_lock(gs):
-        return not tr_unlock(gs)
+        return not is_open(gs, place)
 
     def eff_lock(gs):
         location.lock(gs, place, "schedule")
@@ -36,19 +42,19 @@ def lock_unlock(place, hours):
 
 
 def locked_surf_coffee():
-    return lock_unlock(Place.SURF_COFFEE, working_hours[Place.SURF_COFFEE])
+    return lock_unlock(Place.SURF_COFFEE)
 
 
 def locked_another_coffee():
-    return lock_unlock(Place.ANOTHER_COFFEE, working_hours[Place.ANOTHER_COFFEE])
+    return lock_unlock(Place.ANOTHER_COFFEE)
 
 
 def locked_club():
-    return lock_unlock(Place.CLUB, working_hours[Place.CLUB])
+    return lock_unlock(Place.CLUB)
 
 
 def locked_university():
-    return lock_unlock(Place.UNIVERSITY, working_hours[Place.UNIVERSITY])
+    return lock_unlock(Place.UNIVERSITY)
 
 
 def display_locked(place, message):
