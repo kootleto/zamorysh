@@ -1,6 +1,7 @@
 from engine import activities_api, data_api
 from gameplay.api import location, floors
 from gameplay.api.location import Place
+from interface import ui
 
 DIRECTIONS = {"север": (0, 1), "юг": (0, -1), "восток": (1, 0), "запад": (-1, 0)}
 
@@ -13,6 +14,7 @@ def move(params):
     def tick_effect(gs):
         location.mod(gs, location.X, DIRECTIONS[direction][0])
         location.mod(gs, location.Y, DIRECTIONS[direction][1])
+        ui.display_at(gs, f"Вы пошли на {direction}.")
 
     def can_continue(gs):
         return (
