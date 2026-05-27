@@ -1,3 +1,4 @@
+from content import opening_hours
 from engine import activities_api
 from gameplay.activity_wrappers import single_tick_activity
 from gameplay.api import location, time
@@ -22,12 +23,12 @@ ANOTHER_MENU = {
 ANOTHER_LUCKY = {"Сырный латте с базиликом": 20}
 
 CLUB_MENU = {
-    "Коктейль <<Нулевая аффиксация>>": 25,
-    "Коктейль <<Singularia Tantum>>": 21,
+    "Коктейль «Нулевая аффиксация»": 25,
+    "Коктейль «Singularia Tantum»": 21,
     "Виски": 20,
 }
 
-CLUB_LUCKY = {"Коктейль <<Универсальная дробилка>>": 30}
+CLUB_LUCKY = {"Коктейль «Универсальная дробилка»": 30}
 
 
 def _render_menu_item(product, price):
@@ -40,6 +41,10 @@ def _get_menu(menu, special, show_special=False):
     if show_special:
         menu.extend(special)
     return menu
+
+
+def _location_available(gs, place):
+    return opening_hours.is_open(gs, place) and location.get_place(gs) == place
 
 
 def read_menu_surf(state=None):
@@ -55,9 +60,7 @@ def read_menu_surf(state=None):
         ui.display(*menu_lines, sep="\n")
 
     def can_continue(gs):
-        return (
-            6 < time.get_hour(gs) < 23 and location.get_place(gs) == Place.SURF_COFFEE
-        )
+        return _location_available(gs, Place.SURF_COFFEE)
 
     return single_tick_activity(
         activities_api.base_activity(
@@ -85,7 +88,7 @@ def buy_drink_surf(hold_required=False, state=None):
             vitals.mod(gs, vitals.MENTAL, +15)
             stats.mod(gs, stats.MONEY, -9)
             ui.display(
-                "Вы купили латте. Сахар в нем делает вас довольнее, но вам все еще хочется спать!"
+                "Вы купили латте. Сахар в нём делает вас довольнее, но вам всё ещё хочется спать!"
             )
         elif index == 1 and stats.get(gs, stats.MONEY) > 7:
             stats.mod(gs, stats.MONEY, -8)
@@ -106,11 +109,11 @@ def buy_drink_surf(hold_required=False, state=None):
                 "Ваша любимая позиция в сезонном меню... Кажется, что спасает от всего!"
             )
         else:
-            ui.display("Кажется, вы слишком бедны для вашего выбора... Подумайте еще.")
+            ui.display("Кажется, вы слишком бедны для вашего выбора... Подумайте ещё.")
 
     def can_continue(gs):
-        return stats.get(gs, stats.MONEY) > 8 and (
-            (location.get_place(gs) == Place.SURF_COFFEE) and 6 < time.get_hour(gs) < 23
+        return stats.get(gs, stats.MONEY) > 8 and _location_available(
+            gs, Place.SURF_COFFEE
         )
 
     return single_tick_activity(
@@ -137,10 +140,7 @@ def read_menu_another(state=None):
         ui.display(*menu_lines, sep="\n")
 
     def can_continue(gs):
-        return (
-            6 < time.get_hour(gs) < 23
-            and location.get_place(gs) == Place.ANOTHER_COFFEE
-        )
+        return _location_available(gs, Place.ANOTHER_COFFEE)
 
     return single_tick_activity(
         activities_api.base_activity(
@@ -169,7 +169,7 @@ def buy_drink_another(hold_required=False, state=None):
             vitals.mod(gs, vitals.MENTAL, +15)
             stats.mod(gs, stats.MONEY, -9)
             ui.display(
-                "Вы купили латте. Сахар в нем делает вас довольнее, но вам все еще хочется спать!"
+                "Вы купили латте. Сахар в нём делает вас довольнее, но вам всё ещё хочется спать!"
             )
         elif index == 1 and stats.get(gs, stats.MONEY) > 8:
             stats.mod(gs, stats.MONEY, -8)
@@ -190,12 +190,11 @@ def buy_drink_another(hold_required=False, state=None):
                 "Ваша любимая позиция в сезонном меню... Кажется, что спасает от всего!"
             )
         else:
-            ui.display("Похоже, вам не хватает. Выберите что-то еще?")
+            ui.display("Похоже, вам не хватает. Выберите что-то ещё?")
 
     def can_continue(gs):
-        return stats.get(gs, stats.MONEY) > 8 and (
-            (location.get_place(gs) == Place.ANOTHER_COFFEE)
-            and 6 < time.get_hour(gs) < 23
+        return stats.get(gs, stats.MONEY) > 8 and _location_available(
+            gs, Place.ANOTHER_COFFEE
         )
 
     return single_tick_activity(
@@ -212,7 +211,7 @@ def buy_drink_another(hold_required=False, state=None):
 def read_menu_club(state=None):
     def tick_effect(gs):
         menu_lines = [
-            "Добро пожаловать в Другую кофейню!",
+            "Добро пожаловать в клуб «Nightlife»!",
             "На данный момент в меню доступны следующие позиции:",
         ]
         menu_lines.extend(
@@ -222,9 +221,7 @@ def read_menu_club(state=None):
         ui.display(*menu_lines, sep="\n")
 
     def can_continue(gs):
-        return (
-            21 < time.get_hour(gs) <= 23 or 0 <= time.get_hour(gs) <= 5
-        ) and location.get_place(gs) == Place.CLUB
+        return _location_available(gs, Place.CLUB)
 
     return single_tick_activity(
         activities_api.base_activity(
@@ -277,9 +274,7 @@ def buy_drink_club(hold_required=False, state=None):
             ui.display("Вам это не по карману.")
 
     def can_continue(gs):
-        return stats.get(gs, stats.MONEY) > 8 and (
-            (location.get_place(gs) == Place.CLUB) and 6 < time.get_hour(gs) < 23
-        )
+        return stats.get(gs, stats.MONEY) > 8 and _location_available(gs, Place.CLUB)
 
     return single_tick_activity(
         activities_api.base_activity(

@@ -1,6 +1,7 @@
 from random import choice
 
-from content import studying, wait, minigames
+from content import wait
+from content.study import studying, minigames
 from engine import activities_api, scenarios_api
 from gameplay.api import schedule, vitals, floors, stats
 from interface import ui

@@ -25,6 +25,17 @@ class Place(StrEnum):
     OUTSIDE = "outside"
 
 
+PLACES_FORMS = {
+    Place.HOME: {"out": "дома", "in": "дом"},
+    Place.PARK: {"out": "парка", "in": "парк"},
+    Place.UNIVERSITY: {"out": "университета", "in": "университет"},
+    Place.CLUB: {"out": "клуба «Nightlife»", "in": "клуб «Nightlife»"},
+    Place.SURF_COFFEE: {"out": "Surf coffee", "in": "Surf coffee"},
+    Place.ANOTHER_COFFEE: {"out": "Другой кофейни", "in": "Другую кофейню"},
+    Place.METRO: {"out": "метро", "in": "метро"},
+}
+
+
 _INITIAL = {
     X: 0,
     Y: 0,
@@ -56,13 +67,13 @@ def mod(gs, coordinate, delta):
 def get_directions(gs):
     directions = []
     if get(gs, X) < EAST_BORDER:
-        directions.append("east")
+        directions.append("восток")
     if get(gs, X) > WEST_BORDER:
-        directions.append("west")
+        directions.append("запад")
     if get(gs, Y) < NORTH_BORDER:
-        directions.append("north")
+        directions.append("север")
     if get(gs, Y) > SOUTH_BORDER:
-        directions.append("south")
+        directions.append("юг")
     return directions
 
 
