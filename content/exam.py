@@ -2,7 +2,7 @@ import datetime
 import random
 
 from engine import scenarios_api, gs_api
-from gameplay.api import stats, vitals, time
+from gameplay.api import stats, vitals, time, floors
 from interface import ui
 
 
@@ -82,10 +82,27 @@ def exam(gs):
 
 
 def exam_scenario():
+    def reminder_trigger(gs):
+        return time.get_day(gs) == 7 and time.get_time(gs) == datetime.time(19, 00)
+
+    def reminder(gs):
+        ui.display_at(
+            gs,
+            "Вам на почту пришло письмо об экзамене: он пройдёт 8 сентября в аудитории 501 в 17:00. "
+            "По результатам экзамена вы поймёте, насколько успешно вы прожили эту неделю.",
+        )
+
     def check_exam(gs):
-        return time.get_day(gs) == 8 and time.get_time(gs) == datetime.time(17, 00)
+        return (
+            time.get_day(gs) == 8
+            and time.get_time(gs) == datetime.time(17, 00)
+            and floors.get(gs, floors.CLASSROOM) == 501
+        )
 
     def start_exam(gs):
+        ui.display_at(gs, "Экзамен начинается...")
+
+    def finish_exam(gs):
         ui.display(f"Ваша оценка за экзамен: {exam(gs)["exam_score"]}")
 
     def check_passed(gs):
@@ -101,7 +118,12 @@ def exam_scenario():
 
     return scenarios_api.base_scenario(
         [
-            scenarios_api.base_transition(0, 1, check_exam, start_exam),
-            scenarios_api.base_transition(1, 2, True, check_passed),
+            scenarios_api.base_transition(0, 1, reminder_trigger, reminder),
+            scenarios_api.base_transition(1, 2, check_exam, start_exam),
+            scenarios_api.base_transition(2, 3, True, finish_exam),
+            scenarios_api.base_transition(4, 5, True, check_passed),
         ]
     )
+
+
+SCENARIOS = [exam_scenario]

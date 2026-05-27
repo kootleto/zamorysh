@@ -29,6 +29,7 @@ def breakdown_scenario(state=None):
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, tr1, eff1),
+            scenarios_api.base_transition(1, 0, lambda gs: not tr1(gs), None),
             scenarios_api.base_transition(1, 2, tr2, eff2),
         ]
     )
@@ -54,6 +55,7 @@ def verytired_scenario(state=None):
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, tr1, eff1),
+            scenarios_api.base_transition(1, 0, lambda gs: not tr1(gs), None),
             scenarios_api.base_transition(1, 2, tr2, eff2),
         ]
     )
@@ -138,4 +140,5 @@ SCENARIOS = [
     breakdown_scenario,
     verytired_scenario,
     sociable_scenario,
+    clever_scenario,
 ]
