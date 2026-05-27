@@ -13,7 +13,7 @@ def breakdown_scenario():
         )
 
     def tr_normal(gs):
-        return vitals.get(gs, vitals.MENTAL) == 25
+        return vitals.get(gs, vitals.MENTAL) >= 25
 
     def tr2(gs):
         return vitals.get(gs, vitals.MENTAL) == 0
@@ -41,7 +41,7 @@ def verytired_scenario():
         ui.display("-- Вы чувствуете очень сильную усталость... --")
 
     def tr_normal(gs):
-        return vitals.get(gs, vitals.FATIGUE) == 75
+        return vitals.get(gs, vitals.FATIGUE) <= 75
 
     def tr2(gs):
         return vitals.get(gs, vitals.FATIGUE) == 100
@@ -78,7 +78,7 @@ def rich_scenario():
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, check_rich, congratulations),
-            scenarios_api.base_transition(1, 2, lambda gs: not check_rich(gs), None),
+            scenarios_api.base_transition(1, 0, lambda gs: not check_rich(gs), None),
             scenarios_api.base_transition(1, 2, check_ultra_rich, game_over),
         ]
     )
@@ -117,22 +117,6 @@ def clever_scenario():
             scenarios_api.base_transition(0, 1, check_clever, game_over),
         ]
     )
-
-
-# def win_scenario():
-#
-#     def check_time(gs):
-#         return time.get_day(gs) >= 8
-#
-#     def successfully_survived(gs):
-#         ui.display(
-#             "-- Хорошая концовка: вы героически пережили неделю! Удачи пережить ещё много недель... -- "
-#         )
-#         gs_api.stop(gs)
-#
-#     return scenarios_api.base_scenario(
-#         [scenarios_api.base_transition(0, 1, check_time, successfully_survived)]
-#     )
 
 
 SCENARIOS = [
