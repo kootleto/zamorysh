@@ -36,19 +36,25 @@ class GameApp(App):
     track_title = StringProperty(None)
     scene_name = StringProperty(None)
     sprite_name = StringProperty(None)
-
     volume = NumericProperty(100)
-
+    fullscreen = BooleanProperty(False)
+    muted = BooleanProperty(False)
     key_enter_pressed = BooleanProperty(False)
 
     def __init__(self, gs: GameState, vs: KivyState, get_options_func, **kwargs):
         super().__init__(**kwargs)
         self.gs = gs
-        self.vs = vs
         self.get_options_func = get_options_func
         self.activity_options = []
         self.ready = asyncio.Future()
         self.current_track = None
+
+        self.track_title = vs["track_title"]
+        self.scene_name = vs["scene_name"]
+        self.sprite_name = vs["sprite_name"]
+        self.volume = vs["volume"]
+        self.fullscreen = vs["fullscreen"]
+        self.muted = vs["muted"]
 
     def build(self):
         return Builder.load_file("interface/gui/style.kv")
@@ -97,7 +103,7 @@ class GameApp(App):
         self.current_track = SoundLoader.load(path)
         if self.current_track:
             self.current_track.loop = True
-            self.current_track.volume = self.volume / 100
+            self.current_track.volume = 0 if self.muted else self.volume / 100
             self.current_track.play()
 
     def on_scene_name(self, _, value):
@@ -109,8 +115,24 @@ class GameApp(App):
         self.root.ids.scene.sprite = path
 
     def on_volume(self, _, value):
-        if self.current_track:
+        if self.current_track and not self.muted:
             self.current_track.volume = value / 100
+
+    @staticmethod
+    def on_fullscreen(_, value):
+        print(value)
+        Window.fullscreen = "auto" if value else False
+
+    def on_muted(self, _, value):
+        volume_to = 0 if value else self.volume / 100
+        if self.current_track:
+            self.current_track.volume = volume_to
+
+    def toggle_fullscreen(self):
+        self.fullscreen = not self.fullscreen
+
+    def toggle_mute(self):
+        self.muted = not self.muted
 
     def _on_key_down(self, _window, key, *_args):
         if key == 13:

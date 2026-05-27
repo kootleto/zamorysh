@@ -22,11 +22,21 @@ app = AppProxy()
 
 class KivyState(TypedDict):
     track_title: str | None
+    scene_name: str | None
+    sprite_name: str | None
     volume: int
     fullscreen: bool
+    muted: bool
 
 
-INITIAL_UI_STATE: KivyState = {"track_title": None, "volume": 100, "fullscreen": False}
+INITIAL_UI_STATE: KivyState = {
+    "track_title": None,
+    "scene_name": None,
+    "sprite_name": None,
+    "volume": 100,
+    "fullscreen": True,
+    "muted": True,
+}
 
 
 def init_ui() -> KivyState:

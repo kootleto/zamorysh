@@ -5,7 +5,6 @@ from .smart import (
     ColoredWidget,
     MenuItem,
     Menu,
-    CommandInput,
     SceneView,
     VolumeSlider,
     StatLabel,
