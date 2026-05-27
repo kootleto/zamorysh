@@ -72,10 +72,7 @@ def wrong_room():
         return (
             location.get_place(gs) == location.Place.UNIVERSITY
             and schedule.get_current_room(gs) != floors.get(gs, floors.CLASSROOM)
-            and floors.get(gs, floors.CLASSROOM) != 0
-            and floors.get(gs, floors.CLASSROOM) != 107
-            and floors.get(gs, floors.CLASSROOM) != 405
-            and floors.get(gs, floors.CLASSROOM) != 1
+            and floors.get(gs, floors.CLASSROOM) not in [0, 107, 405, 1]
         )
 
     def wrong():
@@ -98,12 +95,12 @@ def designers_room():
     def check_designers(gs):
         return floors.get(gs, floors.CLASSROOM) == 1
 
-    def desighers():
+    def designers():
         ui.display("Здесь обитают дизайнеры.")
 
     return scenarios_api.base_scenario(
         [
-            scenarios_api.base_transition(0, 1, check_designers, desighers),
+            scenarios_api.base_transition(0, 1, check_designers, designers),
             scenarios_api.base_transition(
                 1, 0, lambda gs: not check_designers(gs), None
             ),
