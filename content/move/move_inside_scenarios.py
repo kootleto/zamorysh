@@ -7,8 +7,8 @@ def floor_scenario(floor_number):
     def check(gs):
         return floors.get(gs, floors.FLOOR) == floor_number
 
-    def enter():
-        ui.display(f"{floor_number} этаж")
+    def enter(gs):
+        ui.display_at(gs, f"{floor_number} этаж")
 
     return scenarios_api.base_scenario(
         [
@@ -40,8 +40,8 @@ def fourth_floor():
     def check(gs):
         return floors.get(gs, floors.FLOOR) == 4
 
-    def enter():
-        ui.display("Fourth floor")
+    def enter(gs):
+        ui.display_at(gs, "Fourth floor")
 
     return scenarios_api.base_scenario(
         [

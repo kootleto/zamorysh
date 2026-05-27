@@ -7,7 +7,7 @@ from interface import ui
 
 
 @activities_api.on_finish(
-    lambda: "Кофе из термоса не такой вкусный, зато это недорого."
+    lambda gs: ui.display_at(gs, "Кофе из термоса не такой вкусный, зато это недорого.")
 )
 def drink_coffee(hold_required=False, earn_sleepiness=-1, state=None):
 
@@ -25,7 +25,7 @@ def drink_coffee(hold_required=False, earn_sleepiness=-1, state=None):
 
 
 @activities_api.on_finish(
-    lambda: ui.display("Вы чувствуете, что это заняло много ваших сил...")
+    lambda gs: ui.display_at(gs, "Вы чувствуете, что это заняло много ваших сил...")
 )
 def socialize(state=None, hold_required=True):
 
@@ -49,7 +49,7 @@ def socialize(state=None, hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda: ui.display("Эх, благодать!"))
+@activities_api.on_finish(lambda gs: ui.display_at(gs, "Эх, благодать!"))
 def walk(state=None, hold_required=True):
 
     def can_continue(gs):
@@ -71,7 +71,9 @@ def walk(state=None, hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda: ui.display("От музыки на душе всегда лучше!"))
+@activities_api.on_finish(
+    lambda gs: ui.display_at(gs, "От музыки на душе всегда лучше!")
+)
 def listen_to_music(state=None, hold_required=True):
     def tick_effect(gs):
         vitals.mod(gs, vitals.MENTAL, +2)
@@ -87,7 +89,9 @@ def listen_to_music(state=None, hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda: ui.display("Это было не очень продуктивно..."))
+@activities_api.on_finish(
+    lambda gs: ui.display_at(gs, "Это было не очень продуктивно...")
+)
 def scroll(state=None, hold_required=True):
 
     def tick_effect(gs):
@@ -108,7 +112,7 @@ def scroll(state=None, hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda: ui.display("Слезами горю не поможешь..."))
+@activities_api.on_finish(lambda gs: ui.display_at(gs, "Слезами горю не поможешь..."))
 def cry(state=None):
     state = data_api.init_defaults(state, counter=10)
 
@@ -124,7 +128,9 @@ def cry(state=None):
     )
 
 
-@activities_api.on_finish(lambda: ui.display("Хорошо, что вы заботитесь о себе!"))
+@activities_api.on_finish(
+    lambda gs: ui.display_at(gs, "Хорошо, что вы заботитесь о себе!")
+)
 def eat_lunch(hold_required=True):
 
     def tick_effect(gs):
@@ -146,7 +152,7 @@ def eat_lunch(hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda: ui.display("Приятно ни о чем не думать!"))
+@activities_api.on_finish(lambda gs: ui.display_at(gs, "Приятно ни о чем не думать!"))
 def dance(state=None, hold_required=True):
     def tick_effect(gs):
         vitals.mod(gs, vitals.FATIGUE, +2)
@@ -167,7 +173,7 @@ def dance(state=None, hold_required=True):
     )
 
 
-@activities_api.on_finish(lambda: ui.display("Ботать-ботать."))
+@activities_api.on_finish(lambda gs: ui.display_at(gs, "Ботать-ботать."))
 def study(state=None, hold_required=True):
 
     def tick_effect(gs):
