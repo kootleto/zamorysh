@@ -158,7 +158,6 @@ def check_button_pressed():
 
 
 async def on_finish():
-    display("--- GAME FINISHED ---")
     app.root.ids.button.text = "Игра окончена"
 
 

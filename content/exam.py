@@ -1,7 +1,9 @@
+import datetime
 import random
 
-from gameplay.api import stats, vitals
-from tools.logger import log
+from engine import scenarios_api, gs_api
+from gameplay.api import stats, vitals, time, floors
+from interface import ui
 
 
 def exam(gs):
@@ -28,7 +30,7 @@ def exam(gs):
     parameter_weights = [0.3, 0.3, 0.3]
     luck_weight = 0.1
 
-    results = []
+    results = {"marks": [], "total": 0, "passed": False}
 
     for i, triplet in enumerate(exam_triplets, 1):
         values = [all_parameters[p] for p in triplet]
@@ -50,28 +52,55 @@ def exam(gs):
             total += w * norm_val
         total += luck_weight * luck_normalized
 
-        exam_score = total * 10
-        passed = exam_score >= 4
+        results["marks"].append(round(total * 10, 2))
 
-        results.append(
-            {
-                "exam": i,
-                "used_parameters": triplet,
-                "parameter_values": values,
-                "luck_score": luck_score,
-                "total_fraction": total,
-                "score_0_to_10": round(exam_score, 2),
-                "passed": passed,
-            }
+    results["total"] = round(sum(results["marks"]) / 3, 2)
+    if results["total"] >= 4:
+        results["passed"] = True
+    return results
+
+
+def exam_scenario():
+    def reminder_trigger(gs):
+        return time.get_day(gs) == 7 and time.get_time(gs) == datetime.time(19, 00)
+
+    def reminder(gs):
+        ui.display_at(
+            gs,
+            "Вам на почту пришло письмо об экзамене: он пройдёт 8 сентября в аудитории 501 в 17:00. "
+            "По результатам экзамена вы поймёте, насколько успешно вы прожили эту неделю.",
         )
 
-    log("=== EXAM RESULTS ===\n")
-    for res in results:
-        log(f"Exam {res['exam']}:")
-        log(f"  Parameters: {res['used_parameters']} = {res['parameter_values']}")
-        log(f"  Luck: {res['luck_score']} points")
-        log(f"  Total fraction: {res['total_fraction']:.3f}")
-        log(f"  Score (0-10): {res['score_0_to_10']}")
-        log(f"  Result: {'PASSED' if res['passed'] else 'FAILED'}\n")
+    def check_exam(gs):
+        return (
+            time.get_day(gs) == 8
+            and time.get_time(gs) == datetime.time(17, 00)
+            and floors.get(gs, floors.CLASSROOM) == 501
+        )
 
-    return results
+    def start_exam(gs):
+        ui.display_at(gs, "Экзамен начинается...")
+
+        ui.display(
+            f"Ваш результат\nOценки за каждую часть: {', '.join(map(str, exam(gs)["marks"]))}\nИтоговая оценка: {exam(gs)["total"]}"
+        )
+
+        if exam(gs)["passed"]:
+            ui.display(
+                "Ура, у вас получилось сдать экзамен! Вы успешно прожили первую неделю на ФиКЛе!"
+            )
+        else:
+            ui.display(
+                "К сожалению, вам не удалось сдать экзамен... Наверное, учёба на ФиКЛе вам не подходит."
+            )
+        gs_api.stop(gs)
+
+    return scenarios_api.base_scenario(
+        [
+            scenarios_api.base_transition(0, 1, reminder_trigger, reminder),
+            scenarios_api.base_transition(1, 2, check_exam, start_exam),
+        ]
+    )
+
+
+SCENARIOS = [exam_scenario]
