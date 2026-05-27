@@ -24,7 +24,7 @@ def move(params):
             <= location.NORTH_BORDER
             and not (
                 location.get_place(gs) == Place.UNIVERSITY
-                and floors.get(gs, floors.FLOOR) != 1
+                and floors.get(gs, floors.FLOOR) != 1 and floors.get(gs, floors.CLASSROOM) == 0
             )
         )
 

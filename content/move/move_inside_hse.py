@@ -42,6 +42,7 @@ def go_to_classroom(state=None):
         classrooms = floors.CLASSROOMS[floors.get(gs, floors.FLOOR)]
         classroom = await ui.ask_option(classrooms, "Выберите аудиторию")
         floors.set(gs, floors.CLASSROOM, classroom)
+        ui.display_at(gs, f"Вы вошли в аудиторию {classroom}.")
 
     def can_continue(gs):
         return (
@@ -59,7 +60,7 @@ def go_out_of_classroom(state=None):
         floors.set(gs, floors.CLASSROOM, 0)
 
     def can_continue(gs):
-        return floors.get(gs, floors.CLASSROOM) != 0
+        return floors.get(gs, floors.CLASSROOM) != 0 and location.get_place(gs) == Place.UNIVERSITY
 
     return single_tick_activity(
         base_activity(tick_effect, can_continue, name="выйти из аудитории"), state
