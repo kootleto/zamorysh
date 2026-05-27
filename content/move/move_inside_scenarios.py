@@ -71,13 +71,14 @@ def wrong_room():
     def check_wrong(gs):
         return (
             location.get_place(gs) == location.Place.UNIVERSITY
+            and schedule.get_current_room(gs) is not None
             and schedule.get_current_room(gs) != floors.get(gs, floors.CLASSROOM)
             and floors.get(gs, floors.CLASSROOM) not in [0, 107, 405, 1]
         )
 
     def wrong():
         ui.display(
-            f"У вас сейчас нет пары в этой аудитории. Здесь {random.choice(["свободно", "семинар по филологии", "конференция", "пара по китайскому"])}."
+            f"У вас сейчас пара не в этой аудитории. Здесь {random.choice(["свободно", "семинар по филологии", "конференция", "пара по китайскому"])}."
         )
 
     def check_restart(gs):

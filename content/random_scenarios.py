@@ -50,7 +50,7 @@ def random_scenario(state=None):
 
     def eff(gs):
         vitals.mod(gs, vitals.FATIGUE, +5)
-        ui.display_at(gs, "Вы РАНДОМНО устали")
+        ui.display_at(gs, "Вы РАНДОМНО устали.")
 
     return scenarios_api.base_scenario(
         [
