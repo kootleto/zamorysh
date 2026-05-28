@@ -8,7 +8,6 @@ ENDING_CONDITIONS = [
     other_endings.rich_ending_trigger,
     other_endings.social_ending_trigger,
     other_endings.clever_ending_trigger,
-    other_endings.win_ending_trigger,
 ]
 
 
