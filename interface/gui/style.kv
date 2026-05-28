@@ -213,15 +213,11 @@ MainScreen:
             spacing: root.space_1
             BoxLayout:
                 spacing: root.space_1
+                id: system_buttons_box
                 ImageButton:
                     id: fullscreen_button
                     on_release: app.toggle_fullscreen()
                     icon_source: "assets/images/ui/windowed.png" if app.fullscreen else "assets/images/ui/fullscreen.png"
-
-                    size_hint_x: None if platform == 'android' else 1
-                    width: 0 if platform == 'android' else self.width
-                    opacity: 0 if platform == 'android' else  1
-                    disabled: True if platform == 'android' else False
                 ImageButton
                     id: save_button
                     on_release: app.save_game()
@@ -229,7 +225,7 @@ MainScreen:
                     icon_source: "assets/images/ui/save.png"
                 ImageButton
                     id: exit_button
-                    on_release: app.on_exit_pressed()
+                    on_release: app.exit_game()
                     disabled: not app.system_buttons_active
                     icon_source: "assets/images/ui/exit.png"
                 ImageButton

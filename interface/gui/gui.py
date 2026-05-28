@@ -171,7 +171,9 @@ def check_button_pressed():
 
 
 async def on_finish():
-    response = await ask_option(["Выйти", "Начать новую игру"], "Игра окончена.", cols=2)
+    response = await ask_option(
+        ["Выйти", "Начать новую игру"], "Игра окончена.", cols=2
+    )
     if response == "Выйти":
         app.session_result.set_result("exit")
     else:
