@@ -18,6 +18,7 @@ COLORS = {
 LOG_TYPE_COLORS = {
     "ui": "red",
     "loader": "black",
+    "storage": "black",
     "config": "magenta",
     "intent": "yellow",
     "resolver": "green",

@@ -12,17 +12,29 @@ async def run(
     gs: GameState,
     definitions: Definitions,
     refresh_ui: bool,
+    save_path,
+    autosave_interval: int,
     use_sleep: bool = True,
+    start_game: bool = True,
 ):
-    await controller.start_game(gs, definitions)
+    if start_game:
+        await controller.start_game(gs, definitions)
 
     next_tick_at = time.perf_counter() + controller.get_tick_interval(gs)
 
+    ticks_before_autosave = autosave_interval
     while controller.is_running(gs):
+        ticks_before_autosave -= 1
+
         if refresh_ui:
             ui.refresh_ui(gs, controller.get_activity_options(gs, definitions))
         # Если не запущена ни одна не-фоновая, игрок должен выбрать активность
         if controller.prompt_required(gs, definitions):
+            if ticks_before_autosave <= 0:
+                controller.save_game(gs, save_path)
+                ui.display_save_notification()
+                ticks_before_autosave = autosave_interval
+
             options = controller.get_activity_options(gs, definitions)
             index = await ui.prompt_activity(options)
             controller.start_selected_activity(gs, definitions, index)

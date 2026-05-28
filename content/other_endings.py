@@ -1,5 +1,5 @@
 from engine import gs_api, scenarios_api
-from gameplay.api import vitals, stats
+from gameplay.api import vitals, stats, time
 from interface import ui
 
 
@@ -119,10 +119,27 @@ def clever_scenario():
     )
 
 
+def win_scenario():
+
+    def check_time(gs):
+        return time.get_day(gs) >= 8
+
+    def successfully_survived(gs):
+        ui.display(
+            "-- Хорошая концовка: Вы героически пережили неделю! Удачи пережить еще много недель... -- "
+        )
+        gs_api.stop(gs)
+
+    return scenarios_api.base_scenario(
+        [scenarios_api.base_transition(0, 1, check_time, successfully_survived)]
+    )
+
+
 SCENARIOS = [
     rich_scenario,
     breakdown_scenario,
     verytired_scenario,
     sociable_scenario,
     clever_scenario,
+    win_scenario,
 ]

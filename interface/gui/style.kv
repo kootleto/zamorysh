@@ -173,6 +173,7 @@
             bg_color: accent_color
             text: str(root.value)
             font_size: root.font_size_value
+            font_name: "UMTypewriter_bold"
         StyledLabel:
             size_hint_x: 0.8
             halign: "center"
@@ -180,9 +181,10 @@
             bg_color: bright_color
             text: root.name
             font_size: root.font_size_name
+            font_name: "UMTypewriter_bold"
 
 <ImageButton>:
-    padding: self.height / 5
+    padding: self.height / 6
     normal_color: bright_color
     pressed_color: accent_color
     bg_color: self.pressed_color if self.state == 'down' else self.normal_color
@@ -222,7 +224,14 @@ MainScreen:
                     disabled: True if platform == 'android' else False
                 ImageButton
                     id: save_button
+                    on_release: app.save_game()
+                    disabled: not app.system_buttons_active
                     icon_source: "assets/images/ui/save.png"
+                ImageButton
+                    id: exit_button
+                    on_release: app.on_exit_pressed()
+                    disabled: not app.system_buttons_active
+                    icon_source: "assets/images/ui/exit.png"
                 ImageButton
                     id: achievements_button
                     icon_source: "assets/images/ui/achievements.png"
@@ -283,6 +292,7 @@ MainScreen:
         GameButton:
             id: button
             font_size: root.text_md
+            font_name: "UMTypewriter_bold"
     BoxLayout:
         orientation: "vertical"
         size_hint_x: 0.2
@@ -298,6 +308,7 @@ MainScreen:
                 id: date_label
                 halign: 'center'
                 text_size: (self.width, None)
+                font_name: "UMTypewriter_bold"
                 font_size: root.text_md
                 size_hint_y: None
                 height: self.texture_size[1]
@@ -306,6 +317,7 @@ MainScreen:
                 id: time_label
                 halign: 'center'
                 text_size: (self.width, None)
+                font_name: "UMTypewriter_bold"
                 font_size: root.text_md
                 size_hint_y: None
                 height: self.texture_size[1]

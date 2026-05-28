@@ -9,7 +9,7 @@ from gameplay.api import vitals, stats, time, formatters
 from tools.logger import log
 
 
-def init_ui():
+def init_ui(_vs_path):
     return {}
 
 
@@ -90,7 +90,7 @@ async def prompt_activity(options: ActivityOptions) -> int:
         Индекс выбранной активности.
     """
 
-    display("Выберите активность")
+    display("Выберите действие")
     for i in range(len(options)):
         display(i, options[i]["label"])
 

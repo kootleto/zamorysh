@@ -6,6 +6,7 @@ from kivy.app import App
 
 from engine.schema import ActivityOptions, GameState
 from gameplay.api import vitals, stats, time, music, location, scene, formatters
+from tools import storage
 from tools.utils import ensure_callable
 
 
@@ -21,26 +22,23 @@ app = AppProxy()
 
 
 class KivyState(TypedDict):
-    track_title: str | None
-    scene_name: str | None
-    sprite_name: str | None
     volume: int
     fullscreen: bool
     muted: bool
+    log_history: list
 
 
 INITIAL_UI_STATE: KivyState = {
-    "track_title": None,
-    "scene_name": None,
-    "sprite_name": None,
     "volume": 100,
     "fullscreen": True,
     "muted": True,
+    "log_history": [],
 }
 
 
-def init_ui() -> KivyState:
-    return deepcopy(INITIAL_UI_STATE)
+def init_ui(vs_path) -> KivyState:
+    vs = storage.read_data(vs_path)
+    return vs if vs else deepcopy(INITIAL_UI_STATE)
 
 
 def display(*message, sep: str = " "):
@@ -118,6 +116,8 @@ async def ask_option(
 
 
 async def prompt_activity(options: ActivityOptions) -> int:
+    app.system_buttons_active = True
+
     def get_submit_message(idx):
         if options[idx]["hold_required"]:
             return "Нажмите и удерживайте"
@@ -134,6 +134,8 @@ async def prompt_activity(options: ActivityOptions) -> int:
             cols=2,
         )
     )
+
+    app.system_buttons_active = False
 
     return selected
 
@@ -169,7 +171,11 @@ def check_button_pressed():
 
 
 async def on_finish():
-    app.root.ids.button.text = "Игра окончена"
+    response = await ask_option(["Выйти", "Начать новую игру"], "Игра окончена.")
+    if response == "Выйти":
+        app.session_result.set_result("exit")
+    else:
+        app.session_result.set_result("restart")
 
 
 async def _wait_for_event(widget, event_name):

@@ -9,6 +9,7 @@ from engine.schema import (
     ActivityEntry,
 )
 from gameplay.api import resolvers, initial_state
+from tools import storage
 from tools.loader import load_definitions
 from tools.logger import log
 from . import activities_api, gs_core
@@ -25,10 +26,17 @@ def _scenario_definitions(definitions: Definitions) -> ScenarioDefinitions:
     return definitions["scenarios"]
 
 
-def init_game():
-    game_state = gs_core.init_gs(initial_state)
-    definitions = load_definitions("content")
-    return game_state, definitions
+def init_game(gs_path, content_dir):
+    game_state = storage.read_data(gs_path)
+    is_save = game_state is not None
+    if not is_save:
+        game_state = gs_core.init_gs(initial_state)
+    definitions = load_definitions(content_dir)
+    return game_state, definitions, is_save
+
+
+def save_game(gs, path):
+    storage.write_data(path, gs)
 
 
 async def start_game(gs: GameState, definitions: Definitions):
