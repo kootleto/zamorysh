@@ -1,15 +1,11 @@
 from engine import activities_api, data_api
 from gameplay.api import location, floors
 from gameplay.api.location import Place
-from interface import ui
 
 DIRECTIONS = {"север": (0, 1), "юг": (0, -1), "восток": (1, 0), "запад": (-1, 0)}
 
 
 @activities_api.with_params_space(direction=location.get_directions)
-@activities_api.on_finish(
-    lambda gs, entry: ui.display_at(gs, f"Вы пошли на {entry["params"]["direction"]}.")
-)
 def move(params):
 
     direction = data_api.get_params(params, "direction")
