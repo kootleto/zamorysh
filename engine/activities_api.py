@@ -133,6 +133,30 @@ def check_auto_start(definition: ActivityDefinition) -> bool:
     return getattr(definition, "auto_start", False)
 
 
+def with_tag(tag: str):
+    def decorator(definition: ActivityDefinition):
+        if not hasattr(definition, "tags"):
+            definition.tags = set()
+        definition.tags.add(tag)
+        return definition
+
+    return decorator
+
+
+def with_tags(*tags: str):
+    def decorator(definition: ActivityDefinition):
+        if not hasattr(definition, "tags"):
+            definition.tags = set()
+        definition.tags.update(tags)
+        return definition
+
+    return decorator
+
+
+def read_tags(definition: ActivityDefinition) -> list[str]:
+    return getattr(definition, "tags", [])
+
+
 def system_only(definition: ActivityDefinition):
     definition.system_only = True
     return definition
