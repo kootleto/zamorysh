@@ -1,6 +1,7 @@
 import asyncio
 import os.path
 
+from kivy import platform
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
@@ -81,6 +82,11 @@ class GameApp(App):
         Clock.schedule_interval(update, 1 / 60)
         Clock.schedule_once(lambda _: self.ready.set_result(True), 0)
 
+        if platform == "android":
+            box = self.root.ids.system_buttons_box
+            btn = self.root.ids.fullscreen_button
+            box.remove_widget(btn)
+
     def on_stats(self, _, value):
         self.root.ids.money_stat_label.value = round(value["money"], 1)
         self.root.ids.knowledge_stat_label.value = round(value["knowledge"], 1)
@@ -148,24 +154,11 @@ class GameApp(App):
         controller.save_game(self.gs, constants.GAME_STATE_PATH)
         ui.display_save_notification()
 
-    _exit_task = None
     session_result = None
 
-    def on_exit_pressed(self):
-        if self._exit_task and not self._exit_task.done():
-            return
-
-        self._exit_task = asyncio.create_task(self.exit_game())
-
-    async def exit_game(self):
-
-        answer = await ui.ask_option(
-            ["Да", "Нет"], "Вы уверены, что хотите выйти?", cols=2
-        )
-
-        if answer == "Да":
-            self.stop()
-            self.session_result.set_result("exit")
+    def exit_game(self):
+        self.stop()
+        self.session_result.set_result("exit")
 
     def _on_key_down(self, _window, key, *_args):
         if key == 13:
