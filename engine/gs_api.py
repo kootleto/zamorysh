@@ -1,9 +1,11 @@
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
+from engine import gs_core, activities_api
 from engine.schema import (
     GameState,
     Operation,
+    ActivityDefinitions,
 )
 from tools.logger import log
 
@@ -53,6 +55,15 @@ def multiply_next_tick_interval(gs: GameState, multiplier: int | float):
 
 def get_time(gs: GameState) -> int:
     return gs["system"]["time"]
+
+
+def get_active_tags(gs: GameState, definitions: ActivityDefinitions) -> list[str]:
+    entries = gs_core.get_activity_entries(gs)
+    tags = set()
+    for entry in entries:
+        definition_tags = activities_api.read_tags(definitions[entry["activity_name"]])
+        tags.update(definition_tags)
+    return list(tags)
 
 
 # При добавлении любого объекта в gs следует присваивать ему ID,
