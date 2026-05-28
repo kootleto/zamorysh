@@ -26,7 +26,6 @@ def get_current_scene(gs) -> str:
 
 
 def set_scene(gs, name: str):
-    print(name)
     gs_api.set_value(gs, _DOMAIN, SCENE_NAME, name)
 
 
