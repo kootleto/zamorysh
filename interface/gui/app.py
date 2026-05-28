@@ -93,10 +93,11 @@ class GameApp(App):
         self.root.ids.social_stat_label.value = round(value["social"], 1)
         self.root.ids.time_label.text = formatters.get_formatted_time(value["datetime"])
         self.root.ids.date_label.text = formatters.get_formatted_date(value["datetime"])
-        self.root.ids.map_label.text = (
-            f"Location: {value["location"]["place"]}\nX: {value["location"]["x"]}, "
-            f"Y: {value["location"]["y"]}"
-        )
+        # TODO: remove that...
+        # self.root.ids.map_label.text = (
+        #     f"Location: {value["location"]["place"]}\nX: {value["location"]["x"]}, "
+        #     f"Y: {value["location"]["y"]}"
+        # )
 
     @staticmethod
     def _resolve_assets_path(filename, folder):
