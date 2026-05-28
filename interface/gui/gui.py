@@ -29,9 +29,9 @@ class KivyState(TypedDict):
 
 
 INITIAL_UI_STATE: KivyState = {
-    "volume": 100,
+    "volume": 50,
     "fullscreen": True,
-    "muted": True,
+    "muted": False,
     "log_history": [],
 }
 
