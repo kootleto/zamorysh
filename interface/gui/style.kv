@@ -228,9 +228,9 @@ MainScreen:
                     on_release: app.exit_game()
                     disabled: not app.system_buttons_active
                     icon_source: "assets/images/ui/exit.png"
-                ImageButton
-                    id: achievements_button
-                    icon_source: "assets/images/ui/achievements.png"
+#                ImageButton
+#                    id: achievements_button
+#                    icon_source: "assets/images/ui/achievements.png"
             StyledBoxLayout:
                 orientation: "horizontal"
                 spacing: root.space_1
@@ -318,6 +318,25 @@ MainScreen:
                 size_hint_y: None
                 height: self.texture_size[1]
                 bg_color: (0, 0, 0, 0)
-        StyledLabel:
-            id: map_label
-
+        RelativeLayout:
+            size_hint_y: 1
+            StyledBoxLayout:
+                orientation: "vertical"
+                padding: root.space_1
+                spacing: root.space_1
+                size_hint_y: None
+                height: self.minimum_height
+                pos_hint: {'center_y': 0.5}
+                Image:
+                    source: "assets/images/ui/map.png"
+                    bg_color: accent_color
+                    size_hint_x: 1
+                    size_hint_y: 1
+                    fit_mode: "contain"
+                    size_hint_y: None
+                    height: (self.width / self.texture_size[0]) * self.texture_size[1] if self.texture_size else dp(100)
+                BoxLayout:
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: "horizontal"
+                    spacing: root.space_1
