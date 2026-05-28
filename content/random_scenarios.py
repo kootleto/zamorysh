@@ -12,6 +12,7 @@ def random_scenario_somewhere(events, hours, place, cooldown, state=None):
         return {
             "minutes": random.randint(0, 9),
             "cooldown": random.randint(0, cooldown - 1),
+            "hour": 0,
         }
 
     state = init_fn(state, init)
@@ -27,9 +28,13 @@ def random_scenario_somewhere(events, hours, place, cooldown, state=None):
         chs = random.choice(events)
         state.update(init())
         chs(gs)
+        state["hour"] = time.get_hour(gs)
 
     def tr1(gs):
-        return time.get_minute(gs) % cooldown != state["cooldown"]
+        return (
+            time.get_minute(gs) == state["minutes"] + 50
+            and time.get_hour(gs) == state["hour"] + 1
+        )
 
     return scenarios_api.base_scenario(
         [
@@ -112,7 +117,7 @@ def random_university_day_scenario(state=None):
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     events = [f1, f2, f3, f4, f5, f6, f7, f8]
     place = Place.UNIVERSITY
-    cooldown = 30
+    cooldown = 700
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
 
@@ -176,7 +181,7 @@ def random_home_day_scenario(state=None):
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     place = Place.HOME
-    cooldown = 25
+    cooldown = 700
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
 
@@ -245,7 +250,7 @@ def random_park_day_scenario(state=None):
 
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-    cooldown = 30
+    cooldown = 700
     place = Place.PARK
 
     return random_scenario_somewhere(events, hours, place, cooldown, state)
@@ -319,7 +324,7 @@ def random_park_night_scenario(state=None):
 
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     hours = [0, 1, 2, 3, 4, 5, 6, 22, 23]
-    cooldown = 20
+    cooldown = 70
     place = Place.PARK
 
     return random_scenario_somewhere(events, hours, place, cooldown, state)
@@ -387,7 +392,7 @@ def random_metro_day_scenario(state=None):
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     events = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
     place = Place.METRO
-    cooldown = 25
+    cooldown = 700
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
 
@@ -425,7 +430,7 @@ def random_surf_coffee_scenario(state=None):
     hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
     events = [f1, f2, f3, f4, f5]
     place = Place.SURF_COFFEE
-    cooldown = 40
+    cooldown = 700
     return random_scenario_somewhere(events, hours, place, cooldown, state)
 
 
