@@ -7,6 +7,7 @@ from engine.schema import GameState, ActivityOptions
 
 _ui_wait_time = 0.0
 
+
 if SETTINGS.gui:
     from .gui import gui
 
@@ -41,8 +42,8 @@ def pop_wait_time():
     return total
 
 
-def init_ui():
-    return interface.init_ui()
+def init_ui(vs_path):
+    return interface.init_ui(vs_path)
 
 
 def display(*message, sep: str = " "):
@@ -51,6 +52,14 @@ def display(*message, sep: str = " "):
 
 def display_at(gs, *message, sep: str = " "):
     interface.display_at(gs, *message, sep=sep)
+
+
+def display_load_notification():
+    display("Данные загружены.")
+
+
+def display_save_notification():
+    display("Игра сохранена.")
 
 
 @_record_wait_time

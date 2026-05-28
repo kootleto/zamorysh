@@ -120,6 +120,21 @@ class LogView(RecycleView, ColoredWidget):
         if self.ids.container.height + dp(50) > self.height:
             self.scroll_y = 0
 
+    def get_clean_data(self) -> list[dict]:
+        return [{"text": item["text"], "dt": item["dt"]} for item in self.data]
+
+    def load_clean_data(self, history: list[dict]):
+        if not history:
+            return
+
+        self.data = []
+        for item in history:
+            self.data.append(
+                {"text": item["text"], "dt": item["dt"], "size": (self.width, dp(40))}
+            )
+
+        Clock.schedule_once(lambda _: self.on_window_resize(), 0)
+
 
 class LogEntry(Label, ColoredWidget):
     p = ENTRY_PADDING_HORIZONTAL

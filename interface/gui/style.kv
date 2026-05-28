@@ -4,6 +4,7 @@
 #:set bright_color utils.get_color_from_hex('#e8e8e8')
 #:set accent_color utils.get_color_from_hex('#8e8e8e')
 #:set text_color utils.get_color_from_hex('#000000')
+#:import platform kivy.utils.platform
 
 # --- Fonts ---
 
@@ -45,7 +46,6 @@
     do_scroll_x: False
     spacing: dp(2)
     cols: 2
-    scroll_timeout: 50
     GridLayout:
         id: container
         cols: root.cols
@@ -118,18 +118,12 @@
 
 <GameButton>:
     size_hint_y: None
-    height: 50
+    height: dp(50)
     background_normal: ''
+    background_down: ''
     background_color: accent_color
     color: text_color
     text: "Action button"
-
-<CommandInput>:
-    size_hint_y: None
-    height: 50
-    hint_text: ""
-    disabled: True
-    multiline: False
 
 <VolumeSlider>:
     min: 0
@@ -137,8 +131,10 @@
     step: 1
     value: app.volume
     on_value: app.volume = self.value
-    cursor_image: 'assets/images/ui/volume_cursor_down.png'
-    cursor_size: (40, 40)
+    track_color: main_color
+    track_height: dp(10)
+    cursor_color: main_color
+    custom_cursor_size: dp(30)
 
 <SceneView>:
     bg: "assets/images/scenes/night_park.jpg"
@@ -177,6 +173,7 @@
             bg_color: accent_color
             text: str(root.value)
             font_size: root.font_size_value
+            font_name: "UMTypewriter_bold"
         StyledLabel:
             size_hint_x: 0.8
             halign: "center"
@@ -184,6 +181,18 @@
             bg_color: bright_color
             text: root.name
             font_size: root.font_size_name
+            font_name: "UMTypewriter_bold"
+
+<ImageButton>:
+    padding: self.height / 6
+    normal_color: bright_color
+    pressed_color: accent_color
+    bg_color: self.pressed_color if self.state == 'down' else self.normal_color
+
+    Image:
+        source: root.icon_source
+        fit_mode: "contain"
+        color: [0.8, 0.8, 0.8, 1] if root.state == 'down' else [1, 1, 1, 1]
 
 MainScreen:
     source: "assets/images/ui/app_bg.png"
@@ -197,9 +206,50 @@ MainScreen:
         size_hint_x: 0.3
         spacing: root.space_1
         StyledBoxLayout:
+            orientation: "vertical"
+            size_hint_y: 0.2
             bg_color: main_color
             padding: root.space_1
-            VolumeSlider
+            spacing: root.space_1
+            BoxLayout:
+                spacing: root.space_1
+                ImageButton:
+                    id: fullscreen_button
+                    on_release: app.toggle_fullscreen()
+                    icon_source: "assets/images/ui/windowed.png" if app.fullscreen else "assets/images/ui/fullscreen.png"
+
+                    size_hint_x: None if platform == 'android' else 1
+                    width: 0 if platform == 'android' else self.width
+                    opacity: 0 if platform == 'android' else  1
+                    disabled: True if platform == 'android' else False
+                ImageButton
+                    id: save_button
+                    on_release: app.save_game()
+                    disabled: not app.system_buttons_active
+                    icon_source: "assets/images/ui/save.png"
+                ImageButton
+                    id: exit_button
+                    on_release: app.on_exit_pressed()
+                    disabled: not app.system_buttons_active
+                    icon_source: "assets/images/ui/exit.png"
+                ImageButton
+                    id: achievements_button
+                    icon_source: "assets/images/ui/achievements.png"
+            StyledBoxLayout:
+                orientation: "horizontal"
+                spacing: root.space_1
+                ImageButton:
+                    size_hint_y: 1
+                    size_hint_x: None
+                    width: self.height
+                    icon_source: "assets/images/ui/mute.png" if app.muted else "assets/images/ui/volume.png"
+                    on_release: app.toggle_mute()
+                StyledBoxLayout:
+                    bg_color: bright_color
+                    padding: root.space_1
+                    VolumeSlider:
+                        track_height: self.height / 12
+                        custom_cursor_size: self.height / 2.5
         SceneView:
             id: scene
             size_hint_x: 1
@@ -207,7 +257,7 @@ MainScreen:
             height: self.width
             border: root.space_1
         StyledBoxLayout:
-            bg_color: main_color
+            size_hint_y: 0.3
             orientation: "vertical"
             spacing: root.space_1
             padding: root.space_1
@@ -242,6 +292,7 @@ MainScreen:
         GameButton:
             id: button
             font_size: root.text_md
+            font_name: "UMTypewriter_bold"
     BoxLayout:
         orientation: "vertical"
         size_hint_x: 0.2
@@ -257,6 +308,7 @@ MainScreen:
                 id: date_label
                 halign: 'center'
                 text_size: (self.width, None)
+                font_name: "UMTypewriter_bold"
                 font_size: root.text_md
                 size_hint_y: None
                 height: self.texture_size[1]
@@ -265,6 +317,7 @@ MainScreen:
                 id: time_label
                 halign: 'center'
                 text_size: (self.width, None)
+                font_name: "UMTypewriter_bold"
                 font_size: root.text_md
                 size_hint_y: None
                 height: self.texture_size[1]

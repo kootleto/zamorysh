@@ -1,6 +1,7 @@
 import asyncio
 
-from kivy.metrics import sp
+from kivy.graphics import Rectangle, Color, Ellipse
+from kivy.metrics import sp, dp
 from kivy.properties import (
     ListProperty,
     NumericProperty,
@@ -10,17 +11,12 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.slider import Slider
-from kivy.uix.textinput import TextInput
 from kivy.uix.togglebutton import ToggleButton
 
 from interface.gui.components.mixins import ColoredWidget, CoverImage
 
 
 class GameButton(Button):
-    pass
-
-
-class CommandInput(TextInput):
     pass
 
 
@@ -75,7 +71,53 @@ class Menu(ScrollView, ColoredWidget):
 
 
 class VolumeSlider(Slider):
-    pass
+    track_color = ListProperty()
+    cursor_color = ListProperty()
+    track_height = NumericProperty()
+    custom_cursor_size = NumericProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.background_width = 0
+        self.cursor_image = ""
+        self.cursor_size = (0, 0)
+
+        with self.canvas.before:
+            self.graphics_color = Color()
+            self.track_rect = Rectangle()
+
+        with self.canvas.after:
+            self.circle_color = Color()
+            self.circle = Ellipse()
+
+        self.bind(
+            pos=self._update_track,
+            size=self._update_track,
+            track_color=self._update_track,
+            value_pos=self._update_circle,
+            cursor_color=self._update_circle,
+        )
+
+    def _update_track(self, *_args):
+        if self.track_color:
+            self.graphics_color.rgba = self.track_color
+
+        track_length = self.width - dp(20)
+        self.track_rect.size = (track_length, self.track_height)
+        self.track_rect.pos = (
+            self.center_x - track_length / 2,
+            self.center_y - self.track_height / 2,
+        )
+
+    def _update_circle(self, *_args):
+        if self.circle_color:
+            self.circle_color.rgba = self.cursor_color
+
+        self.circle.size = (self.custom_cursor_size, self.custom_cursor_size)
+        self.circle.pos = (
+            self.value_pos[0] - self.custom_cursor_size / 2,
+            self.center_y - self.custom_cursor_size / 2,
+        )
 
 
 class SceneView(BoxLayout, ColoredWidget):
@@ -87,7 +129,7 @@ class StatLabel(BoxLayout):
 
 
 class MainScreen(BoxLayout, CoverImage):
-    unit = NumericProperty()
+    unit = NumericProperty(1)
     space_nano = NumericProperty()
     space_sm = NumericProperty()
     space_1 = NumericProperty()

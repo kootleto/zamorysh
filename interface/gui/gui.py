@@ -5,7 +5,8 @@ from typing import TypedDict, Callable
 from kivy.app import App
 
 from engine.schema import ActivityOptions, GameState
-from gameplay.api import vitals, stats, time, music, location, scene
+from gameplay.api import vitals, stats, time, music, location, scene, formatters
+from tools import storage
 from tools.utils import ensure_callable
 
 
@@ -21,16 +22,23 @@ app = AppProxy()
 
 
 class KivyState(TypedDict):
-    track_title: str | None
     volume: int
     fullscreen: bool
+    muted: bool
+    log_history: list
 
 
-INITIAL_UI_STATE: KivyState = {"track_title": None, "volume": 100, "fullscreen": False}
+INITIAL_UI_STATE: KivyState = {
+    "volume": 100,
+    "fullscreen": True,
+    "muted": True,
+    "log_history": [],
+}
 
 
-def init_ui() -> KivyState:
-    return deepcopy(INITIAL_UI_STATE)
+def init_ui(vs_path) -> KivyState:
+    vs = storage.read_data(vs_path)
+    return vs if vs else deepcopy(INITIAL_UI_STATE)
 
 
 def display(*message, sep: str = " "):
@@ -103,12 +111,13 @@ async def ask_option(
                 selected = task_change.result()
 
     menu.reset_selection()
-    button.text = "Игра запущена"
     menu.awaits_selection = False
     return options[selected]
 
 
 async def prompt_activity(options: ActivityOptions) -> int:
+    app.system_buttons_active = True
+
     def get_submit_message(idx):
         if options[idx]["hold_required"]:
             return "Нажмите и удерживайте"
@@ -125,6 +134,8 @@ async def prompt_activity(options: ActivityOptions) -> int:
             cols=2,
         )
     )
+
+    app.system_buttons_active = False
 
     return selected
 
@@ -149,8 +160,10 @@ def refresh_ui(gs: GameState, options: ActivityOptions):
     app.sprite_name = scene.get_current_sprite(gs)
     new_labels = [option["label"] for option in options]
 
-    if not app.root.ids.menu.awaits_selection and app.root.ids.menu.items != new_labels:
-        app.root.ids.menu.items = new_labels
+    if not app.root.ids.menu.awaits_selection:
+        if app.root.ids.menu.items != new_labels:
+            app.root.ids.menu.items = new_labels
+        app.root.ids.button.text = formatters.get_formatted_time(app.stats["datetime"])
 
 
 def check_button_pressed():
@@ -158,7 +171,11 @@ def check_button_pressed():
 
 
 async def on_finish():
-    app.root.ids.button.text = "Игра окончена"
+    response = await ask_option(["Выйти", "Начать новую игру"], "Игра окончена.", cols=2)
+    if response == "Выйти":
+        app.session_result.set_result("exit")
+    else:
+        app.session_result.set_result("restart")
 
 
 async def _wait_for_event(widget, event_name):

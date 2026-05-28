@@ -21,3 +21,6 @@ __pycache__/
 main.spec
 buildozer.spec
 setup.iss
+
+# Game saves
+.saves/

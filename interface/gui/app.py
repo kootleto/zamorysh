@@ -13,10 +13,13 @@ from kivy.properties import (
     NumericProperty,
 )
 
+import constants
+from engine import controller
 from engine.schema import GameState
 from gameplay.api import formatters
 from interface import ui
-from interface.gui.gui import KivyState
+from interface.gui.gui import KivyState, INITIAL_UI_STATE
+from tools import storage
 
 
 class GameApp(App):
@@ -36,38 +39,52 @@ class GameApp(App):
     track_title = StringProperty(None)
     scene_name = StringProperty(None)
     sprite_name = StringProperty(None)
-
     volume = NumericProperty(100)
-
+    fullscreen = BooleanProperty(False)
+    muted = BooleanProperty(False)
     key_enter_pressed = BooleanProperty(False)
+    system_buttons_active = BooleanProperty(False)
 
-    def __init__(self, gs: GameState, vs: KivyState, get_options_func, **kwargs):
+    def __init__(
+        self, gs: GameState, vs: KivyState, get_options_func, is_save, **kwargs
+    ):
         super().__init__(**kwargs)
         self.gs = gs
-        self.vs = vs
         self.get_options_func = get_options_func
         self.activity_options = []
         self.ready = asyncio.Future()
         self.current_track = None
+        self.volume = vs["volume"]
+        self.fullscreen = vs["fullscreen"]
+        self.muted = vs["muted"]
+        self.log_history = (
+            vs["log_history"] if is_save else INITIAL_UI_STATE["log_history"]
+        )
 
     def build(self):
+        Builder.unload_file("interface/gui/style.kv")
         return Builder.load_file("interface/gui/style.kv")
 
     def on_start(self):
         Window.bind(on_key_down=self._on_key_down)
         Window.bind(on_key_up=self._on_key_up)
-
-        self.ready.set_result(True)
+        self.root.ids.logger.load_clean_data(self.log_history)
 
         def update(_):
+
+            if App.get_running_app() is None:
+                return False
+
             ui.refresh_ui(self.gs, self.get_options_func())
+            return True
 
         Clock.schedule_interval(update, 1 / 60)
+        Clock.schedule_once(lambda _: self.ready.set_result(True), 0)
 
     def on_stats(self, _, value):
-        self.root.ids.money_stat_label.value = round(value["money"], 2)
-        self.root.ids.knowledge_stat_label.value = round(value["knowledge"], 2)
-        self.root.ids.social_stat_label.value = round(value["social"], 2)
+        self.root.ids.money_stat_label.value = round(value["money"], 1)
+        self.root.ids.knowledge_stat_label.value = round(value["knowledge"], 1)
+        self.root.ids.social_stat_label.value = round(value["social"], 1)
         self.root.ids.time_label.text = formatters.get_formatted_time(value["datetime"])
         self.root.ids.date_label.text = formatters.get_formatted_date(value["datetime"])
         self.root.ids.map_label.text = (
@@ -97,7 +114,7 @@ class GameApp(App):
         self.current_track = SoundLoader.load(path)
         if self.current_track:
             self.current_track.loop = True
-            self.current_track.volume = self.volume / 100
+            self.current_track.volume = 0 if self.muted else self.volume / 100
             self.current_track.play()
 
     def on_scene_name(self, _, value):
@@ -109,8 +126,46 @@ class GameApp(App):
         self.root.ids.scene.sprite = path
 
     def on_volume(self, _, value):
-        if self.current_track:
+        if self.current_track and not self.muted:
             self.current_track.volume = value / 100
+
+    @staticmethod
+    def on_fullscreen(_, value):
+        Window.fullscreen = "auto" if value else False
+
+    def on_muted(self, _, value):
+        volume_to = 0 if value else self.volume / 100
+        if self.current_track:
+            self.current_track.volume = volume_to
+
+    def toggle_fullscreen(self):
+        self.fullscreen = not self.fullscreen
+
+    def toggle_mute(self):
+        self.muted = not self.muted
+
+    def save_game(self):
+        controller.save_game(self.gs, constants.GAME_STATE_PATH)
+        ui.display_save_notification()
+
+    _exit_task = None
+    session_result = None
+
+    def on_exit_pressed(self):
+        if self._exit_task and not self._exit_task.done():
+            return
+
+        self._exit_task = asyncio.create_task(self.exit_game())
+
+    async def exit_game(self):
+
+        answer = await ui.ask_option(
+            ["Да", "Нет"], "Вы уверены, что хотите выйти?", cols=2
+        )
+
+        if answer == "Да":
+            self.stop()
+            self.session_result.set_result("exit")
 
     def _on_key_down(self, _window, key, *_args):
         if key == 13:
@@ -121,7 +176,24 @@ class GameApp(App):
         if key == 13:
             self.key_enter_pressed = False
 
+    _saved_on_exit = False
+
     def on_stop(self):
+        if self._saved_on_exit:
+            return
+
+        self._saved_on_exit = True
+
+        controller.save_game(self.gs, constants.GAME_STATE_PATH)
+        log_history = self.root.ids.logger.get_clean_data()
+        vs: KivyState = {
+            "volume": self.volume,
+            "fullscreen": self.fullscreen,
+            "muted": self.muted,
+            "log_history": log_history,
+        }
+        storage.write_data(constants.VIEW_STATE_PATH, vs)
+
         if self.current_track:
             self.current_track.stop()
             self.current_track.unload()
