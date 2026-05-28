@@ -6,6 +6,7 @@ from gameplay.api import vitals, timers, time, location
 from interface import ui
 
 
+@activities_api.with_tag("sleep")
 @activities_api.on_finish(
     lambda gs: ui.display_at(gs, "Как прекрасен мир, являющийся во снах...")
 )
@@ -25,7 +26,7 @@ def sleep():
 
     return activities_api.base_activity(tick_effect, can_continue, name="лечь спать")
 
-
+@activities_api.with_tag("sleep")
 @activities_api.system_only
 def auto_sleep():
 

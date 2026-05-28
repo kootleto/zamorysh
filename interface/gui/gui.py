@@ -5,7 +5,7 @@ from typing import TypedDict, Callable
 from kivy.app import App
 
 from engine.schema import ActivityOptions, GameState
-from gameplay.api import vitals, stats, time, music, location, scene, formatters
+from gameplay.api import vitals, stats, time, music, location, formatters, scenes
 from tools import storage
 from tools.utils import ensure_callable
 
@@ -29,9 +29,9 @@ class KivyState(TypedDict):
 
 
 INITIAL_UI_STATE: KivyState = {
-    "volume": 100,
+    "volume": 50,
     "fullscreen": True,
-    "muted": True,
+    "muted": False,
     "log_history": [],
 }
 
@@ -156,8 +156,8 @@ def refresh_ui(gs: GameState, options: ActivityOptions):
     }
 
     app.track_title = music.get_current_track(gs)
-    app.scene_name = scene.get_current_scene(gs)
-    app.sprite_name = scene.get_current_sprite(gs)
+    app.scene_name = scenes.get_current_scene(gs)
+    app.sprite_name = scenes.get_current_sprite(gs)
     new_labels = [option["label"] for option in options]
 
     if not app.root.ids.menu.awaits_selection:

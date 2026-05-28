@@ -1,7 +1,7 @@
 import random
 
 from engine import data_api, scenarios_api
-from gameplay.api import time, location
+from gameplay.api import time, location, quests
 from gameplay.api.location import Place
 from interface import ui
 
@@ -38,11 +38,12 @@ def key_lost_quest(state=None):
     def activate_loss(gs):
         return location.get(gs, location.X) == 0 and location.get(gs, location.Y) == 0
 
-    def home_locked():
+    def home_locked(gs):
         ui.display(
             "Вы потеряли ключи. Вы не помните, где вы видели их в последний раз."
         )
         state["key_x"], state["key_y"] = generate_outside_coords()
+        quests.set_status(gs, "keys", quests.Status.ACTIVE)
 
     def find_trigger(gs):
         return (
@@ -64,6 +65,7 @@ def key_lost_quest(state=None):
 
         ui.display_at(gs, key_msg + " Вы нашли свои ключи.")
         location.unlock(gs, Place.HOME, "key_lost")
+        quests.finish(gs, "keys")
 
     return scenarios_api.base_scenario(
         [
