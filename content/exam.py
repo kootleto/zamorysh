@@ -71,6 +71,15 @@ def exam_scenario():
             "По результатам экзамена вы поймёте, насколько успешно вы прожили эту неделю.",
         )
 
+    def check_skip(gs):
+        return (
+            time.get_day(gs) == 8
+            and time.get_time(gs) == datetime.time(17, 00)
+            and floors.get(gs, floors.CLASSROOM) != 501
+        )
+
+
+
     def check_exam(gs):
         return (
             time.get_day(gs) == 8
