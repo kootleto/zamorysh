@@ -78,7 +78,9 @@ def exam_scenario():
             and floors.get(gs, floors.CLASSROOM) != 501
         )
 
-
+    def skip(gs):
+        ui.display_at(gs, "Игра окончена: вы не пришли на экзамен и были отчислены.")
+        gs_api.stop(gs)
 
     def check_exam(gs):
         return (
@@ -107,6 +109,7 @@ def exam_scenario():
     return scenarios_api.base_scenario(
         [
             scenarios_api.base_transition(0, 1, reminder_trigger, reminder),
+            scenarios_api.base_transition(1, 3, check_skip, skip),
             scenarios_api.base_transition(1, 2, check_exam, start_exam),
         ]
     )
