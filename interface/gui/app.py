@@ -25,6 +25,7 @@ from tools import storage
 
 class GameApp(App):
     title = "Zamorysh"
+    icon = "assets/images/ui/kivy_icon.png"
     stats = DictProperty(
         {
             "time": "undefined",
