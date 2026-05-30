@@ -1,5 +1,5 @@
 from engine import gs_api, scenarios_api
-from gameplay.api import vitals, stats, scenes
+from gameplay.api import vitals, stats
 from interface import ui
 
 
@@ -20,7 +20,7 @@ def breakdown_scenario():
         ui.display(
             "-- Игра окончена: Вам стоило больше следить за своим ментальным здоровьем. У вас случился нервный срыв и вы отчислились.  -- "
         )
-        scenes.set_sprite(gs, "dead.png")
+        # scenes.set_sprite(gs, "dead.png")
         gs_api.stop(gs)
 
     return scenarios_api.base_scenario(
@@ -47,7 +47,7 @@ def verytired_scenario():
         ui.display(
             "-- Игра окончена: вы настолько истощены, что больше ничего не можете делать. -- "
         )
-        scenes.set_sprite(gs, "dead.png")
+        # scenes.set_sprite(gs, "dead.png")
         gs_api.stop(gs)
 
     return scenarios_api.base_scenario(
@@ -72,7 +72,7 @@ def rich_scenario():
 
     def game_over(gs):
         ui.display("-- Игра окончена: вы слишком богаты для студента. --")
-        scenes.set_sprite(gs, "happy.png")
+        # scenes.set_sprite(gs, "happy.png")
         gs_api.stop(gs)
 
     return scenarios_api.base_scenario(
@@ -94,7 +94,7 @@ def sociable_scenario():
             "-- Игра окончена: вы завели столько полезных знакомств, "
             "что вам уже не нужно учиться в университете. --"
         )
-        scenes.set_sprite(gs, "happy.png")
+        # scenes.set_sprite(gs, "happy.png")
         gs_api.stop(gs)
 
     return scenarios_api.base_scenario(
@@ -114,7 +114,7 @@ def clever_scenario():
         ui.display(
             "-- Игра окончена: вы накопили очень много знаний и получили автомат за экзамен! Ура! --"
         )
-        scenes.set_sprite(gs, "smart.png")
+        # scenes.set_sprite(gs, "smart.png")
         gs_api.stop(gs)
 
     return scenarios_api.base_scenario(
