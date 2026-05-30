@@ -1,14 +1,5 @@
-from content import other_endings
 from engine import gs_api, scenarios_api
 from gameplay.api import scenes, vitals
-
-ENDING_CONDITIONS = [
-    other_endings.breakdown_ending_trigger,
-    other_endings.tired_ending_trigger,
-    other_endings.rich_ending_trigger,
-    other_endings.social_ending_trigger,
-    other_endings.clever_ending_trigger,
-]
 
 
 def sprite_manager(activity_definitions):
@@ -23,10 +14,6 @@ def sprite_manager(activity_definitions):
             if not any([fatigue_critical, sleepiness_critical, mental_critical]):
                 scenes.set_sprite(gs, "idle.png")
             else:
-                conditions = [f(gs) for f in ENDING_CONDITIONS]
-                if any(conditions):
-                    return
-
                 file_parts = []
                 if fatigue_critical:
                     file_parts.append("tired")
