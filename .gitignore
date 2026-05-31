@@ -24,3 +24,6 @@ setup.iss
 
 # Game saves
 .saves/
+
+# ZIP archive for Android building
+zamorysh.zip

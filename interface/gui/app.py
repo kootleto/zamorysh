@@ -1,5 +1,6 @@
 import asyncio
 import os.path
+import time
 
 from kivy import platform
 from kivy.app import App
@@ -192,3 +193,15 @@ class GameApp(App):
         if self.current_track:
             self.current_track.stop()
             self.current_track.unload()
+
+    _last_click_time = 0
+
+    def prevent_double_click(self, func):
+        def wrapper(*args, **kwargs):
+            current_time = time.time()
+            if current_time - self._last_click_time < 0.3:
+                return True
+            self._last_click_time = current_time
+            return func(*args, **kwargs)
+
+        return wrapper

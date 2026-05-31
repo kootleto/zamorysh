@@ -34,13 +34,15 @@ Label.font_name = "UMTypewriter"
 
 Config.set("input", "wm_pen", "")
 Config.set("input", "wm_touch", "")
-Config.set("input", "mouse", "mouse,multitouch_on_demand")
+Config.set("input", "mouse", "mouse,disable_multitouch")
 Config.set("graphics", "show_cursor", "1")
 Config.write()
 
 
 async def start(gs: GameState, definitions: Definitions, vs: KivyState, is_save: bool):
-    app = GameApp(gs, vs, lambda: controller.get_activity_options(gs, definitions), is_save)
+    app = GameApp(
+        gs, vs, lambda: controller.get_activity_options(gs, definitions), is_save
+    )
 
     app.session_result = asyncio.get_running_loop().create_future()
 
